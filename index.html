@@ -5077,7 +5077,7 @@ function getChatHist(fid){return JSON.parse(localStorage.getItem('chat_'+fid)||'
 function setChatHist(fid,h){localStorage.setItem('chat_'+fid,JSON.stringify(h))}
 
 // 打开聊天
-function openChatPage(friendId){ 
+async function openChatPage(friendId){ 
   var list = getFriends();
   
   // 1. 用 ID 找到这个好朋友对象
@@ -5129,8 +5129,8 @@ if(f.remark){
   setFriends(list);
   
   // 5. 渲染聊天记录并展示页面
-  preloadChatExtraAv(f.id);
-  renderChatHist();
+  await preloadChatExtraAv(f.id);
+renderChatHist();
   document.getElementById('ctMenuPinText').textContent = f.pinned ? '取消置顶' : '置顶';
     applyChatBg();
   enableMsgOnlyCSS();
@@ -5173,19 +5173,17 @@ function renderChatHist(){
   body.innerHTML='';
   if(!hist.length)return;
   
-  // ★ 只渲染最后50条
   var RENDER_LIMIT = 50;
   var totalLen = hist.length;
   var renderFrom = totalLen > RENDER_LIMIT ? totalLen - RENDER_LIMIT : 0;
-  var hiddenCount = renderFrom; // 前面被隐藏的消息数
+  var hiddenCount = renderFrom; 
   
-  var avSet = getAvatarSettings(chatFriend ? chatFriend.id : null);
-  var tsSet = getTimestampSettings();
+var avSet = getAvatarSettings(chatFriend ? chatFriend.id : null);
+var tsSet = getTimestampSettings(chatFriend ? chatFriend.id : null);    // ← 加上好友ID
   var prevRole = null;
   var lastCenterTs = 0;
   var interval = tsSet.centerTimeInterval * 60 * 1000;
   
-  // 如果有更早的消息没显示，顶部加一个"加载更多"
   if(hiddenCount > 0){
     var loadMore = document.createElement('div');
     loadMore.className = 'ct-time';
@@ -5194,25 +5192,20 @@ function renderChatHist(){
     loadMore.onclick = function(){
       var currentFrom = renderFrom;
       renderFrom = currentFrom > RENDER_LIMIT ? currentFrom - RENDER_LIMIT : 0;
-      
       var oldScrollHeight = body.scrollHeight;
       var oldScrollTop = body.scrollTop;
       
       window._skipAutoScroll = true;
-      
       body.innerHTML = '';
       renderChatHistFrom(renderFrom);
       
       var newScrollHeight = body.scrollHeight;
       body.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
-      
       setTimeout(function(){ window._skipAutoScroll = false; }, 100);
     };
-
     body.appendChild(loadMore);
   }
   
-  // 渲染 hist[renderFrom] 到 hist[totalLen-1]
   for(var idx = renderFrom; idx < totalLen; idx++){
     var m = hist[idx];
     
@@ -5232,7 +5225,6 @@ function renderChatHist(){
       }
     }
     
-    // 每轮顶部头像条（角色切换时显示）
     if(avSet.frequency === 'top-bar' && m.role !== prevRole) {
       var isMe = m.role === 'user';
       var showThisTop = isMe
@@ -5253,13 +5245,17 @@ function renderChatHist(){
           if(myP.avatarKey) {
             var avKey = myP.avatarKey;
             if(avatarCache[avKey]) {
-              barDiv.querySelector('.ct-top-av').innerHTML = '<img src="' + avatarCache[avKey] + '">';
+              var topAvEl = barDiv.querySelector('.ct-top-av');
+              if(topAvEl) topAvEl.innerHTML = '<img src="' + avatarCache[avKey] + '">';
             } else {
-              dbGet(avKey).then(function(blob) {
-                if(blob) {
+              var barDivRef = barDiv;
+              dbGet(avKey).then(function(blob){
+                if(blob){
                   if(!avatarCache[avKey]) avatarCache[avKey] = URL.createObjectURL(blob);
-                  var avElRef = barDiv.querySelector('.ct-top-av');
-                  if(avElRef) avElRef.innerHTML = '<img src="' + avatarCache[avKey] + '">';
+                  if(barDivRef.parentElement){
+                    var avElRef = barDivRef.querySelector('.ct-top-av');
+                    if(avElRef) avElRef.innerHTML = '<img src="' + avatarCache[avKey] + '">';
+                  }
                 }
               }).catch(function(){});
             }
@@ -5272,13 +5268,17 @@ function renderChatHist(){
           if(chatFriend && chatFriend.avatarKey) {
             var fAvKey = chatFriend.avatarKey;
             if(avatarCache[fAvKey]) {
-              barDiv.querySelector('.ct-top-av').innerHTML = '<img src="' + avatarCache[fAvKey] + '">';
+              var topAvEl2 = barDiv.querySelector('.ct-top-av');
+              if(topAvEl2) topAvEl2.innerHTML = '<img src="' + avatarCache[fAvKey] + '">';
             } else {
-              dbGet(fAvKey).then(function(blob) {
-                if(blob) {
+              var barDivRef2 = barDiv;
+              dbGet(fAvKey).then(function(blob){
+                if(blob){
                   if(!avatarCache[fAvKey]) avatarCache[fAvKey] = URL.createObjectURL(blob);
-                  var avElRef2 = barDiv.querySelector('.ct-top-av');
-                  if(avElRef2) avElRef2.innerHTML = '<img src="' + avatarCache[fAvKey] + '">';
+                  if(barDivRef2.parentElement){
+                    var avElRef2 = barDivRef2.querySelector('.ct-top-av');
+                    if(avElRef2) avElRef2.innerHTML = '<img src="' + avatarCache[fAvKey] + '">';
+                  }
                 }
               }).catch(function(){});
             }
@@ -5289,7 +5289,6 @@ function renderChatHist(){
     }
     
     var showAvatar = true;
-    
     if(avSet.frequency === 'top-bar') {
       showAvatar = false;
     } else {
@@ -5309,15 +5308,13 @@ function renderChatHist(){
     }
     
     var needAvSlot = (avSet.frequency !== 'top-bar');
-    
-appendBubble(m.role, m.content, m.time, false, showAvatar, tsSet, needAvSlot, m.quote);
+    appendBubble(m.role, m.content, m.time, false, showAvatar, tsSet, needAvSlot, m.quote);
     prevRole = m.role;
   }
   
   scrollChatBottom();
 }
 
-// 从指定起始位置渲染到末尾（加载更多用）
 function renderChatHistFrom(fromIdx){
   if(!chatFriend) return;
   var hist = getChatHist(chatFriend.id);
@@ -5327,12 +5324,11 @@ function renderChatHistFrom(fromIdx){
   var hiddenCount = fromIdx;
   
   var avSet = getAvatarSettings(chatFriend.id);
-  var tsSet = getTimestampSettings(chatFriend ? chatFriend.id : null);
+  var tsSet = getTimestampSettings(chatFriend.id);
   var prevRole = null;
   var lastCenterTs = 0;
   var interval = tsSet.centerTimeInterval * 60 * 1000;
   
-  // 顶部"加载更多"
   if(hiddenCount > 0){
     var loadMore = document.createElement('div');
     loadMore.className = 'ct-time';
@@ -5342,24 +5338,17 @@ function renderChatHistFrom(fromIdx){
       var currentFrom = fromIdx;
       var newFrom = currentFrom > RENDER_LIMIT ? currentFrom - RENDER_LIMIT : 0;
       
-      // ★ 记住当前滚动位置
       var oldScrollHeight = body.scrollHeight;
       var oldScrollTop = body.scrollTop;
       
-      // ★ 临时禁用自动滚底
       window._skipAutoScroll = true;
-      
       body.innerHTML = '';
       renderChatHistFrom(newFrom);
       
-      // ★ 恢复滚动位置：新内容加在顶部，补偿高度差
       var newScrollHeight = body.scrollHeight;
       body.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
-      
-      // ★ 恢复自动滚底
       setTimeout(function(){ window._skipAutoScroll = false; }, 100);
     };
-    
     body.appendChild(loadMore);
   }
   
@@ -5402,17 +5391,19 @@ function renderChatHistFrom(fromIdx){
           if(myP.avatarKey) {
             var avKey = myP.avatarKey;
             if(avatarCache[avKey]) {
-              barDiv.querySelector('.ct-top-av').innerHTML = '<img src="' + avatarCache[avKey] + '">';
+              var topAvEl = barDiv.querySelector('.ct-top-av');
+              if(topAvEl) topAvEl.innerHTML = '<img src="' + avatarCache[avKey] + '">';
             } else {
-              (function(key, el){
-                dbGet(key).then(function(blob){
-                  if(blob){
-                    if(!avatarCache[key]) avatarCache[key] = URL.createObjectURL(blob);
-                    var ref = el.querySelector('.ct-top-av');
-                    if(ref) ref.innerHTML = '<img src="' + avatarCache[key] + '">';
+              var barDivRef = barDiv;
+              dbGet(avKey).then(function(blob){
+                if(blob){
+                  if(!avatarCache[avKey]) avatarCache[avKey] = URL.createObjectURL(blob);
+                  if(barDivRef.parentElement){
+                    var avElRef = barDivRef.querySelector('.ct-top-av');
+                    if(avElRef) avElRef.innerHTML = '<img src="' + avatarCache[avKey] + '">';
                   }
-                }).catch(function(){});
-              })(avKey, barDiv);
+                }
+              }).catch(function(){});
             }
           }
         } else {
@@ -5423,17 +5414,19 @@ function renderChatHistFrom(fromIdx){
           if(chatFriend && chatFriend.avatarKey) {
             var fAvKey = chatFriend.avatarKey;
             if(avatarCache[fAvKey]) {
-              barDiv.querySelector('.ct-top-av').innerHTML = '<img src="' + avatarCache[fAvKey] + '">';
+              var topAvEl2 = barDiv.querySelector('.ct-top-av');
+              if(topAvEl2) topAvEl2.innerHTML = '<img src="' + avatarCache[fAvKey] + '">';
             } else {
-              (function(key, el){
-                dbGet(key).then(function(blob){
-                  if(blob){
-                    if(!avatarCache[key]) avatarCache[key] = URL.createObjectURL(blob);
-                    var ref = el.querySelector('.ct-top-av');
-                    if(ref) ref.innerHTML = '<img src="' + avatarCache[key] + '">';
+              var barDivRef2 = barDiv;
+              dbGet(fAvKey).then(function(blob){
+                if(blob){
+                  if(!avatarCache[fAvKey]) avatarCache[fAvKey] = URL.createObjectURL(blob);
+                  if(barDivRef2.parentElement){
+                    var avElRef2 = barDivRef2.querySelector('.ct-top-av');
+                    if(avElRef2) avElRef2.innerHTML = '<img src="' + avatarCache[fAvKey] + '">';
                   }
-                }).catch(function(){});
-              })(fAvKey, barDiv);
+                }
+              }).catch(function(){});
             }
           }
         }
@@ -5442,7 +5435,6 @@ function renderChatHistFrom(fromIdx){
     }
     
     var showAvatar = true;
-    
     if(avSet.frequency === 'top-bar') {
       showAvatar = false;
     } else {
@@ -5462,8 +5454,7 @@ function renderChatHistFrom(fromIdx){
     }
     
     var needAvSlot = (avSet.frequency !== 'top-bar');
-    
-appendBubble(m.role, m.content, m.time, false, showAvatar, tsSet, needAvSlot, m.quote);
+    appendBubble(m.role, m.content, m.time, false, showAvatar, tsSet, needAvSlot, m.quote);
     prevRole = m.role;
   }
 }
@@ -5704,56 +5695,66 @@ if(role === 'assistant') {
     });
   }
 
-  // ====== 处理对方头像 ======
-  if(role==='assistant' && showAvatar && shouldHaveAvSlot && chatFriend){
-    var extraCharAv = getChatExtraAv('char', chatFriend.id);
-    var avEl = row.querySelector('.ct-row-av');
-    if(avEl){
-      if(extraCharAv){
-        // 优先使用专属头像
-        avEl.innerHTML='<img src="'+extraCharAv+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+(avSet.shape==='square'?'6px':'50%')+'">';
-      } else if(chatFriend.avatarKey){
-        // 没有专属，再使用常规头像
-        var cachedUrl = avatarCache[chatFriend.avatarKey];
-        if(cachedUrl){
-          avEl.innerHTML='<img src="'+cachedUrl+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+(avSet.shape==='square'?'6px':'50%')+'">';
-        } else {
-          dbGet(chatFriend.avatarKey).then(function(blob){
-            if(blob){
-              avatarCache[chatFriend.avatarKey]=URL.createObjectURL(blob);
-              avEl.innerHTML='<img src="'+avatarCache[chatFriend.avatarKey]+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+(avSet.shape==='square'?'6px':'50%')+'">';
+// ====== 处理对方头像 ======
+if(role==='assistant' && showAvatar && shouldHaveAvSlot && chatFriend){
+  var extraCharAv = getChatExtraAv('char', chatFriend.id);
+  var avEl = row.querySelector('.ct-row-av');
+  var avBorderRadius = avSet.shape === 'square' ? '6px' : '50%';
+  var avImgStyle = 'width:100%;height:100%;object-fit:cover;border-radius:' + avBorderRadius;
+  if(avEl){
+    if(extraCharAv){
+      avEl.innerHTML = '<img src="' + extraCharAv + '" style="' + avImgStyle + '">';
+    } else if(chatFriend.avatarKey){
+      var cachedUrl = avatarCache[chatFriend.avatarKey];
+      if(cachedUrl){
+        avEl.innerHTML = '<img src="' + cachedUrl + '" style="' + avImgStyle + '">';
+      } else {
+        // 保存引用，但异步回调时先检查元素是否还在 DOM 里
+        var avElRef = avEl;
+        var avKey = chatFriend.avatarKey;
+        dbGet(avKey).then(function(blob){
+          if(blob){
+            if(!avatarCache[avKey]) avatarCache[avKey] = URL.createObjectURL(blob);
+            // 关键检查：元素还在 DOM 里吗？
+            if(avElRef.parentElement){
+              avElRef.innerHTML = '<img src="' + avatarCache[avKey] + '" style="' + avImgStyle + '">';
             }
-          }).catch(function(){});
-        }
+          }
+        }).catch(function(){});
       }
     }
   }
+}
 
-  // ====== 处理我方头像 ======
-  if(role==='user' && showAvatar && shouldHaveAvSlot){
-    var extraUserAv = getChatExtraAv('user', chatFriend ? chatFriend.id : null);
-    var myP2 = getActivePersona(chatFriend ? chatFriend.id : null);
-    var myAvEl = row.querySelector('.ct-row-av');
-    if(myAvEl){
-      if(extraUserAv){
-        // 优先使用专属头像
-        myAvEl.innerHTML='<img src="'+extraUserAv+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+(avSet.shape==='square'?'6px':'50%')+'">';
-      } else if(myP2 && myP2.avatarKey){
-        // 没有专属，再使用常规头像
-        var cachedUrl2 = avatarCache[myP2.avatarKey];
-        if(cachedUrl2){
-          myAvEl.innerHTML='<img src="'+cachedUrl2+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+(avSet.shape==='square'?'6px':'50%')+'">';
-        } else {
-          dbGet(myP2.avatarKey).then(function(blob){
-            if(blob){
-              avatarCache[myP2.avatarKey]=URL.createObjectURL(blob);
-              myAvEl.innerHTML='<img src="'+avatarCache[myP2.avatarKey]+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+(avSet.shape==='square'?'6px':'50%')+'">';
+// ====== 处理我方头像 ======
+if(role==='user' && showAvatar && shouldHaveAvSlot){
+  var extraUserAv = getChatExtraAv('user', chatFriend ? chatFriend.id : null);
+  var myP2 = getActivePersona(chatFriend ? chatFriend.id : null);
+  var myAvEl = row.querySelector('.ct-row-av');
+  var avBorderRadius2 = avSet.shape === 'square' ? '6px' : '50%';
+  var avImgStyle2 = 'width:100%;height:100%;object-fit:cover;border-radius:' + avBorderRadius2;
+  if(myAvEl){
+    if(extraUserAv){
+      myAvEl.innerHTML = '<img src="' + extraUserAv + '" style="' + avImgStyle2 + '">';
+    } else if(myP2 && myP2.avatarKey){
+      var cachedUrl2 = avatarCache[myP2.avatarKey];
+      if(cachedUrl2){
+        myAvEl.innerHTML = '<img src="' + cachedUrl2 + '" style="' + avImgStyle2 + '">';
+      } else {
+        var myAvElRef = myAvEl;
+        var myAvKey = myP2.avatarKey;
+        dbGet(myAvKey).then(function(blob){
+          if(blob){
+            if(!avatarCache[myAvKey]) avatarCache[myAvKey] = URL.createObjectURL(blob);
+            if(myAvElRef.parentElement){
+              myAvElRef.innerHTML = '<img src="' + avatarCache[myAvKey] + '" style="' + avImgStyle2 + '">';
             }
-          }).catch(function(){});
-        }
+          }
+        }).catch(function(){});
       }
     }
   }
+}
 
   scrollChatBottom();
   return row;
@@ -5803,21 +5804,25 @@ function showTyping(forFriendId){
   body.appendChild(row);
   
   if(chatFriend&&chatFriend.avatarKey){
-    var avEl=row.querySelector('.ct-row-av');
-    if(avEl){
-      if(avatarCache[chatFriend.avatarKey]){
-        // ★ 这里也要给 img 标签加上圆角样式
-        avEl.innerHTML='<img src="'+avatarCache[chatFriend.avatarKey]+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+br+'">';
-      } else {
-        dbGet(chatFriend.avatarKey).then(function(blob){
-          if(blob){
-            avatarCache[chatFriend.avatarKey]=URL.createObjectURL(blob);
-            avEl.innerHTML='<img src="'+avatarCache[chatFriend.avatarKey]+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+br+'">';
+  var avEl=row.querySelector('.ct-row-av');
+  if(avEl){
+    var typingAvKey = chatFriend.avatarKey;
+    var typingBr = br;
+    if(avatarCache[typingAvKey]){
+      avEl.innerHTML='<img src="'+avatarCache[typingAvKey]+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+typingBr+'">';
+    } else {
+      var avElRef = avEl;
+      dbGet(typingAvKey).then(function(blob){
+        if(blob){
+          if(!avatarCache[typingAvKey]) avatarCache[typingAvKey]=URL.createObjectURL(blob);
+          if(avElRef.parentElement){
+            avElRef.innerHTML='<img src="'+avatarCache[typingAvKey]+'" style="width:100%;height:100%;object-fit:cover;border-radius:'+typingBr+'">';
           }
-        }).catch(function(){});
-      }
+        }
+      }).catch(function(){});
     }
   }
+}
   
   document.getElementById('ctStatusText').textContent='正在输入...';
   scrollChatBottom();
@@ -7476,6 +7481,11 @@ function saveFriend(){
   friendAvatarBlob=null;
   closeAddFriend();
   renderFriendList();
+  
+  // 如果当前刚好在和这个修改过的好友聊天，就刷新一下聊天框
+  if(chatFriend && list.find(function(f){ return f.id === chatFriend.id })) {
+    reloadCurrentChat();
+  }
 }
 
 
@@ -7964,30 +7974,36 @@ function getTimestampSettings(friendId) {
 }
 
 function getAvatarSettings(friendId) {
-  // 如果指定了好友，先看有没有聊天专属设置
-  if(friendId) {
-    try {
-      var cs = JSON.parse(localStorage.getItem('avatarSettings_' + friendId));
-      if(cs) {
-        if (!cs.vAlign) cs.vAlign = 'bottom';
-        if (!cs.frequency) cs.frequency = 'all';
-        if (!cs.shape) cs.shape = 'circle';
-        return cs;
-      }
-    } catch(e) {}
-  }
-  // 全局设置
+  // 默认值
+  var defaults = { size: 32, visibility: 'all', vAlign: 'bottom', frequency: 'all', shape: 'circle' };
+  
+  // 读全局设置
+  var global = {};
   try {
-    var s = JSON.parse(localStorage.getItem('avatarSettings'));
-    if (s) {
-      if (!s.vAlign) s.vAlign = 'bottom';
-      if (!s.frequency) s.frequency = 'all';
-      if (!s.shape) s.shape = 'circle';
-      return s;
-    }
-  } catch(e) {}
-  return { size: 32, visibility: 'all', vAlign: 'bottom', frequency: 'all', shape: 'circle' };
+    var g = JSON.parse(localStorage.getItem('avatarSettings'));
+    if (g) global = g;
+  } catch (e) {}
+  
+  // 读聊天专属设置
+  var chat = {};
+  if (friendId) {
+    try {
+      var c = JSON.parse(localStorage.getItem('avatarSettings_' + friendId));
+      if (c) chat = c;
+    } catch (e) {}
+  }
+  
+  // 合并：默认值 → 全局覆盖默认 → 专属覆盖全局
+  var merged = {};
+  merged.size = chat.size !== undefined ? chat.size : (global.size !== undefined ? global.size : defaults.size);
+  merged.visibility = chat.visibility || global.visibility || defaults.visibility;
+  merged.vAlign = chat.vAlign || global.vAlign || defaults.vAlign;
+  merged.frequency = chat.frequency || global.frequency || defaults.frequency;
+  merged.shape = chat.shape || global.shape || defaults.shape;
+  
+  return merged;
 }
+
 function openAvatarSettings() {
   toggleCtMenu();
 
@@ -8014,9 +8030,9 @@ function openAvatarSettings() {
 
   renderAvPreview();
 
-  // ★ 作用范围：默认"仅当前聊天"，只有没在聊天时才默认全局
+  // ★ 作用范围：如果之前存过专属设置就选"仅当前聊天"，否则选"全局"
   var hasChatSettings = friendId ? !!localStorage.getItem('avatarSettings_' + friendId) : false;
-  var defaultScope = friendId ? 'chat' : 'global';
+  var defaultScope = hasChatSettings ? 'chat' : 'global';
   document.querySelectorAll('[data-av-scope]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-av-scope') === defaultScope);
   });
@@ -8026,7 +8042,8 @@ function openAvatarSettings() {
   // ★ 时间戳：同样读当前生效的
   var tsSet = getTimestampSettings(friendId);
 
-  var defaultTsScope = friendId ? 'chat' : 'global';
+  var hasChatTsSettings = friendId ? !!localStorage.getItem('timestampSettings_' + friendId) : false;
+  var defaultTsScope = hasChatTsSettings ? 'chat' : 'global';
   document.querySelectorAll('[data-ts-scope]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-ts-scope') === defaultTsScope);
   });
@@ -8279,7 +8296,7 @@ function saveAvatarSettings() {
   }
 
   closeModal('avatarSettingsModal');
-  if (chatFriend) renderChatHist();
+  reloadCurrentChat(); // ← 调用我们新写的刷新函数
 }
 
 /* ===== 世界书系统 ===== */
@@ -11831,7 +11848,7 @@ function openChatExtraPage(){
 function closeChatExtraPage(){
   document.getElementById('chatExtraPage').classList.remove('show');
   // 刷新聊天记录以应用新头像
-  if(chatFriend) renderChatHist();
+  reloadCurrentChat(); // ← 这里也改成新的刷新函数
 }
 
 function uploadChatExtraAv(e, who){
@@ -11873,16 +11890,18 @@ function getChatExtraAv(who, friendId){
 }
 
 // 预加载聊天专属头像
-function preloadChatExtraAv(friendId){
+async function preloadChatExtraAv(friendId){
   if(!friendId) return;
-  ['chatAvUser_', 'chatAvChar_'].forEach(function(prefix){
-    var key = prefix + friendId;
+  var prefixes = ['chatAvUser_', 'chatAvChar_'];
+  for(var i = 0; i < prefixes.length; i++){
+    var key = prefixes[i] + friendId;
     if(!avatarCache[key]){
-      dbGet(key).then(function(blob){
+      try{
+        var blob = await dbGet(key);
         if(blob) avatarCache[key] = URL.createObjectURL(blob);
-      }).catch(function(){});
+      }catch(e){}
     }
-  });
+  }
 }
 
 /* ===== 语音消息 ===== */
@@ -11950,6 +11969,14 @@ function buildVoiceBubbleHtml(voiceText, time){
       '<div class="ct-voice-convert">-- 转文字 --</div>' +
     '</div>' +
   '</div>';
+}
+
+// 重新刷新当前聊天框
+function reloadCurrentChat() {
+  if (chatFriend) {
+    // 再次调用 openChatPage 会重新拉取数据库里的新头像、新设置并重新渲染
+    openChatPage(chatFriend.id);
+  }
 }
 </script>
 </body>
