@@ -7690,7 +7690,7 @@ function renderProfile() {
 
   list.forEach(function(p) {
     var isActive = (p.id === activeP.id) ? 'active' : '';
-    var scopeIcon = p.scope === 'friend' ? '锁' : '';
+    var scopeIcon = p.scope === 'friend' ? '●' : '';
     html +=
       '<div class="prf-item ' + isActive + '" onclick="switchPersona(\'' + p.id + '\')">' +
         '<div class="prf-circle">' + p.name.charAt(0).toUpperCase() + '</div>' +
@@ -7988,72 +7988,67 @@ function getAvatarSettings(friendId) {
   } catch(e) {}
   return { size: 32, visibility: 'all', vAlign: 'bottom', frequency: 'all', shape: 'circle' };
 }
-
 function openAvatarSettings() {
   toggleCtMenu();
-  var s = getAvatarSettings();
+
+  var friendId = chatFriend ? chatFriend.id : null;
+
+  // ★ 读取当前生效的设置（优先专属，没有就全局）
+  var s = getAvatarSettings(friendId);
+
   document.getElementById('avSizeSlider').value = s.size;
   document.getElementById('avSizeVal').textContent = s.size;
-  
-  // 显示对象
+
   document.querySelectorAll('[data-av]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-av') === s.visibility);
   });
-  // 垂直位置
   document.querySelectorAll('[data-valign]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-valign') === s.vAlign);
   });
-  // 显示频率
   document.querySelectorAll('[data-freq]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-freq') === s.frequency);
   });
-    // 形状
   document.querySelectorAll('[data-shape]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-shape') === s.shape);
   });
 
   renderAvPreview();
-    // 作用范围
-  var hasChatSettings = chatFriend ? !!localStorage.getItem('avatarSettings_' + chatFriend.id) : false;
+
+  // ★ 作用范围：默认"仅当前聊天"，只有没在聊天时才默认全局
+  var hasChatSettings = friendId ? !!localStorage.getItem('avatarSettings_' + friendId) : false;
+  var defaultScope = friendId ? 'chat' : 'global';
   document.querySelectorAll('[data-av-scope]').forEach(function(el) {
-    el.classList.toggle('on', el.getAttribute('data-av-scope') === (hasChatSettings ? 'chat' : 'global'));
+    el.classList.toggle('on', el.getAttribute('data-av-scope') === defaultScope);
   });
-  // 作用范围字段：没有聊天时隐藏
   var scopeField = document.getElementById('avScopeField');
-  if(scopeField) scopeField.style.display = chatFriend ? 'block' : 'none';
+  if(scopeField) scopeField.style.display = friendId ? 'block' : 'none';
 
-    // 时间戳设置初始化
-  var tsSet = getTimestampSettings(chatFriend ? chatFriend.id : null);
+  // ★ 时间戳：同样读当前生效的
+  var tsSet = getTimestampSettings(friendId);
 
-  // 时间戳作用范围
-  var hasChatTsSettings = chatFriend ? !!localStorage.getItem('timestampSettings_' + chatFriend.id) : false;
+  var defaultTsScope = friendId ? 'chat' : 'global';
   document.querySelectorAll('[data-ts-scope]').forEach(function(el) {
-    el.classList.toggle('on', el.getAttribute('data-ts-scope') === (hasChatTsSettings ? 'chat' : 'global'));
+    el.classList.toggle('on', el.getAttribute('data-ts-scope') === defaultTsScope);
   });
   var tsScopeField = document.getElementById('tsScopeField');
-  if(tsScopeField) tsScopeField.style.display = chatFriend ? 'block' : 'none';
+  if(tsScopeField) tsScopeField.style.display = friendId ? 'block' : 'none';
 
-  
-  // 气泡时间戳开关
   document.querySelectorAll('[data-ts-show]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-ts-show') === (tsSet.showBubbleTime ? 'on' : 'off'));
   });
   var posField = document.getElementById('tsPositionField');
   if(posField) posField.style.display = tsSet.showBubbleTime ? 'block' : 'none';
-  
-  // 位置
+
   document.querySelectorAll('[data-ts-pos]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-ts-pos') === tsSet.bubbleTimePosition);
   });
-  
-  // 中间时间戳开关
+
   document.querySelectorAll('[data-ct-show]').forEach(function(el) {
     el.classList.toggle('on', el.getAttribute('data-ct-show') === (tsSet.showCenterTime ? 'on' : 'off'));
   });
   var intField = document.getElementById('tsIntervalField');
   if(intField) intField.style.display = tsSet.showCenterTime ? 'block' : 'none';
-  
-  // 间隔
+
   var slider = document.getElementById('tsIntervalSlider');
   if(slider) {
     slider.value = tsSet.centerTimeInterval;
@@ -8061,6 +8056,8 @@ function openAvatarSettings() {
   }
   openModal('avatarSettingsModal');
 }
+
+
 
 function setAvValign(type, el) {
   document.querySelectorAll('[data-valign]').forEach(function(t) { t.classList.remove('on'); });
@@ -8233,12 +8230,11 @@ function saveAvatarSettings() {
   var vAlign = valignActiveEl ? valignActiveEl.getAttribute('data-valign') : 'bottom';
   var freqActiveEl = document.querySelector('[data-freq].on');
   var frequency = freqActiveEl ? freqActiveEl.getAttribute('data-freq') : 'all';
-    var scopeActiveEl = document.querySelector('[data-av-scope].on');
-  var avScope = scopeActiveEl ? scopeActiveEl.getAttribute('data-av-scope') : 'global';
-  
-    var shapeActiveEl = document.querySelector('[data-shape].on');
+  var scopeActiveEl = document.querySelector('[data-av-scope].on');
+  var avScope = scopeActiveEl ? scopeActiveEl.getAttribute('data-av-scope') : 'chat';
+  var shapeActiveEl = document.querySelector('[data-shape].on');
   var shape = shapeActiveEl ? shapeActiveEl.getAttribute('data-shape') : 'circle';
-  
+
   var settingsObj = {
     size: size,
     visibility: vis,
@@ -8246,40 +8242,40 @@ function saveAvatarSettings() {
     frequency: frequency,
     shape: shape
   };
-  
-  if(avScope === 'chat' && chatFriend) {
-    localStorage.setItem('avatarSettings_' + chatFriend.id, JSON.stringify(settingsObj));
-  } else {
+
+  if(avScope === 'global') {
+    // ★ 全局：写全局 key，不动任何聊天的专属 key
     localStorage.setItem('avatarSettings', JSON.stringify(settingsObj));
+    showToast('头像设置已全局保存', 'ok');
+  } else if(chatFriend) {
+    // ★ 仅当前聊天：写专属 key
+    localStorage.setItem('avatarSettings_' + chatFriend.id, JSON.stringify(settingsObj));
+    showToast('已保存为 ' + chatFriend.name + ' 的专属设置', 'ok');
   }
-  
-  // 保存时间戳设置
+
+  // === 时间戳 ===
   var bubbleShowEl = document.querySelector('[data-ts-show].on');
   var showBubbleTime = bubbleShowEl ? (bubbleShowEl.getAttribute('data-ts-show') === 'on') : true;
-  
   var posEl = document.querySelector('[data-ts-pos].on');
   var bubbleTimePosition = posEl ? posEl.getAttribute('data-ts-pos') : 'below';
-  
   var centerShowEl = document.querySelector('[data-ct-show].on');
   var showCenterTime = centerShowEl ? (centerShowEl.getAttribute('data-ct-show') === 'on') : true;
-  
   var centerTimeInterval = parseInt(document.getElementById('tsIntervalSlider').value) || 10;
-  
+
   var tsObj = {
     showBubbleTime: showBubbleTime,
     bubbleTimePosition: bubbleTimePosition,
     showCenterTime: showCenterTime,
     centerTimeInterval: centerTimeInterval
   };
-  
-  // ★ 支持仅当前聊天
+
   var tsScopeEl = document.querySelector('[data-ts-scope].on');
-  var tsScope = tsScopeEl ? tsScopeEl.getAttribute('data-ts-scope') : 'global';
-  
-  if(tsScope === 'chat' && chatFriend) {
-    localStorage.setItem('timestampSettings_' + chatFriend.id, JSON.stringify(tsObj));
-  } else {
+  var tsScope = tsScopeEl ? tsScopeEl.getAttribute('data-ts-scope') : 'chat';
+
+  if(tsScope === 'global') {
     localStorage.setItem('timestampSettings', JSON.stringify(tsObj));
+  } else if(chatFriend) {
+    localStorage.setItem('timestampSettings_' + chatFriend.id, JSON.stringify(tsObj));
   }
 
   closeModal('avatarSettingsModal');
