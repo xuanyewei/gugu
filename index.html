@@ -6400,7 +6400,7 @@ if(m.rpMode) continue;
         
         if(isMe) {
           var myP = getActivePersona(chatFriend ? chatFriend.id : null);
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" onclick="showInnerVoice(this, true, ' + idx + ')"><span>' + 
+          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:\'+avSet.size+\'px;height:\'+avSet.size+\'px" onclick="showInnerVoice(this, true, ' + idx + ')"><span style="font-size:\'+Math.round(avSet.size*0.4)+\'px">' + 
             myP.name.charAt(0).toUpperCase() + '</span></div>' +
             '<div class="ct-top-av-name">' + escapeHTML(myP.name) + '</div>' +
             '<div class="ct-inner-voice-popup is-me" id="ivPopup_me_' + idx + '"></div>';
@@ -6423,7 +6423,7 @@ if(m.rpMode) continue;
             }
           }
         } else {
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" onclick="showInnerVoice(this, false, ' + idx + ')"><span>' + 
+          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:\'+avSet.size+\'px;height:\'+avSet.size+\'px" onclick="showInnerVoice(this, false, ' + idx + ')"><span style="font-size:\'+Math.round(avSet.size*0.4)+\'px">' + 
             (chatFriend ? chatFriend.name.charAt(0).toUpperCase() : '?') + '</span></div>' +
             '<div class="ct-top-av-name">' + escapeHTML(chatFriend ? chatFriend.name : '?') + '</div>' +
             '<div class="ct-inner-voice-popup" id="ivPopup_' + idx + '"></div>';
@@ -6546,7 +6546,7 @@ function renderChatHistFrom(fromIdx){
         
         if(isMe) {
           var myP = getActivePersona(chatFriend.id);
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" onclick="showInnerVoice(this, true, ' + idx + ')"><span>' + 
+          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:\'+avSet.size+\'px;height:\'+avSet.size+\'px" onclick="showInnerVoice(this, true, ' + idx + ')"><span style="font-size:\'+Math.round(avSet.size*0.4)+\'px">' + 
             myP.name.charAt(0).toUpperCase() + '</span></div>' +
             '<div class="ct-top-av-name">' + escapeHTML(myP.name) + '</div>' +
             '<div class="ct-inner-voice-popup is-me" id="ivPopup_me_' + idx + '"></div>';
@@ -6569,7 +6569,7 @@ function renderChatHistFrom(fromIdx){
             }
           }
         } else {
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" onclick="showInnerVoice(this, false, ' + idx + ')"><span>' + 
+          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:\'+avSet.size+\'px;height:\'+avSet.size+\'px" onclick="showInnerVoice(this, false, ' + idx + ')"><span style="font-size:\'+Math.round(avSet.size*0.4)+\'px">' + 
             (chatFriend ? chatFriend.name.charAt(0).toUpperCase() : '?') + '</span></div>' +
             '<div class="ct-top-av-name">' + escapeHTML(chatFriend ? chatFriend.name : '?') + '</div>' +
             '<div class="ct-inner-voice-popup" id="ivPopup_' + idx + '"></div>';
@@ -7031,6 +7031,123 @@ function getTodayStr(){
   document.body.appendChild(fi);
 })();
 
+// === 新增：实时消息追加函数（处理头像 仅首条/仅末条/最顶部 等逻辑） ===
+function appendRealtimeBubble(role, text, time, quoteText) {
+  var friendId = chatFriend ? chatFriend.id : null;
+  var avSet = getAvatarSettings(friendId);
+  var tsSet = getTimestampSettings(friendId);
+  var hist = getChatHist(friendId);
+  var prevRole = null;
+  
+  // 找出上一条真实消息是谁发的
+  for(var i = hist.length - 2; i >= 0; i--) {
+    if(!hist[i].rpMode) {
+      prevRole = hist[i].role;
+      break;
+    }
+  }
+
+  var body = document.getElementById('ctBody');
+
+  // 1. 处理最顶部的头像条 (top-bar)
+  if(avSet.frequency === 'top-bar' && role !== prevRole) {
+    var isMe = role === 'user';
+    var showThisTop = isMe
+      ? (avSet.visibility === 'all' || avSet.visibility === 'hide-theirs')
+      : (avSet.visibility === 'all' || avSet.visibility === 'hide-mine');
+      
+    if(showThisTop) {
+      var barDiv = document.createElement('div');
+      barDiv.className = 'ct-top-avatar-bar' + (isMe ? ' is-me' : '');
+      var shapeClass = avSet.shape === 'square' ? ' square' : '';
+      var idx = hist.length - 1;
+      
+      if(isMe) {
+        var myP = getActivePersona(friendId);
+        barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:\'+avSet.size+\'px;height:\'+avSet.size+\'px" onclick="showInnerVoice(this, true, ' + idx + ')"><span style="font-size:\'+Math.round(avSet.size*0.4)+\'px">' + 
+          myP.name.charAt(0).toUpperCase() + '</span></div>' +
+          '<div class="ct-top-av-name">' + escapeHTML(myP.name) + '</div>' +
+          '<div class="ct-inner-voice-popup is-me" id="ivPopup_me_' + idx + '"></div>';
+        if(myP.avatarKey && avatarCache[myP.avatarKey]) {
+          barDiv.querySelector('.ct-top-av').innerHTML = '<img src="' + avatarCache[myP.avatarKey] + '">';
+        }
+      } else {
+        var frName = chatFriend ? chatFriend.name : '?';
+        var frAvKey = chatFriend ? chatFriend.avatarKey : null;
+        barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:\'+avSet.size+\'px;height:\'+avSet.size+\'px" onclick="showInnerVoice(this, false, ' + idx + ')"><span style="font-size:\'+Math.round(avSet.size*0.4)+\'px">' + 
+          frName.charAt(0).toUpperCase() + '</span></div>' +
+          '<div class="ct-top-av-name">' + escapeHTML(frName) + '</div>' +
+          '<div class="ct-inner-voice-popup" id="ivPopup_' + idx + '"></div>';
+        if(frAvKey && avatarCache[frAvKey]) {
+          barDiv.querySelector('.ct-top-av').innerHTML = '<img src="' + avatarCache[frAvKey] + '">';
+        }
+      }
+      body.appendChild(barDiv);
+    }
+  }
+
+  // 2. 气泡旁头像显示逻辑
+  var showAvatar = true;
+  if(avSet.frequency === 'top-bar') {
+    showAvatar = false;
+  } else {
+    if(role === 'user') {
+      showAvatar = (avSet.visibility === 'all' || avSet.visibility === 'hide-theirs');
+    } else {
+      showAvatar = (avSet.visibility === 'all' || avSet.visibility === 'hide-mine');
+    }
+    
+    if(showAvatar && avSet.frequency === 'first') {
+      showAvatar = (role !== prevRole);
+    } else if(showAvatar && avSet.frequency === 'last') {
+      showAvatar = true;
+      // 【关键】如果是连续对话，把上一条DOM里的头像隐藏变成占位符
+      if(role === prevRole) {
+        var rows = body.querySelectorAll('.ct-row');
+        for(var r = rows.length - 1; r >= 0; r--) {
+          var rowNode = rows[r];
+          if(rowNode.id === 'ctTypingRow') continue;
+          var isRowMe = rowNode.classList.contains('is-me');
+          if((role === 'user' && isRowMe) || (role === 'assistant' && !isRowMe)) {
+            var avImg = rowNode.querySelector('.ct-row-av');
+            if(avImg) {
+              avImg.style.visibility = 'hidden';
+              avImg.style.pointerEvents = 'none';
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  var needAvSlot = (avSet.frequency !== 'top-bar');
+
+  // 3. 补充：如果两人太久没说话，自动插一条时间戳
+  if (tsSet.showCenterTime) {
+    var nowTs = Date.now();
+    var intervalMs = tsSet.centerTimeInterval * 60 * 1000;
+    var lastMsgTs = 0;
+    if (hist.length > 1) {
+       for(var k = hist.length - 2; k >= 0; k--) {
+         if(!hist[k].rpMode && hist[k].ts) {
+            lastMsgTs = hist[k].ts;
+            break;
+         }
+       }
+    }
+    if (lastMsgTs === 0 || (nowTs - lastMsgTs >= intervalMs)) {
+       var timeDiv = document.createElement('div');
+       timeDiv.className = 'ct-time';
+       timeDiv.textContent = formatCenterTime(new Date(nowTs));
+       body.appendChild(timeDiv);
+    }
+  }
+
+  // 最后调用原生追加
+  appendBubble(role, text, time, true, showAvatar, tsSet, needAvSlot, quoteText);
+}
+
 // ---- 发送消息 ----
 function ctSendMsg(){
   var input=document.getElementById('ctMsgInput');
@@ -7057,7 +7174,7 @@ function ctSendMsg(){
   setChatHist(chatFriend.id,hist);
   
   // 添加到界面（只一次！传入引用）
-  appendBubble('user',text,time,true, true, null, true, currentQuoteText);
+  appendRealtimeBubble('user', text, time, currentQuoteText);
   
   // 发送后清空引用
   cancelQuote();
@@ -7401,10 +7518,9 @@ if(memoryItems.length > 0 && activeFriendId){
         playMsgTone(); 
 
         if(stillInChat){
-          hideTyping(activeFriendId);
-          appendBubble('assistant',cleanText,time,true, true, null, true, finalQuote);
-        }
-
+  hideTyping(activeFriendId);
+  appendRealtimeBubble('assistant', cleanText, time, finalQuote);
+}
         if(!stillInChat){
           showNtf(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
           var _fl = getFriends();
@@ -9357,10 +9473,10 @@ function renderAvPreview() {
 if (freq === 'top-bar') {
   // 对方轮
   html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0 8px">';
-  html += '<div style="width:40px;height:40px;border-radius:'+br+';background:#f3f3f3;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden"><span style="font-size:16px;font-weight:700;color:#bbb">A</span></div>';
+  html += '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+br+';background:#f3f3f3;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden"><span style="font-size:'+Math.round(size*0.4)+'px;font-weight:700;color:#bbb">A</span></div>';
   html += '<span style="font-size:11px;color:#999;font-weight:600">对方</span>';
   html += '</div>';
-  var theirMsgs = ['你好呀~', '今天天气不错呢'];
+  var theirMsgs = ['不再依赖哥哥的话，', '算长大吗？'];
   theirMsgs.forEach(function(msg) {
     html += '<div style="margin-bottom:4px">';
     html += '<div style="background:#fff;border-radius:4px 18px 18px 18px;color:#0a0a0a;border:1px solid #ececec;padding:8px 12px;font-size:12px;line-height:1.4;display:inline-block">' + msg + '</div>';
@@ -9368,10 +9484,10 @@ if (freq === 'top-bar') {
   });
   // 我方轮
   html += '<div style="display:flex;align-items:center;gap:8px;padding:12px 0 8px;flex-direction:row-reverse">';
-  html += '<div style="width:40px;height:40px;border-radius:'+br+';background:#f3f3f3;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden"><span style="font-size:16px;font-weight:700;color:#bbb">我</span></div>';
+  html += '<div style="width:'+size+'px;height:'+size+'px;border-radius:'+br+';background:#f3f3f3;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden"><span style="font-size:'+Math.round(size*0.4)+'px;font-weight:700;color:#bbb">我</span></div>';
   html += '<span style="font-size:11px;color:#999;font-weight:600">我方</span>';
   html += '</div>';
-  var myMsgs = ['嗨嗨!', '在的在的'];
+  var myMsgs = ['不算。', '算哥哥没用。'];
   myMsgs.forEach(function(msg) {
     html += '<div style="margin-bottom:4px;text-align:right">';
     html += '<div style="background:#0a0a0a;border-radius:18px 4px 18px 18px;color:#fff;padding:8px 12px;font-size:12px;line-height:1.4;display:inline-block">' + msg + '</div>';
@@ -9380,8 +9496,6 @@ if (freq === 'top-bar') {
   area.innerHTML = html;
   return;
 }
-
-
   
   // 其他模式
   var theirMsgs = ['你好呀~', '今天天气不错呢', '在吗？'];
@@ -13211,7 +13325,7 @@ function confirmSendImg(){
   });
   setChatHist(chatFriend.id, hist);
   
-  appendBubble('user', content, time, true);
+  appendRealtimeBubble('user', content, time, null);
   updateFriendLastMsg('[图片]', time);
   closeImgSendModal();
   playMsgTone();
@@ -13368,7 +13482,7 @@ function confirmSendVoice(){
   hist.push({role:'user', content:content, time:time, date:getTodayStr(), ts:Date.now(), msgType:'voice'});
   setChatHist(chatFriend.id, hist);
   
-  appendBubble('user', content, time, true);
+  appendRealtimeBubble('user', content, time, null);
   updateFriendLastMsg('[语音]', time);
   closeVoiceSendModal();
   playMsgTone();
