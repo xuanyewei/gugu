@@ -176,7 +176,7 @@ svg{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .modal-overlay.show .modal-panel{transform:translateY(0)}
 .modal-bar{width:36px;height:4px;background:var(--c5);border-radius:2px;margin:12px auto 16px}
 .modal-title{font-size:clamp(16px,4.5vw,20px);font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
-.modal-close{width:28px;height:28px;border-radius:50%;background:var(--c6);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:16px;color:var(--c2);transition:.15s}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--c6);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:16px;color:var(--c2);transition:.15s;position:relative;z-index:10;}
 .modal-close:active{transform:scale(.9)}
 
 .field{margin-bottom:14px}
@@ -4801,30 +4801,7 @@ input[type="range"]::-webkit-slider-thumb{
     <span style="font-size:12px;color:var(--c3)">当前: <span id="cardColorVal">#ffffff</span></span>
     <button class="btn btn-secondary" style="width:auto;padding:0 12px;margin:0;height:36px;font-size:11px" onclick="resetCardColor()">重置</button>
   </div>
-  </div>
-  <div class="field">
-  <label>自定义字体</label>
-  <div style="display:flex;gap:8px">
-    <input type="text" id="fontUrlInput" placeholder="字体CSS直链，如 https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap" style="flex:1;height:clamp(38px,9vw,44px);padding:0 12px;border:1.5px solid var(--c5);border-radius:12px;font-size:12px;background:var(--c7);color:var(--c1);outline:none;font-family:inherit">
-    <button class="btn btn-secondary" style="width:auto;padding:0 14px;margin:0;height:clamp(38px,9vw,44px);font-size:11px" onclick="applyFont()">应用</button>
-  </div>
-  <small>粘贴 Google Fonts 等字体 CSS 链接，点击应用即可。字体名会自动识别。</small>
-  <div style="display:flex;gap:8px;margin-top:8px">
-    <button class="btn btn-secondary" style="width:auto;padding:0 14px;margin:0;height:clamp(38px,9vw,44px);font-size:11px" onclick="clearFont()">清除字体</button>
-  </div>
-  <div style="margin-top:10px">
-  <label style="font-size:clamp(10px,2.6vw,12px);font-weight:600;color:var(--c2);margin-bottom:6px;display:block">字体大小</label>
-  <div class="field-row">
-    <input type="range" id="fontSizeSlider" min="12" max="20" value="14" oninput="previewFontSize(this.value)">
-    <span class="range-val" id="fontSizeVal">14</span>
-  </div>
-  <small style="font-size:clamp(9px,2.2vw,10px);color:var(--c4)">12=小字 14=默认 18=大字 20=超大。影响全局文字。</small>
-  <div style="display:flex;gap:8px;margin-top:6px">
-    <button class="btn btn-secondary" style="width:auto;padding:0 14px;margin:0;height:32px;font-size:11px" onclick="applyFontSize()">应用</button>
-    <button class="btn btn-secondary" style="width:auto;padding:0 14px;margin:0;height:32px;font-size:11px" onclick="resetFontSize()">重置</button>
-  </div>
 </div>
-
 
     <div class="field">
       <label>背景图片</label>
@@ -5439,26 +5416,6 @@ function navTo(idx){if(idx>=tp)return;ci=idx;upPg()}
 /* ===== 模态框 ===== */
 function openModal(id){
   document.getElementById(id).classList.add('show');
-  // 如果是美化模态框，恢复字体输入框内容
-  if(id === 'themeModal'){
-    var fontUrl = localStorage.getItem('customFontUrl') || '';
-    var fontInput = document.getElementById('fontUrlInput');
-    if(fontInput) fontInput.value = fontUrl;
-  }
-}
-
-function openModal(id){
-  document.getElementById(id).classList.add('show');
-  if(id === 'themeModal'){
-    var fontUrl = localStorage.getItem('customFontUrl') || '';
-    var fontInput = document.getElementById('fontUrlInput');
-    if(fontInput) fontInput.value = fontUrl;
-  }
-}
-
-// ★★★ 缺失的函数 ★★★
-function closeModal(id){
-  document.getElementById(id).classList.remove('show');
 }
 
 /* ===== 应用入口 ===== */
@@ -6135,13 +6092,6 @@ async function resetTheme(){
     const eImg=document.getElementById('ieImg-'+i);
     if(eImg)eImg.style.display='none';
   }
-  // 清除自定义字体
-var fontLink = document.getElementById('customFontLink');
-if(fontLink) fontLink.remove();
-document.body.style.fontFamily = '';
-localStorage.removeItem('customFontUrl');
-localStorage.removeItem('customFontName');
-document.getElementById('fontUrlInput').value = '';
 }
 
 /* ===== 音乐封面 ===== */
@@ -6240,248 +6190,6 @@ function resetCardColor(){
   document.getElementById('cardColorVal').textContent='#ffffff';
   localStorage.removeItem('customCardColor');
 }
-
-function applyFont(){
-  var url = document.getElementById('fontUrlInput').value.trim();
-  if(!url){showToast('请输入字体链接','err');return;}
-  
-  // 移除旧的
-  var oldLink = document.getElementById('customFontLink');
-  if(oldLink) oldLink.remove();
-  var oldStyle = document.getElementById('customFontFaceStyle');
-  if(oldStyle) oldStyle.remove();
-  
-  // 判断是字体文件直链还是CSS链接
-  var isFontFile = /\.(ttf|woff2?|otf)(\?.*)?$/i.test(url);
-  
-  if(isFontFile){
-    // 字体文件直链：用 @font-face 加载
-    var format = 'truetype';
-    if(/\.woff2/i.test(url)) format = 'woff2';
-    else if(/\.woff/i.test(url)) format = 'woff';
-    else if(/\.otf/i.test(url)) format = 'opentype';
-    
-    var style = document.createElement('style');
-    style.id = 'customFontFaceStyle';
-    style.textContent = '@font-face { font-family: "CustomURLFont"; src: url("' + url + '") format("' + format + '"); font-weight: 100 900; font-display: swap; }';
-    document.head.appendChild(style);
-    
-    document.body.style.fontFamily = '"CustomURLFont", -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif';
-    localStorage.setItem('customFontUrl', url);
-    localStorage.setItem('customFontName', 'CustomURLFont');
-    localStorage.setItem('customFontType', 'file');
-    showToast('字体文件已应用 ✓', 'ok');
-  } else {
-    // CSS直链（Google Fonts等）
-    var link = document.createElement('link');
-    link.id = 'customFontLink';
-    link.rel = 'stylesheet';
-    link.href = url;
-    document.head.appendChild(link);
-    
-    var fontName = '';
-    try{
-      var match = url.match(/family=([^&:]+)/);
-      if(match) fontName = decodeURIComponent(match[1].replace(/\+/g,' ')).split(':')[0].split(',')[0].trim();
-    }catch(e){}
-    
-    if(fontName){
-      document.body.style.fontFamily = '"'+fontName+'", -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif';
-    }
-    
-    localStorage.setItem('customFontUrl', url);
-    localStorage.setItem('customFontName', fontName);
-    localStorage.setItem('customFontType', 'css');
-    showToast('字体已应用 ✓', 'ok');
-  }
-}
-
-function clearFont(){
-  var oldLink = document.getElementById('customFontLink');
-  if(oldLink) oldLink.remove();
-  var oldStyle = document.getElementById('customFontFaceStyle');  // ← 加这行
-  if(oldStyle) oldStyle.remove();                                  // ← 加这行
-  
-  document.body.style.fontFamily = '';
-  
-  localStorage.removeItem('customFontUrl');
-  localStorage.removeItem('customFontName');
-  localStorage.removeItem('customFontType');  // ← 加这行
-  document.getElementById('fontUrlInput').value = '';
-  showToast('字体已清除', 'ok');
-}
-
-/* ===== 字体大小（修复版）===== */
-function previewFontSize(val){
-  document.getElementById('fontSizeVal').textContent = val;
-  applyFontSizeCSS(val);
-}
-
-function applyFontSize(){
-  var val = document.getElementById('fontSizeSlider').value;
-  applyFontSizeCSS(val);
-  localStorage.setItem('customFontSize', val);
-  showToast('字体大小已设置为 ' + val + 'px', 'ok');
-}
-
-function resetFontSize(){
-  var el = document.getElementById('fontSizeOverride');
-  if(el) el.remove();
-  localStorage.removeItem('customFontSize');
-  document.getElementById('fontSizeSlider').value = 14;
-  document.getElementById('fontSizeVal').textContent = '14';
-  showToast('字体大小已恢复默认', 'ok');
-}
-
-function applyFontSizeCSS(val){
-  val = parseInt(val);
-  if(!val || val === 14) {
-    var el = document.getElementById('fontSizeOverride');
-    if(el) el.remove();
-    return;
-  }
-  
-  // 计算缩放比例：14px 是默认基准
-  var scale = val / 14;
-  
-  var style = document.getElementById('fontSizeOverride');
-  if(!style){
-    style = document.createElement('style');
-    style.id = 'fontSizeOverride';
-    document.head.appendChild(style);
-  }
-  
-  // 用缩放比例批量覆盖所有文字大小
-  style.textContent = 
-    // 聊天气泡（最常看的）
-    '.ct-bubble { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    '.ct-name { font-size: ' + Math.round(15 * scale) + 'px !important; }' +
-    '.ct-status { font-size: ' + Math.round(10 * scale) + 'px !important; }' +
-    '.ct-time { font-size: ' + Math.round(10 * scale) + 'px !important; }' +
-    '.ct-bubble-time-below, .ct-bubble-time-outside, .ct-bubble-time-inside { font-size: ' + Math.round(9 * scale) + 'px !important; }' +
-    '.ct-typing i { width: ' + Math.round(5 * scale) + 'px !important; height: ' + Math.round(5 * scale) + 'px !important; }' +
-    '.ct-input-field { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    '.ct-send { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    '.ct-msg-quote { font-size: ' + Math.round(12 * scale) + 'px !important; }' +
-    
-    // 好友列表
-    '.msg-fr-name { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    '.msg-fr-desc { font-size: ' + Math.round(11 * scale) + 'px !important; }' +
-    '.msg-fr-date { font-size: ' + Math.round(10 * scale) + 'px !important; }' +
-    '.msg-stat-num { font-size: ' + Math.round(22 * scale) + 'px !important; }' +
-    '.msg-stat-label { font-size: ' + Math.round(9 * scale) + 'px !important; }' +
-    
-    // 主页
-    '.hero-time { font-size: ' + Math.round(58 * scale) + 'px !important; }' +
-    '.hero-sec { font-size: ' + Math.round(18 * scale) + 'px !important; }' +
-    '.hero-row span { font-size: ' + Math.round(10 * scale) + 'px !important; }' +
-    '.weather-temp { font-size: ' + Math.round(32 * scale) + 'px !important; }' +
-    '.weather-desc { font-size: ' + Math.round(11 * scale) + 'px !important; }' +
-    '.mus-title { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    '.mus-artist { font-size: ' + Math.round(10 * scale) + 'px !important; }' +
-    '.app-nm { font-size: ' + Math.round(10 * scale) + 'px !important; }' +
-    '.tg { font-size: ' + Math.round(9 * scale) + 'px !important; }' +
-    '.sb-time { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    '.nav-label { font-size: ' + Math.round(9 * scale) + 'px !important; }' +
-    
-    // 日历
-    '.cal-head strong { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    '.cal-grid .cc { font-size: ' + Math.round(11 * scale) + 'px !important; }' +
-    '.cal-grid .ch { font-size: ' + Math.round(9 * scale) + 'px !important; }' +
-    
-    // 设置页
-    '.set-row-name { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    '.set-row-desc { font-size: ' + Math.round(11 * scale) + 'px !important; }' +
-    '.set-group-title { font-size: ' + Math.round(10 * scale) + 'px !important; }' +
-    
-    // 弹窗
-    '.modal-title { font-size: ' + Math.round(18 * scale) + 'px !important; }' +
-    '.field label { font-size: ' + Math.round(11 * scale) + 'px !important; }' +
-    '.field input, .field select { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    '.field small { font-size: ' + Math.round(9 * scale) + 'px !important; }' +
-    '.btn { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    
-    // RP模式
-    '.rp-ptext { font-size: ' + Math.round(14.5 * scale) + 'px !important; }' +
-    '.rp-pname { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    '.rp-pg-field { font-size: ' + Math.round(14 * scale) + 'px !important; }' +
-    
-    // 搜索栏
-    '.srch span { font-size: ' + Math.round(12 * scale) + 'px !important; }' +
-    
-    // 收藏/记忆
-    '.fav-note-text { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    '.fav-detail-text { font-size: ' + Math.round(16 * scale) + 'px !important; }' +
-    '.film-mem-frame-text { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    '.mem-card-text { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    
-    // 世界书
-    '.vinyl-wb-record-name { font-size: ' + Math.round(12 * scale) + 'px !important; }' +
-    '.wb-entry-name { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    
-    // 通知/Toast
-    '.ntf-name { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    '.ntf-msg { font-size: ' + Math.round(12 * scale) + 'px !important; }' +
-    '.gg-toast-text { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    
-    // 人设页
-    '.prf-name { font-size: ' + Math.round(16 * scale) + 'px !important; }' +
-    '.prf-bio { font-size: ' + Math.round(13 * scale) + 'px !important; }' +
-    '.prf-stat-num { font-size: ' + Math.round(18 * scale) + 'px !important; }';
-}
-
-// 恢复字体大小
-(function(){
-  var savedSize = localStorage.getItem('customFontSize');
-  if(savedSize){
-    applyFontSizeCSS(savedSize);
-    // 同步滑块（美化弹窗打开时能看到正确值）
-    var slider = document.getElementById('fontSizeSlider');
-    if(slider) slider.value = savedSize;
-    var valEl = document.getElementById('fontSizeVal');
-    if(valEl) valEl.textContent = savedSize;
-  }
-})();
-
-// 恢复字体大小
-(function(){
-  var savedSize = localStorage.getItem('customFontSize');
-  if(savedSize){
-    document.documentElement.style.fontSize = savedSize + 'px';
-  }
-})();
-
-// 页面加载时恢复字体（放在最后的自执行区域里）
-(function(){
-  var savedFontUrl = localStorage.getItem('customFontUrl');
-  var savedFontName = localStorage.getItem('customFontName');
-  var savedFontType = localStorage.getItem('customFontType');
-  if(!savedFontUrl) return;
-  
-  if(savedFontType === 'file'){
-    // 字体文件直链恢复
-    var format = 'truetype';
-    if(/\.woff2/i.test(savedFontUrl)) format = 'woff2';
-    else if(/\.woff/i.test(savedFontUrl)) format = 'woff';
-    else if(/\.otf/i.test(savedFontUrl)) format = 'opentype';
-    
-    var style = document.createElement('style');
-    style.id = 'customFontFaceStyle';
-    style.textContent = '@font-face { font-family: "CustomURLFont"; src: url("' + savedFontUrl + '") format("' + format + '"); font-weight: 100 900; font-display: swap; }';
-    document.head.appendChild(style);
-    document.body.style.fontFamily = '"CustomURLFont", -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif';
-  } else {
-    // CSS直链恢复
-    var link = document.createElement('link');
-    link.id = 'customFontLink';
-    link.rel = 'stylesheet';
-    link.href = savedFontUrl;
-    document.head.appendChild(link);
-    if(savedFontName){
-      document.body.style.fontFamily = '"'+savedFontName+'", -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif';
-    }
-  }
-})();   
 
 // 恢复自定义颜色
 (function(){
@@ -6692,7 +6400,7 @@ if(m.rpMode) continue;
         
         if(isMe) {
           var myP = getActivePersona(chatFriend ? chatFriend.id : null);
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:'+Math.max(avSet.size||32,32)+'px;height:'+Math.max(avSet.size||32,32)+'px" onclick="showInnerVoice(this, true, ' + idx + ')"><span>' + 
+          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" onclick="showInnerVoice(this, true, ' + idx + ')"><span>' + 
             myP.name.charAt(0).toUpperCase() + '</span></div>' +
             '<div class="ct-top-av-name">' + escapeHTML(myP.name) + '</div>' +
             '<div class="ct-inner-voice-popup is-me" id="ivPopup_me_' + idx + '"></div>';
@@ -6715,7 +6423,7 @@ if(m.rpMode) continue;
             }
           }
         } else {
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:'+Math.max(avSet.size||32,32)+'px;height:'+Math.max(avSet.size||32,32)+'px" onclick="showInnerVoice(this, false, ' + idx + ')"><span>' + 
+          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" onclick="showInnerVoice(this, false, ' + idx + ')"><span>' + 
             (chatFriend ? chatFriend.name.charAt(0).toUpperCase() : '?') + '</span></div>' +
             '<div class="ct-top-av-name">' + escapeHTML(chatFriend ? chatFriend.name : '?') + '</div>' +
             '<div class="ct-inner-voice-popup" id="ivPopup_' + idx + '"></div>';
@@ -6838,7 +6546,7 @@ function renderChatHistFrom(fromIdx){
         
         if(isMe) {
           var myP = getActivePersona(chatFriend.id);
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:'+Math.max(avSet.size||32,32)+'px;height:'+Math.max(avSet.size||32,32)+'px" onclick="showInnerVoice(this, true, ' + idx + ')"><span>' + 
+          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" onclick="showInnerVoice(this, true, ' + idx + ')"><span>' + 
             myP.name.charAt(0).toUpperCase() + '</span></div>' +
             '<div class="ct-top-av-name">' + escapeHTML(myP.name) + '</div>' +
             '<div class="ct-inner-voice-popup is-me" id="ivPopup_me_' + idx + '"></div>';
@@ -6861,7 +6569,7 @@ function renderChatHistFrom(fromIdx){
             }
           }
         } else {
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" style="width:'+Math.max(avSet.size||32,32)+'px;height:'+Math.max(avSet.size||32,32)+'px" onclick="showInnerVoice(this, false, ' + idx + ')"><span>' + 
+          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass + '" onclick="showInnerVoice(this, false, ' + idx + ')"><span>' + 
             (chatFriend ? chatFriend.name.charAt(0).toUpperCase() : '?') + '</span></div>' +
             '<div class="ct-top-av-name">' + escapeHTML(chatFriend ? chatFriend.name : '?') + '</div>' +
             '<div class="ct-inner-voice-popup" id="ivPopup_' + idx + '"></div>';
@@ -6914,64 +6622,16 @@ function renderChatHistFrom(fromIdx){
 }
 
 function appendBubble(role, text, time, animate, showAvatar, tsSet, needAvSlot, quoteText){
+// 跳过RP消息在线上模式不显示
 if(text === '[RP剧情]') return;
-
-  var avSet = getAvatarSettings(chatFriend ? chatFriend.id : null);
   if(!tsSet) tsSet = getTimestampSettings(chatFriend ? chatFriend.id : null);
-
-  if(needAvSlot === undefined){
-    needAvSlot = (avSet.frequency !== 'top-bar');
-  }
-
-  if(avSet.frequency === 'top-bar'){
-    showAvatar = false;
-    needAvSlot = false;
-
-    var bodyTmp = document.getElementById('ctBody');
-    var allEls = bodyTmp.querySelectorAll('.ct-row, .ct-top-avatar-bar');
-    var lastEl = allEls.length > 0 ? allEls[allEls.length - 1] : null;
-    var currentIsMe = (role === 'user');
-    var needTopBar = false;
-
-    if(!lastEl){
-      needTopBar = true;
-    } else if(lastEl.classList.contains('ct-top-avatar-bar')){
-      needTopBar = lastEl.classList.contains('is-me') !== currentIsMe;
-    } else if(lastEl.classList.contains('ct-row')){
-      needTopBar = lastEl.classList.contains('is-me') !== currentIsMe;
-    }
-
-    if(needTopBar){
-      var showThisTop = currentIsMe
-        ? (avSet.visibility === 'all' || avSet.visibility === 'hide-theirs')
-        : (avSet.visibility === 'all' || avSet.visibility === 'hide-mine');
-
-      if(showThisTop){
-        var topSize = Math.max(avSet.size || 32, 32);
-        var shapeClass2 = avSet.shape === 'square' ? ' square' : '';
-        var barDiv = document.createElement('div');
-        barDiv.className = 'ct-top-avatar-bar' + (currentIsMe ? ' is-me' : '');
-
-        if(currentIsMe){
-          var myPTop = getActivePersona(chatFriend ? chatFriend.id : null);
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass2 + '" style="width:'+topSize+'px;height:'+topSize+'px"><span style="font-size:'+Math.round(topSize*0.4)+'px">' + myPTop.name.charAt(0).toUpperCase() + '</span></div><div class="ct-top-av-name">' + escapeHTML(myPTop.name) + '</div>';
-          var euAv = getChatExtraAv('user', chatFriend ? chatFriend.id : null);
-          if(euAv) barDiv.querySelector('.ct-top-av').innerHTML = '<img src="'+euAv+'" style="width:100%;height:100%;object-fit:cover">';
-          else if(myPTop.avatarKey && avatarCache[myPTop.avatarKey]) barDiv.querySelector('.ct-top-av').innerHTML = '<img src="'+avatarCache[myPTop.avatarKey]+'" style="width:100%;height:100%;object-fit:cover">';
-        } else {
-          barDiv.innerHTML = '<div class="ct-top-av' + shapeClass2 + '" style="width:'+topSize+'px;height:'+topSize+'px" onclick="showInnerVoiceBubble(this,false)"><span style="font-size:'+Math.round(topSize*0.4)+'px">' + (chatFriend ? chatFriend.name.charAt(0).toUpperCase() : '?') + '</span></div><div class="ct-top-av-name">' + escapeHTML(chatFriend ? chatFriend.name : '?') + '</div>';
-          var ecAv = getChatExtraAv('char', chatFriend ? chatFriend.id : null);
-          if(ecAv) barDiv.querySelector('.ct-top-av').innerHTML = '<img src="'+ecAv+'" style="width:100%;height:100%;object-fit:cover">';
-          else if(chatFriend && chatFriend.avatarKey && avatarCache[chatFriend.avatarKey]) barDiv.querySelector('.ct-top-av').innerHTML = '<img src="'+avatarCache[chatFriend.avatarKey]+'" style="width:100%;height:100%;object-fit:cover">';
-        }
-        bodyTmp.appendChild(barDiv);
-      }
-    }
-  }
-
+  if(needAvSlot === undefined) needAvSlot = true;
+  
   var body = document.getElementById('ctBody');
   var row = document.createElement('div');
   row.className = 'ct-row' + (role==='user'?' is-me':'');
+
+  var avSet = getAvatarSettings(chatFriend ? chatFriend.id : null);
   var avSize = avSet.size;
   var valignCSS = 'flex-end';
   if(avSet.vAlign === 'top') valignCSS = 'flex-start';
@@ -12097,6 +11757,12 @@ function resetCustomCSS(){
   document.getElementById('cssEditorTextarea').value = localStorage.getItem('customCSS') || '';
 }
 
+// 页面加载恢复全局CSS
+(function(){
+  var saved = localStorage.getItem('customCSS');
+  if(saved) applyCustomCSS(saved);
+})();
+
 /* ===== CSS预设管理 ===== */
 function getCssPresets(){
   try{
@@ -12638,10 +12304,13 @@ function playMsgTone(){
     });
   } catch(e){}
 }
-
-/* ===== 后台保活（省电版）===== */
+/* ===== 后台保活（强化版）===== */
+var _aliveCtx = null;
+var _aliveOsc = null;
+var _aliveGain = null;
 var _aliveAudio = null;
 var _aliveCheckInterval = null;
+var _aliveLock = null;
 var _aliveOn = localStorage.getItem('keepAlive') === '1';
 
 function toggleKeepAlive(){
@@ -12652,9 +12321,10 @@ function toggleKeepAlive(){
   else stopKeepAlive();
 }
 
-function makeSilentWav(){
-  var rate = 8000, dur = 0.5, ch = 1;
-  var samples = Math.round(rate * dur);
+// 生成一段30秒低频WAV（更长更稳定）
+function makeWavBlob(){
+  var rate = 22050, dur = 30, ch = 1;
+  var samples = rate * dur;
   var buf = new ArrayBuffer(44 + samples * 2);
   var v = new DataView(buf);
   function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}
@@ -12664,63 +12334,221 @@ function makeSilentWav(){
   v.setUint16(32,ch*2,true); v.setUint16(34,16,true);
   ws(36,'data'); v.setUint32(40,samples*2,true);
   for(var i=0;i<samples;i++){
-    v.setInt16(44+i*2, 0, true);
+    v.setInt16(44+i*2, Math.round(Math.sin(2*Math.PI*100*i/rate)*80), true);
   }
   return new Blob([buf],{type:'audio/wav'});
 }
 
-function startKeepAlive(){
-  if(_aliveAudio && !_aliveAudio.paused) return;
+// 启动 AudioContext 引擎
+function startAliveCtx(){
   try{
-    if(!_aliveAudio){
-      var blob = makeSilentWav();
-      var url = URL.createObjectURL(blob);
-      _aliveAudio = new Audio(url);
-      _aliveAudio.loop = true;
-      _aliveAudio.volume = 0.001;
+    if(_aliveCtx && _aliveCtx.state !== 'closed') return;
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    gain.gain.value = 0.001;
+    osc.frequency.value = 1;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    if(ctx.state === 'suspended') ctx.resume();
+    _aliveCtx = ctx;
+    _aliveOsc = osc;
+    _aliveGain = gain;
+  } catch(e){ console.log('[保活] Ctx启动失败:', e); }
+}
+
+// 启动 Audio 元素引擎
+function startAliveAudio(){
+  try{
+    if(_aliveAudio && !_aliveAudio.paused) return;
+    if(_aliveAudio){
+      _aliveAudio.play().catch(function(){});
+      return;
     }
+    var blob = makeWavBlob();
+    var url = URL.createObjectURL(blob);
+    _aliveAudio = new Audio(url);
+    _aliveAudio.loop = true;
+    _aliveAudio.volume = 0.01;
+    // 监听结束/暂停事件，自动恢复
+    _aliveAudio.addEventListener('pause', function(){
+      if(_aliveOn && _aliveAudio){
+        setTimeout(function(){
+          if(_aliveOn && _aliveAudio && _aliveAudio.paused){
+            _aliveAudio.play().catch(function(){});
+          }
+        }, 500);
+      }
+    });
+    _aliveAudio.addEventListener('ended', function(){
+      if(_aliveOn && _aliveAudio){
+        _aliveAudio.currentTime = 0;
+        _aliveAudio.play().catch(function(){});
+      }
+    });
     var p = _aliveAudio.play();
     if(p && p.then){
       p.then(function(){
         if('mediaSession' in navigator){
-          navigator.mediaSession.metadata = new MediaMetadata({title:'运行中',artist:'后台保活'});
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: '运行中',
+            artist: '后台保活',
+            album: '保持在线'
+          });
           navigator.mediaSession.setActionHandler('pause', function(){
             if(_aliveOn && _aliveAudio) _aliveAudio.play().catch(function(){});
           });
+          navigator.mediaSession.setActionHandler('play', function(){
+            if(_aliveOn && _aliveAudio) _aliveAudio.play().catch(function(){});
+          });
+          navigator.mediaSession.setActionHandler('stop', function(){
+            if(_aliveOn && _aliveAudio) _aliveAudio.play().catch(function(){});
+          });
         }
-      }).catch(function(){});
+      }).catch(function(e){
+        console.log('[保活] Audio首次播放失败:', e);
+      });
     }
-  }catch(e){}
+  } catch(e){ console.log('[保活] Audio启动失败:', e); }
+}
+
+// 获取 Web Lock 防止标签页被丢弃
+function acquireWakeLock(){
+  // Web Lock API（防止标签页被浏览器回收）
+  if('locks' in navigator){
+    try{
+      navigator.locks.request('gg_keepalive_lock', {mode:'exclusive'}, function(){
+        return new Promise(function(){}); // 永远不 resolve，锁一直持有
+      });
+    }catch(e){}
+  }
+  // WakeLock API（防止屏幕休眠，可选）
+  if('wakeLock' in navigator){
+    try{
+      navigator.wakeLock.request('screen').then(function(lock){
+        _aliveLock = lock;
+        lock.addEventListener('release', function(){
+          if(_aliveOn){
+            setTimeout(function(){
+              if(_aliveOn) acquireWakeLock();
+            }, 1000);
+          }
+        });
+      }).catch(function(){});
+    }catch(e){}
+  }
+}
+
+// 健康检查：每15秒检测一次，挂了就立刻重启
+function aliveHealthCheck(){
+  if(!_aliveOn) return;
+
+  // 检查 AudioContext
+  if(!_aliveCtx || _aliveCtx.state === 'closed'){
+    console.log('[保活] Ctx已关闭，重新创建');
+    startAliveCtx();
+  } else if(_aliveCtx.state === 'suspended'){
+    console.log('[保活] Ctx被挂起，尝试恢复');
+    _aliveCtx.resume().catch(function(){
+      // resume 失败就重建
+      try{ _aliveCtx.close(); }catch(e){}
+      _aliveCtx = null;
+      startAliveCtx();
+    });
+  }
+
+  // 检查 Audio
+  if(!_aliveAudio){
+    console.log('[保活] Audio不存在，重新创建');
+    startAliveAudio();
+  } else if(_aliveAudio.paused){
+    console.log('[保活] Audio已暂停，尝试恢复');
+    _aliveAudio.play().catch(function(){
+      // 播放失败就重建
+      _aliveAudio = null;
+      startAliveAudio();
+    });
+  }
+}
+
+function startKeepAlive(){
+  startAliveCtx();
+  startAliveAudio();
+  acquireWakeLock();
+
+  // 启动周期性健康检查
   if(_aliveCheckInterval) clearInterval(_aliveCheckInterval);
-  _aliveCheckInterval = setInterval(function(){
-    if(!_aliveOn) return;
-    if(_aliveAudio && _aliveAudio.paused) _aliveAudio.play().catch(function(){});
-  }, 60000);
+  _aliveCheckInterval = setInterval(aliveHealthCheck, 15000);
+
   showToast('后台保活已开启', 'ok');
 }
 
 function stopKeepAlive(){
+  // 停止健康检查
   if(_aliveCheckInterval){ clearInterval(_aliveCheckInterval); _aliveCheckInterval = null; }
+
+  // 关闭 AudioContext
+  try{
+    if(_aliveOsc){ _aliveOsc.stop(); _aliveOsc = null; }
+    if(_aliveCtx){ _aliveCtx.close(); _aliveCtx = null; }
+    _aliveGain = null;
+  }catch(e){}
+
+  // 关闭 Audio
   try{
     if(_aliveAudio){ _aliveAudio.pause(); _aliveAudio.src=''; _aliveAudio = null; }
   }catch(e){}
+
+  // 释放 WakeLock
+  try{
+    if(_aliveLock){ _aliveLock.release(); _aliveLock = null; }
+  }catch(e){}
+
   showToast('后台保活已关闭', 'ok');
 }
 
+// 页面可见性变化时恢复
 document.addEventListener('visibilitychange', function(){
-  if(_aliveOn && !document.hidden){
-    if(_aliveAudio && _aliveAudio.paused) _aliveAudio.play().catch(function(){});
+  if(_aliveOn){
+    if(!document.hidden){
+      // 切回前台：立刻做一次健康检查
+      aliveHealthCheck();
+    } else {
+      // 切到后台：延迟2秒再检查一次（确保后台也活着）
+      setTimeout(function(){
+        if(_aliveOn) aliveHealthCheck();
+      }, 2000);
+    }
   }
 });
 
+// 页面获得焦点时也检查
+window.addEventListener('focus', function(){
+  if(_aliveOn) aliveHealthCheck();
+});
+
+// 任何用户交互都尝试恢复（浏览器要求用户交互后才允许音频）
 document.addEventListener('click', function(){
-  if(_aliveOn && _aliveAudio && _aliveAudio.paused) _aliveAudio.play().catch(function(){});
+  if(_aliveOn){
+    if(!_aliveCtx || _aliveCtx.state === 'closed' || !_aliveAudio){
+      startKeepAlive();
+    } else {
+      if(_aliveCtx.state === 'suspended') _aliveCtx.resume();
+      if(_aliveAudio && _aliveAudio.paused) _aliveAudio.play().catch(function(){});
+    }
+  }
 }, {capture:true});
 
+// touchstart 也触发（移动端点击有时不触发click）
 document.addEventListener('touchstart', function(){
-  if(_aliveOn && _aliveAudio && _aliveAudio.paused) _aliveAudio.play().catch(function(){});
+  if(_aliveOn){
+    if(_aliveCtx && _aliveCtx.state === 'suspended') _aliveCtx.resume();
+    if(_aliveAudio && _aliveAudio.paused) _aliveAudio.play().catch(function(){});
+  }
 }, {capture:true, passive:true});
 
+// 恢复上次状态
 if(_aliveOn){
   document.getElementById('keepAliveSwitch').classList.add('on');
 }
@@ -14689,6 +14517,13 @@ function applyRpCSS(){
 function removeRpCSS(){
   var el = document.getElementById('rpCustomStyle');
   if(el) el.remove();
+}
+
+function closeModal(id) {
+  var el = document.getElementById(id);
+  if (el) {
+    el.classList.remove('show');
+  }
 }
 </script>
 </body>
