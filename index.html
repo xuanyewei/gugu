@@ -12278,14 +12278,19 @@ function deleteCssPreset(idx){
 
 // 进入聊天时切换到专属CSS
 function applyCssForCurrentChat(){
+  var globalCSS = localStorage.getItem('customCSS') || '';
+  
   if(chatFriend){
     var chatCSS = localStorage.getItem('customCSS_' + chatFriend.id);
     if(chatCSS !== null && chatCSS !== ''){
-      applyCustomCSS(chatCSS);
+      // ★ 有专属CSS：用专属的替换全局
+      applyCustomCSS(chatCSS, 'global');
       return;
     }
   }
-  applyCustomCSS(localStorage.getItem('customCSS') || '');
+  
+  // ★ 没有专属CSS：恢复全局
+  applyCustomCSS(globalCSS, 'global');
 }
 
 function clearAllCache(){
@@ -12544,12 +12549,15 @@ setCssScope = function(val, el){
 var _origSaveCustomCSS = saveCustomCSS;
 saveCustomCSS = function(){
   var css = document.getElementById('cssEditorTextarea').value.trim();
+  
   if(cssEditorScope === 'msg-only'){
     localStorage.setItem('customCSS_msgOnly', css);
+    // ★ 只写 msg-only 专属标签，不碰全局
     applyCustomCSS(css, 'msg-only');
-    showCssStatus('已保存为"仅消息应用"样式，不影响主界面', 'ok');
+    showCssStatus('已保存为"仅消息应用"样式', 'ok');
     return;
   }
+  
   if(cssEditorScope === 'chat'){
     if(cssEditorSelectedFriends.length === 0){
       showCssStatus('请至少选择一个角色', 'err');
@@ -12558,7 +12566,8 @@ saveCustomCSS = function(){
     cssEditorSelectedFriends.forEach(function(fid){
       localStorage.setItem('customCSS_' + fid, css);
     });
-    applyCustomCSS(css, 'chat');
+    // ★ 不往全局写，而是走 applyCssForCurrentChat 判断
+    applyCssForCurrentChat();
     var names = cssEditorSelectedFriends.map(function(fid){
       var f = getFriends().find(function(x){ return x.id === fid; });
       return f ? f.name : fid;
@@ -12566,6 +12575,8 @@ saveCustomCSS = function(){
     showCssStatus('已保存为 ' + names.join('、') + ' 的专属样式', 'ok');
     return;
   }
+  
+  // global
   localStorage.setItem('customCSS', css);
   applyCustomCSS(css, 'global');
   showCssStatus('已保存为全局样式', 'ok');
@@ -12609,7 +12620,7 @@ resetCustomCSS = function(){
 // 重写 applyCustomCSS 支持多 style 标签
 applyCustomCSS = function(css, scope){
   if(!scope) scope = 'global';
-  // 消息应用专属 style
+  
   var msgStyle = document.getElementById('customCSSMsgStyle');
   var globalStyle = document.getElementById('customCSSStyle');
   
@@ -12623,28 +12634,15 @@ applyCustomCSS = function(css, scope){
       msgStyle.id = 'customCSSMsgStyle';
       document.head.appendChild(msgStyle);
     }
-    // ★ 核心：自动给选择器加消息页面前缀，不影响主界面
     msgStyle.textContent = scopeCssSelectors(css, MSG_SCOPE_PREFIX);
     msgStyle.disabled = false;
     return;
   }
-  if(scope === 'global'){
+  
+  // ★ global 和 chat 都写同一个标签，但 chat 不再从这里调用了
+  if(scope === 'global' || scope === 'chat'){
     if(!css){
-      if(globalStyle) globalStyle.remove();
-      return;
-    }
-    if(!globalStyle){
-      globalStyle = document.createElement('style');
-      globalStyle.id = 'customCSSStyle';
-      document.head.appendChild(globalStyle);
-    }
-    globalStyle.textContent = css;
-    return;
-  }
-  if(scope === 'chat'){
-    // chat CSS 和 global 用同一个标签（临时预览）
-    if(!css){
-      if(globalStyle) globalStyle.remove();
+      if(globalStyle) globalStyle.textContent = '';
       return;
     }
     if(!globalStyle){
@@ -14920,6 +14918,17 @@ function closeModal(id) {
   var el = document.getElementById(id);
   if (el) {
     el.classList.remove('show');
+  }
+  
+  // ★ 关闭CSS编辑器时，恢复到正确状态
+  if(id === 'cssEditorModal'){
+    // 恢复全局CSS
+    var globalCSS = localStorage.getItem('customCSS') || '';
+    applyCustomCSS(globalCSS, 'global');
+    // 如果在聊天中，再覆盖为专属CSS
+    if(chatFriend){
+      applyCssForCurrentChat();
+    }
   }
 }
 
