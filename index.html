@@ -7412,21 +7412,48 @@ if(sumSettings.enabled && summaries.length > 0){
   if (wbInjection.assistant) {
     messages.push({ role: 'system', content: '回复前先参考以下信息：\n' + wbInjection.assistant });
   }
-  recent.forEach(function(m){
-    var msgRole = m.role === 'user' ? 'user' : 'assistant';
-    
-    // 如果是带真实图片的消息，用 vision 格式
-    if(m.image && m.msgType === 'realImg'){
-      var parts = [];
-      var captionMatch = m.content.match(/^\[实拍图片[:：]\s*([\s\S]*?)\]$/);
-      var caption = captionMatch ? captionMatch[1].trim() : '';
-      if(caption) parts.push({type:'text', text:'[对方发了一张照片' + (caption ? '，说明：' + caption : '') + ']'});
-      parts.push({type:'image_url', image_url:{url: m.image, detail:'low'}});
-      messages.push({role:msgRole, content:parts});
-    } else {
-      messages.push({role:msgRole, content:m.content});
-    }
-  });
+  // ★ 合并连续同角色消息，让AI能分辨每条的边界
+var mergedRecent = [];
+recent.forEach(function(m){
+  var msgRole = m.role === 'user' ? 'user' : 'assistant';
+  var isVision = m.image && m.msgType === 'realImg';
+  
+  // vision格式的图片消息不合并，单独发
+  if(isVision){
+    var parts = [];
+    var captionMatch = m.content.match(/^\[实拍图片[:：]\s*([\s\S]*?)\]$/);
+    var caption = captionMatch ? captionMatch[1].trim() : '';
+    if(caption) parts.push({type:'text', text:'[对方发了一张照片' + (caption ? '，说明：' + caption : '') + ']'});
+    parts.push({type:'image_url', image_url:{url: m.image, detail:'low'}});
+    mergedRecent.push({role:msgRole, content:parts, isVision:true});
+    return;
+  }
+  
+  var last = mergedRecent.length > 0 ? mergedRecent[mergedRecent.length - 1] : null;
+  
+  if(last && last.role === msgRole && !last.isVision){
+    // 同角色连续消息：用分隔符拼接，让AI知道是多条
+    last.content += '\n---\n' + m.content;
+    last.msgCount = (last.msgCount || 1) + 1;
+  } else {
+    mergedRecent.push({role:msgRole, content:m.content, msgCount:1});
+  }
+});
+
+// 给合并的消息加上提示
+mergedRecent.forEach(function(m){
+  if(m.isVision){
+    messages.push({role:m.role, content:m.content});
+  } else if(m.msgCount > 1){
+    // 告诉AI这是多条分开发的消息
+    var prefix = m.role === 'user' 
+      ? '（以下是对方连续发的' + m.msgCount + '条消息，用---分隔）\n' 
+      : '';
+    messages.push({role:m.role, content: prefix + m.content});
+  } else {
+    messages.push({role:m.role, content:m.content});
+  }
+});
   
   // ★ 如果对话超过10轮，插一次轻量提醒（用system角色，放在前面）
 if(recent.length > 10){
@@ -7901,6 +7928,8 @@ p += '  · 只能引用对方发的某一条原话，不能把多条消息拼在
 p += '  · 对方发了"你好" "在干嘛" "吃饭了吗"三条，你只能引用其中一条，比如[引用: 吃饭了吗]\n';
 p += '  · 禁止写成[引用: 你好 在干嘛 吃饭了吗]这种把多条拼在一起的\n';
 p += '  · 引用后面必须跟你的回复文字，不能只有引用没有回复\n';
+p += '  · 对方连续发的多条消息会用 --- 分隔，每个 --- 之间就是一条独立消息\n';
+p += '  · 例如对方发了"你好\\n---\\n在吗\\n---\\n吃了没"就是3条独立消息，引用时只能引其中一条\n';
 p += '如果对方说了一句让你印象深刻的话，你可以在某条消息里用 [收藏: 对方的原话内容] 来收藏它。\n';
 p += '【收藏引用严格警告】：收藏/引用的内容【必须是一字不差、完整存在的对方发过的某条原话】，绝对不能只截取几个字，也不能自行拼接修改！不要频繁使用，语音、图片都不能使用。仅在真正触动时用。\n';
 p += '\n【图片消息】\n';
