@@ -5317,6 +5317,13 @@ function scopeCssSelectors(css, prefix) {
   return result;
 }
 
+/* ===== 持久化存储请求 ===== */
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().then(function(granted) {
+    console.log('[存储] 持久化' + (granted ? '已获批' : '未获批'));
+  });
+}
+
 /* ===== 基础工具 ===== */
 const days=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
 const appNames=['消息','美化','记录','联系人','图库','收藏','通知','设置'];
@@ -5330,9 +5337,154 @@ function openDB(){
     r.onerror=e=>no(e.target.error);
   });
 }
-async function dbPut(k,v){const db=await openDB();return new Promise((ok,no)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,k);tx.oncomplete=()=>ok();tx.onerror=e=>no(e.target.error)})}
-async function dbGet(k){const db=await openDB();return new Promise((ok,no)=>{const tx=db.transaction(STORE,'readonly');const r=tx.objectStore(STORE).get(k);r.onsuccess=()=>ok(r.result||null);r.onerror=e=>no(e.target.error)})}
-async function dbDel(k){const db=await openDB();return new Promise((ok,no)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(k);tx.oncomplete=()=>ok();tx.onerror=e=>no(e.target.error)})}
+
+// 图片压缩为小base64（头像专用，128px，质量0.6）
+function compressToBase64Backup(blob, maxSize, quality) {
+  return new Promise(function(resolve) {
+    if (!maxSize) maxSize = 128;
+    if (!quality) quality = 0.6;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var w = img.width, h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = function() { resolve(null); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function() { resolve(null); };
+    reader.readAsDataURL(blob);
+  });
+}
+
+// 判断是否是图片类型的key（需要备份的）
+function isImageKey(k) {
+  return k && (
+    k.indexOf('friendAv_') === 0 ||
+    k.indexOf('personaAv_') === 0 ||
+    k.indexOf('chatAvUser_') === 0 ||
+    k.indexOf('chatAvChar_') === 0 ||
+    k.indexOf('chatBg_') === 0 ||
+    k === 'musicCover' ||
+    k === 'bgImage' ||
+    k === 'globalBgImage' ||
+    k.indexOf('appIcon_') === 0
+  );
+}
+
+async function dbPut(k, v) {
+  // 1. 正常写 IndexedDB
+  var db = await openDB();
+  await new Promise(function(ok, no) {
+    var tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put(v, k);
+    tx.oncomplete = function() { ok(); };
+    tx.onerror = function(e) { no(e.target.error); };
+  });
+
+  // 2. 如果是图片，同时压缩备份到 localStorage
+  if (isImageKey(k) && v instanceof Blob) {
+    try {
+      var isAvatar = k.indexOf('Av_') >= 0 || k.indexOf('personaAv_') >= 0;
+      var maxPx = isAvatar ? 128 : 256;
+      var b64 = await compressToBase64Backup(v, maxPx, 0.6);
+      if (b64) {
+        try {
+          localStorage.setItem('_imgBackup_' + k, b64);
+        } catch (e) {
+          // localStorage 满了，清理最老的备份腾空间
+          cleanOldImageBackups();
+          try { localStorage.setItem('_imgBackup_' + k, b64); } catch (e2) {}
+        }
+      }
+    } catch (e) {
+      console.log('[备份] 压缩失败:', k, e);
+    }
+  }
+}
+
+async function dbGet(k) {
+  var db = await openDB();
+  var result = await new Promise(function(ok, no) {
+    var tx = db.transaction(STORE, 'readonly');
+    var r = tx.objectStore(STORE).get(k);
+    r.onsuccess = function() { ok(r.result || null); };
+    r.onerror = function(e) { no(e.target.error); };
+  });
+
+  // IndexedDB 有数据，直接返回
+  if (result) return result;
+
+  // IndexedDB 没有，尝试从 localStorage 备份恢复
+  if (isImageKey(k)) {
+    var backup = localStorage.getItem('_imgBackup_' + k);
+    if (backup) {
+      console.log('[恢复] 从备份恢复图片:', k);
+      try {
+        // 把 base64 转回 Blob
+        var parts = backup.split(';base64,');
+        var contentType = parts[0].split(':')[1] || 'image/jpeg';
+        var raw = window.atob(parts[1]);
+        var arr = new Uint8Array(raw.length);
+        for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        var blob = new Blob([arr], { type: contentType });
+
+        // 写回 IndexedDB（自动修复）
+        var db2 = await openDB();
+        await new Promise(function(ok2) {
+          var tx2 = db2.transaction(STORE, 'readwrite');
+          tx2.objectStore(STORE).put(blob, k);
+          tx2.oncomplete = function() { ok2(); };
+          tx2.onerror = function() { ok2(); };
+        });
+
+        return blob;
+      } catch (e) {
+        console.log('[恢复] 还原失败:', k, e);
+      }
+    }
+  }
+
+  return null;
+}
+
+async function dbDel(k) {
+  var db = await openDB();
+  await new Promise(function(ok, no) {
+    var tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).delete(k);
+    tx.oncomplete = function() { ok(); };
+    tx.onerror = function(e) { no(e.target.error); };
+  });
+  // 同时删除备份
+  localStorage.removeItem('_imgBackup_' + k);
+}
+
+// localStorage 空间不够时，删最老的图片备份
+function cleanOldImageBackups() {
+  var backupKeys = [];
+  for (var i = 0; i < localStorage.length; i++) {
+    var key = localStorage.key(i);
+    if (key && key.indexOf('_imgBackup_') === 0) {
+      backupKeys.push(key);
+    }
+  }
+  // 按key排序，删掉前1/3（最老的）
+  backupKeys.sort();
+  var delCount = Math.max(1, Math.floor(backupKeys.length / 3));
+  for (var j = 0; j < delCount; j++) {
+    localStorage.removeItem(backupKeys[j]);
+  }
+  console.log('[备份] 清理了 ' + delCount + ' 个旧备份');
+}
 
 /* ===== 时钟 ===== */
 function ut(){
@@ -7719,13 +7871,13 @@ p += '  · 偏好：喜欢/讨厌的食物、颜色、音乐、电影、游戏\n
 p += '  · 生活：工作/学校、宠物、家人、朋友、作息习惯\n';
 p += '  · 事件：考试、面试、旅行、生病、搬家、分手、重要约定\n';
 p += '  · 情感：对你的态度变化、关系里程碑（第一次说喜欢等）\n';
-p += '  · 口癖/习惯：经常说的话、做事方式、小动作\n';
+p += '  · 口癖/习惯：经常说的话、做事方式、重要的事、小动作\n';
 p += '  格式：{"content":"她生日3月14号白色情人节","level":"important","context":"第3次聊天她主动提到"}\n';
 p += '  level: important=生日/名字/重大事件/关系变化  normal=爱好/习惯/日常偏好  temp=今天的状态/临时的事\n';
 p += '  context: 简短记录信息来源，如"她说的""她朋友圈看到的""聊到XX话题时提到"\n';
 p += '  ⚠ 已经记过的内容不要重复记。不要为了凑记忆频繁写记，有新信息就写。没有新信息可以不写memories字段。\n\n';
 
-p += '引用对方的话：[引用: 内容] 放在消息开头。\n';
+p += '引用对方的话：[引用: 内容] 放在消息开头，引用后照常发消息，不要单独一条进行引用而不回复。\n';
 p += '如果对方说了一句让你印象深刻的话，你可以在某条消息里用 [收藏: 对方的原话内容] 来收藏它。\n';
 p += '【收藏引用严格警告】：收藏/引用的内容【必须是一字不差、完整存在的对方发过的某条原话】，绝对不能只截取几个字，也不能自行拼接修改！不要频繁使用，仅在真正触动时用。\n';
 p += '\n【图片消息】\n';
@@ -10405,6 +10557,30 @@ function setAvScope(val, el) {
 }
 
 preloadAllAvatars();
+
+// 启动时自动检测头像完整性
+(function autoRepairAvatars() {
+  setTimeout(function() {
+    var repaired = 0;
+    var keys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('_imgBackup_') === 0) {
+        keys.push(k.replace('_imgBackup_', ''));
+      }
+    }
+    // 逐个检查 IndexedDB 里有没有
+    keys.forEach(function(k) {
+      dbGet(k).then(function(blob) {
+        // dbGet 内部已经会自动从备份恢复了
+        // 这里只是触发一下检查
+        if (blob && !avatarCache[k]) {
+          avatarCache[k] = URL.createObjectURL(blob);
+        }
+      }).catch(function() {});
+    });
+  }, 2000); // 延迟2秒，等页面稳定了再检查
+})();
 
 
 /* ===== 上下文条数设置 ===== */
@@ -14639,6 +14815,45 @@ function closeModal(id) {
     el.classList.remove('show');
   }
 }
+
+// 首次运行：给已有的 IndexedDB 图片补建 localStorage 备份
+(function buildMissingBackups() {
+  setTimeout(async function() {
+    var friends = getFriends();
+    var keysToCheck = [];
+
+    friends.forEach(function(f) {
+      if (f.avatarKey) keysToCheck.push(f.avatarKey);
+    });
+
+    var personas = getUserPersonas();
+    personas.forEach(function(p) {
+      if (p.avatarKey) keysToCheck.push(p.avatarKey);
+    });
+
+    for (var i = 0; i < keysToCheck.length; i++) {
+      var k = keysToCheck[i];
+      // 已有备份就跳过
+      if (localStorage.getItem('_imgBackup_' + k)) continue;
+      try {
+        var db = await openDB();
+        var blob = await new Promise(function(ok) {
+          var tx = db.transaction(STORE, 'readonly');
+          var r = tx.objectStore(STORE).get(k);
+          r.onsuccess = function() { ok(r.result || null); };
+          r.onerror = function() { ok(null); };
+        });
+        if (blob) {
+          var b64 = await compressToBase64Backup(blob, 128, 0.6);
+          if (b64) {
+            try { localStorage.setItem('_imgBackup_' + k, b64); } catch (e) {}
+          }
+        }
+      } catch (e) {}
+    }
+    console.log('[备份] 补建完成，检查了 ' + keysToCheck.length + ' 个头像');
+  }, 5000);
+})();
 </script>
 </body>
 </html>
