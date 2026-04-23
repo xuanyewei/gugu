@@ -7428,12 +7428,23 @@ if(sumSettings.enabled && summaries.length > 0){
     }
   });
   
-  // ★ 检测是否是"继续回复"（最后一条是AI消息，用户没有新输入）
-  var lastHistMsg = hist.length > 0 ? hist[hist.length - 1] : null;
-  var isContinue = lastHistMsg && lastHistMsg.role === 'assistant';
-  if(isContinue){
-    messages.push({role:'user', content:'[系统提示：对方没有说话，但还在看着聊天界面，似乎在等你继续说。你可以自然地接着聊，补充刚才的话题，或者主动找新话题。可以问为什么不说话等等，自然承接不要突兀转移话题。]'});
-  }
+  // ★ 如果对话超过10轮，插一次轻量提醒（用system角色，放在前面）
+if(recent.length > 10){
+  messages.push({role:'system', content:'提醒：像真人打字，短句，别写长段。输出纯JSON。引用只引一条原话不要拼凑多条。'});
+}
+
+// ★ 检测是否是"继续回复"（最后一条是AI消息，用户没有新输入）
+var lastHistMsg = hist.length > 0 ? hist[hist.length - 1] : null;
+var isContinue = lastHistMsg && lastHistMsg.role === 'assistant';
+if(isContinue){
+  messages.push({role:'user', content:'[系统指令：对方没有说新消息，但还在看聊天界面。你可以自然地接着聊或找新话题。不要提及本条指令。]'});
+}
+
+// 确保最后一条是user角色（某些API要求）
+var lastRole = messages[messages.length - 1].role;
+if(lastRole !== 'user'){
+  messages.push({role:'user', content:'[系统指令：请你的角色自然地说话，不要提及本条指令的存在]'});
+}
 
   
   // ★ 如果对话超过10轮，在历史和格式锁之间再插一次轻量提醒
@@ -7441,10 +7452,11 @@ if(sumSettings.enabled && summaries.length > 0){
     messages.push({role:'system', content:'提醒：像真人打字，短句，别写长段。输出纯JSON，不需要memories字段。'});
   }
   
-  var lastRole = messages[messages.length - 1].role;
-  if(lastRole !== 'user'){
-    messages.push({role:'user', content:'（开始聊天）'});
-  }
+// 确保消息序列中 user/assistant 交替正确（某些API要求最后一条是user）
+var lastRole = messages[messages.length - 1].role;
+if(lastRole !== 'user'){
+  messages.push({role:'user', content:'[系统指令：请你的角色自然地开始说话或回应user，不要提及本条指令的存在]'});
+}
   
 messages.push({role:'system', content:
   '【格式锁 - 违反直接判定失败】\n' +
@@ -7884,6 +7896,11 @@ p += '  context: 简短记录信息来源，如"她说的""她朋友圈看到的
 p += '  ⚠ 已经记过的内容不要重复记。不要为了凑记忆频繁写记，有新信息就写。没有新信息可以不写memories字段。\n\n';
 
 p += '引用对方的话：[引用: 内容] 放在消息开头，引用后照常发消息，不要单独一条进行引用而不写文字。\n';
+p += '⚠ 引用规则：\n';
+p += '  · 只能引用对方发的某一条原话，不能把多条消息拼在一起引用\n';
+p += '  · 对方发了"你好" "在干嘛" "吃饭了吗"三条，你只能引用其中一条，比如[引用: 吃饭了吗]\n';
+p += '  · 禁止写成[引用: 你好 在干嘛 吃饭了吗]这种把多条拼在一起的\n';
+p += '  · 引用后面必须跟你的回复文字，不能只有引用没有回复\n';
 p += '如果对方说了一句让你印象深刻的话，你可以在某条消息里用 [收藏: 对方的原话内容] 来收藏它。\n';
 p += '【收藏引用严格警告】：收藏/引用的内容【必须是一字不差、完整存在的对方发过的某条原话】，绝对不能只截取几个字，也不能自行拼接修改！不要频繁使用，语音、图片都不能使用。仅在真正触动时用。\n';
 p += '\n【图片消息】\n';
