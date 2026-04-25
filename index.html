@@ -15613,11 +15613,13 @@ async function gpInvokeAI(){
   if(!fr){ showToast('未找到AI好友', 'err'); return; }
 
   _gpAiBusy = true;
+showGpTyping(fr);
 
   var config = window.getAPIConfig();
   if(!config.base || !config.key || !config.model){
     showToast('请先配置API', 'err');
     _gpAiBusy = false;
+    hideGpTyping(); 
     return;
   }
 
@@ -15783,6 +15785,8 @@ if(lastRole !== 'user'){
     var json = await res.json();
     var content = json.choices[0].message.content.trim();
     if(!content) throw new Error('空回复');
+    
+    hideGpTyping();
 
     // === 解析 JSON 分条 ===
     var parsedMsgs = [];
@@ -15835,6 +15839,7 @@ if(lastRole !== 'user'){
     }
 
   }catch(err){
+  hideGpTyping();
     showToast('AI回复失败: ' + err.message, 'err');
     _gpAiBusy = false;
   }
@@ -16897,8 +16902,49 @@ function updateGpStatus(isThinking) {
     }
 }
 
-// 修改 gpInvokeAI，在开头加上 updateGpStatus(true)，结尾加上 updateGpStatus(false)
-// 搜索并定位到 gpInvokeAI 函数
+// ===== 显示群聊打字状态气泡 =====
+function showGpTyping(fr) {
+  var body = document.getElementById('gpBody');
+  var existing = document.getElementById('gpTypingRow');
+  if(existing) existing.remove();
+
+  var row = document.createElement('div');
+  row.className = 'ct-row';
+  row.id = 'gpTypingRow';
+
+  var avUrl = null;
+  if(fr.avatarKey && avatarCache[fr.avatarKey]){
+    avUrl = avatarCache[fr.avatarKey];
+  }
+  var initial = fr.name.charAt(0).toUpperCase();
+  var avInner = avUrl 
+    ? '<img src="' + avUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' 
+    : '<span style="font-size:12px;font-weight:700;color:#bbb">' + initial + '</span>';
+
+  // 构建带头像和打字动画波浪点的气泡
+  row.innerHTML = 
+    '<div class="ct-row-av" style="width:32px;height:32px;background:#f3f3f3;align-self:flex-end;overflow:hidden">' + avInner + '</div>' +
+    '<div class="ct-bubble-wrap">' +
+      '<div style="font-size:10px;color:#555;font-weight:600;margin-bottom:2px;">' + escapeHTML(fr.name) + '</div>' +
+      '<div class="ct-bubble" style="padding:12px 18px">' +
+        '<div class="ct-typing"><i></i><i></i><i></i></div>' +
+      '</div>' +
+    '</div>';
+
+  body.appendChild(row);
+  body.scrollTop = body.scrollHeight;
+
+  // 更新顶部状态文字
+  var el = document.getElementById('gpMemberCount');
+  if(el) el.textContent = fr.name + ' 正在输入...';
+}
+
+// 隐藏群聊打字状态
+function hideGpTyping() {
+  var t = document.getElementById('gpTypingRow');
+  if(t) t.remove();
+  loadGpMembers(); // 恢复顶部显示人数
+}
 </script>
 </body>
 </html>
