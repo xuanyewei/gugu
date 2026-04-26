@@ -3795,37 +3795,6 @@ input[type="range"]::-webkit-slider-thumb{
 .rp-preset-overlay.show .rp-preset-panel{transform:translateY(0)}
 [data-theme="dark"] .rp-preset-panel{background:#1a1a1a}
 
-/* 确保菜单能显示在最上层 */
-.ct-action-menu {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%) scale(0.9);
-  background: var(--card);
-  border: 1px solid var(--c6);
-  border-radius: 12px;
-  display: flex;
-  gap: 8px;
-  padding: 6px;
-  z-index: 1000;
-  box-shadow: var(--sh);
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.2s;
-}
-.ct-action-menu.show {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
-  pointer-events: auto;
-}
-.ct-act {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: var(--c7);
-  cursor: pointer;
-}
 </style>
 </head>
 <body>
@@ -15370,39 +15339,22 @@ async function loadGpHistory(){
   renderGpMessages();
 }
 
-// 订阅实时消息（升级版：支持修改和删除同步）
+// 订阅实时消息
 function subscribeGpMessages(){
   var sb = getSB(); if(!sb || !_gpRoom) return;
 
   _gpChannel = sb
     .channel('room_' + _gpRoom)
     .on('postgres_changes', {
-      event: '*', // 监听所有动作：INSERT, UPDATE, DELETE
+      event: 'INSERT',
       schema: 'public',
       table: 'room_messages',
       filter: 'room_id=eq.' + _gpRoom
     }, function(payload){
-      if(payload.eventType === 'INSERT'){
-        var msg = payload.new;
-        _gpMessages.push(msg);
-        appendGpBubble(msg, true);
-        if(msg.sender_id !== _gpUserId) playMsgTone();
-      } 
-      else if(payload.eventType === 'DELETE'){
-        // 全群同步删除
-        var deletedId = payload.old.id;
-        _gpMessages = _gpMessages.filter(m => m.id !== deletedId);
-        var el = document.querySelector(`[data-gp-msg-id="${deletedId}"]`);
-        if(el) el.closest('.ct-row').remove();
-      }
-      else if(payload.eventType === 'UPDATE'){
-        // 全群同步编辑
-        var updatedMsg = payload.new;
-        var idx = _gpMessages.findIndex(m => m.id === updatedMsg.id);
-        if(idx >= 0) _gpMessages[idx] = updatedMsg;
-        var el = document.querySelector(`[data-gp-msg-id="${updatedMsg.id}"]`);
-        if(el) el.textContent = updatedMsg.content;
-      }
+      var msg = payload.new;
+      _gpMessages.push(msg);
+      appendGpBubble(msg, true);
+      if(msg.sender_id !== _gpUserId) playMsgTone();
     })
     .on('postgres_changes', {
       event: '*',
@@ -15437,43 +15389,98 @@ function appendGpBubble(msg, animate){
   var body = document.getElementById('gpBody');
   var isMe = msg.sender_id === _gpUserId && msg.msg_type === 'user';
   var isMyAi = msg.sender_id === _gpUserId + '_ai';
+  var isAi = msg.msg_type === 'ai';
 
   var row = document.createElement('div');
   row.className = 'ct-row' + (isMe ? ' is-me' : '');
 
+  var initial = msg.sender_name ? msg.sender_name.charAt(0).toUpperCase() : '?';
+
+  // 头像：优先本地缓存，其次从成员数据拿 base64
   var avUrl = null;
-  // ... (保持原有的头像逻辑不变) ...
+
   if(isMe){
     var myP = getActivePersona(_gpAiFriendId);
-    if(myP && myP.avatarKey && avatarCache[myP.avatarKey]) avUrl = avatarCache[myP.avatarKey];
+    if(myP && myP.avatarKey && avatarCache[myP.avatarKey]){
+      avUrl = avatarCache[myP.avatarKey];
+    } else {
+      var myMember = _gpMembers.find(function(m){ return m.user_id === _gpUserId; });
+      if(myMember && myMember.avatar_url) avUrl = myMember.avatar_url;
+    }
   } else if(isMyAi){
     if(_gpAiFriendId){
-      var fr = getFriends().find(f => f.id === _gpAiFriendId);
-      if(fr && fr.avatarKey && avatarCache[fr.avatarKey]) avUrl = avatarCache[fr.avatarKey];
+      var fr = getFriends().find(function(f){ return f.id === _gpAiFriendId; });
+      if(fr && fr.avatarKey && avatarCache[fr.avatarKey]){
+        avUrl = avatarCache[fr.avatarKey];
+      } else {
+        var myM = _gpMembers.find(function(m){ return m.user_id === _gpUserId; });
+        if(myM && myM.ai_avatar_url) avUrl = myM.ai_avatar_url;
+      }
     }
+  } else if(isAi){
+    // 别人的AI：从成员数据找
+    var aiOwner = _gpMembers.find(function(m){
+      return m.ai_name === msg.sender_name && m.user_id !== _gpUserId;
+    });
+    if(aiOwner && aiOwner.ai_avatar_url) avUrl = aiOwner.ai_avatar_url;
   } else {
-    var otherMember = _gpMembers.find(m => (m.user_name === msg.sender_name || m.ai_name === msg.sender_name) && m.user_id !== _gpUserId);
-    if(otherMember) avUrl = (msg.msg_type === 'ai') ? otherMember.ai_avatar_url : otherMember.avatar_url;
+    // 别人（真人）：从成员数据找
+    var otherMember = _gpMembers.find(function(m){
+      return m.user_name === msg.sender_name && m.user_id !== _gpUserId;
+    });
+    if(otherMember && otherMember.avatar_url) avUrl = otherMember.avatar_url;
   }
 
-  var avInner = avUrl ? `<img src="${avUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : `<span style="font-size:12px;font-weight:700;color:#bbb">${msg.sender_name.charAt(0).toUpperCase()}</span>`;
-  
-  // 增加 data-gp-msg-id 属性，这是后续删除/编辑的关键
-  var bubbleHtml = `<div class="ct-bubble" data-gp-msg-id="${msg.id}">${escapeHTML(msg.content)}</div>`;
-  
-  // 权限判断：只有自己或自己的AI能弹出菜单
-  var longPressAction = (isMe || isMyAi) ? `ontouchstart="gpStartLong(event, this, '${msg.id}', ${isMyAi})"` : '';
+  var avInner = avUrl
+    ? '<img src="' + avUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+    : '<span style="font-size:12px;font-weight:700;color:#bbb">' + initial + '</span>';
 
-  row.innerHTML = `
-    <div class="ct-row-av" style="width:32px;height:32px;background:#f3f3f3;align-self:flex-end;overflow:hidden">${avInner}</div>
-    <div class="ct-bubble-wrap" ${longPressAction} oncontextmenu="return false">
-      <div style="font-size:10px;color:#555;font-weight:600;margin-bottom:2px;${isMe?'text-align:right':''}">${escapeHTML(msg.sender_name)}</div>
-      ${bubbleHtml}
-    </div>`;
+  // 点击头像加好友
+  var clickAttr = '';
+  if(!isMe && !isMyAi){
+    var clickName = escapeAttr(msg.sender_name);
+    var clickAv = avUrl ? escapeAttr(avUrl) : '';
+    clickAttr = ' onclick="event.stopPropagation();gpClickAvatar(\'' + clickName + '\',\'' + clickAv + '\')" style="width:32px;height:32px;background:#f3f3f3;align-self:flex-end;overflow:hidden;cursor:pointer"';
+  } else {
+    clickAttr = ' style="width:32px;height:32px;background:#f3f3f3;align-self:flex-end;overflow:hidden"';
+  }
+
+  var avHtml = '<div class="ct-row-av"' + clickAttr + '>' + avInner + '</div>';
+
+  var nameHtml = '<div style="font-size:10px;color:#555;font-weight:600;margin-bottom:2px;' + (isMe ? 'text-align:right' : '') + '">' +
+    escapeHTML(msg.sender_name) + '</div>';
+
+  var timeStr = '';
+  if(msg.created_at){
+    var d = new Date(msg.created_at);
+    timeStr = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+
+  var contentHtml = escapeHTML(msg.content || '');
+
+  row.innerHTML = avHtml +
+    '<div class="ct-bubble-wrap">' + nameHtml +
+      '<div class="ct-bubble">' + contentHtml + '</div>' +
+      '<div class="ct-bubble-time-below" style="' + (isMe ? 'text-align:right' : '') + '">' + timeStr + '</div>' +
+    '</div>';
+
+  if(animate){
+    row.style.opacity = '0';
+    row.style.transform = 'translateY(12px)';
+    row.style.transition = 'all .3s ease';
+  }
 
   body.appendChild(row);
-  if(animate) { /* 动画逻辑保持原样 */ }
-  body.scrollTop = body.scrollHeight;
+
+  if(animate){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        row.style.opacity = '1';
+        row.style.transform = 'translateY(0)';
+      });
+    });
+    requestAnimationFrame(function(){ body.scrollTop = body.scrollHeight; });
+  }
 }
 
 // 发送消息
@@ -15613,13 +15620,11 @@ async function gpInvokeAI(){
   if(!fr){ showToast('未找到AI好友', 'err'); return; }
 
   _gpAiBusy = true;
-showGpTyping(fr);
 
   var config = window.getAPIConfig();
   if(!config.base || !config.key || !config.model){
     showToast('请先配置API', 'err');
     _gpAiBusy = false;
-    hideGpTyping(); 
     return;
   }
 
@@ -15785,8 +15790,6 @@ if(lastRole !== 'user'){
     var json = await res.json();
     var content = json.choices[0].message.content.trim();
     if(!content) throw new Error('空回复');
-    
-    hideGpTyping();
 
     // === 解析 JSON 分条 ===
     var parsedMsgs = [];
@@ -15839,7 +15842,6 @@ if(lastRole !== 'user'){
     }
 
   }catch(err){
-  hideGpTyping();
     showToast('AI回复失败: ' + err.message, 'err');
     _gpAiBusy = false;
   }
@@ -16832,118 +16834,6 @@ function confirmGpCssPreview(cssB64){
   var overlay = document.getElementById('gpCssPreviewConfirm');
   if(overlay) overlay.remove();
   applySharedGpCss(cssB64);
-}
-// 群聊长按菜单逻辑
-var gpLongTimer = null;
-function gpStartLong(e, wrap, msgId, isAi) {
-    gpLongTimer = setTimeout(() => {
-        gpShowMenu(wrap, msgId, isAi);
-        if (navigator.vibrate) navigator.vibrate(20);
-    }, 500);
-}
-
-function gpShowMenu(wrap, msgId, isAi) {
-    var old = document.getElementById('gpActiveMenu'); if (old) old.remove();
-    var menu = document.createElement('div');
-    menu.className = 'ct-action-menu show';
-    menu.id = 'gpActiveMenu';
-    
-    // 基础：编辑和删除
-    var html = `
-        <div class="ct-act" onclick="gpActEdit('${msgId}')">编辑</div>
-        <div class="ct-act" onclick="gpActDelete('${msgId}')">删除</div>
-    `;
-    // 如果是AI发的，增加重回功能
-    if (isAi) {
-        html = `<div class="ct-act" onclick="gpActRetry('${msgId}')">重回</div>` + html;
-    }
-    
-    menu.innerHTML = html;
-    wrap.appendChild(menu);
-    document.addEventListener('click', () => menu.remove(), { once: true });
-}
-
-// 删除功能
-async function gpActDelete(msgId) {
-    var sb = getSB(); if (!sb) return;
-    await sb.from('room_messages').delete().eq('id', msgId);
-    showToast('已删除', 'ok');
-}
-
-// 编辑功能
-async function gpActEdit(msgId) {
-    var msg = _gpMessages.find(m => m.id == msgId);
-    if (!msg) return;
-    var newText = prompt('编辑消息内容：', msg.content);
-    if (newText && newText !== msg.content) {
-        var sb = getSB(); if (!sb) return;
-        await sb.from('room_messages').update({ content: newText }).eq('id', msgId);
-    }
-}
-
-// 重回（Retry）功能：删除当前这条，重新调用AI
-async function gpActRetry(msgId) {
-    var sb = getSB(); if (!sb) return;
-    await sb.from('room_messages').delete().eq('id', msgId);
-    gpInvokeAI(); // 重新触发AI生成
-}
-
-// AI 正在输入的顶部显示
-function updateGpStatus(isThinking) {
-    var el = document.getElementById('gpStatusText');
-    if (!el) return;
-    if (isThinking) {
-        var fr = getFriends().find(f => f.id === _gpAiFriendId);
-        el.textContent = (fr ? fr.name : 'AI') + ' 正在思考...';
-        el.style.color = 'var(--accent)';
-    } else {
-        loadGpMembers(); // 恢复显示人数
-        el.style.color = '';
-    }
-}
-
-// ===== 显示群聊打字状态气泡 =====
-function showGpTyping(fr) {
-  var body = document.getElementById('gpBody');
-  var existing = document.getElementById('gpTypingRow');
-  if(existing) existing.remove();
-
-  var row = document.createElement('div');
-  row.className = 'ct-row';
-  row.id = 'gpTypingRow';
-
-  var avUrl = null;
-  if(fr.avatarKey && avatarCache[fr.avatarKey]){
-    avUrl = avatarCache[fr.avatarKey];
-  }
-  var initial = fr.name.charAt(0).toUpperCase();
-  var avInner = avUrl 
-    ? '<img src="' + avUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' 
-    : '<span style="font-size:12px;font-weight:700;color:#bbb">' + initial + '</span>';
-
-  // 构建带头像和打字动画波浪点的气泡
-  row.innerHTML = 
-    '<div class="ct-row-av" style="width:32px;height:32px;background:#f3f3f3;align-self:flex-end;overflow:hidden">' + avInner + '</div>' +
-    '<div class="ct-bubble-wrap">' +
-      '<div style="font-size:10px;color:#555;font-weight:600;margin-bottom:2px;">' + escapeHTML(fr.name) + '</div>' +
-      '<div class="ct-bubble" style="padding:12px 18px">' +
-        '<div class="ct-typing"><i></i><i></i><i></i></div>' +
-      '</div>' +
-    '</div>';
-
-  body.appendChild(row);
-  body.scrollTop = body.scrollHeight;
-
-  // 更新顶部状态文字
-  var el = document.getElementById('gpMemberCount');
-  if(el) el.textContent = fr.name + ' 正在输入...';
-}
-
-// 隐藏群聊打字状态
-function hideGpTyping() {
-  var t = document.getElementById('gpTypingRow');
-  if(t) t.remove();
-  loadGpMembers(); // 恢复顶部显示人数
 }
 </script>
 </body>
