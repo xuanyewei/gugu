@@ -3983,6 +3983,342 @@ input[type="range"]::-webkit-slider-thumb{
 [data-theme="dark"] .gal-empty-icon svg{stroke:#48484a}
 [data-theme="dark"] .gal-empty-title{color:#fff}
 [data-theme="dark"] .gal-empty-desc{color:#8e8e93}
+
+/* ===== 群聊准入验证 ===== */
+.gp-gate-overlay{
+  position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.gp-gate-overlay.show{opacity:1;pointer-events:auto}
+.gp-gate{
+  width:100%;max-width:340px;background:#fff;
+  border-radius:28px;overflow:hidden;
+  box-shadow:0 24px 80px rgba(0,0,0,.18),0 4px 16px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.8);
+  transform:scale(.92) translateY(20px);
+  transition:transform .5s cubic-bezier(.16,1,.3,1);
+}
+.gp-gate-overlay.show .gp-gate{transform:scale(1) translateY(0)}
+.gp-gate-strip{
+  height:4px;
+  background:linear-gradient(90deg,#222 0%,#555 50%,#222 100%);
+  position:relative;overflow:hidden;
+}
+.gp-gate-strip::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  animation:gpShimmer 2s infinite;
+}
+@keyframes gpShimmer{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(100%)}
+}
+.gp-gate-body{padding:32px 28px 28px;text-align:center}
+.gp-gate-lock{
+  width:72px;height:72px;margin:0 auto 20px;
+  border-radius:50%;background:#fafafa;border:2px solid #f0f0f0;
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+.gp-gate-lock::before{
+  content:"";position:absolute;width:88px;height:88px;
+  border-radius:50%;border:1.5px dashed #e0e0e0;
+  animation:gpLockSpin 20s linear infinite;
+}
+@keyframes gpLockSpin{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+.gp-gate-lock svg{width:28px;height:28px;stroke:#333;stroke-width:1.8;fill:none}
+.gp-gate-title{font-size:20px;font-weight:800;letter-spacing:-.5px;color:#111;margin-bottom:6px}
+.gp-gate-sub{font-size:12px;color:#999;line-height:1.6;margin-bottom:24px}
+.gp-gate-sub strong{color:#555;font-weight:600}
+.gp-gate-input-wrap{position:relative;margin-bottom:16px}
+.gp-gate-input{
+  width:100%;height:48px;padding:0 44px 0 18px;
+  border:2px solid #e8e8e8;border-radius:14px;
+  font-size:15px;font-weight:500;color:#111;background:#fafafa;
+  outline:none;font-family:inherit;text-align:center;letter-spacing:2px;
+  transition:border .25s,background .25s,box-shadow .25s;
+}
+.gp-gate-input:focus{
+  border-color:#222;background:#fff;
+  box-shadow:0 0 0 4px rgba(34,34,34,.06);
+}
+.gp-gate-input::placeholder{color:#ccc;letter-spacing:1px;font-weight:400}
+.gp-gate-input-icon{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  width:22px;height:22px;stroke:#ccc;stroke-width:1.8;fill:none;
+  pointer-events:none;transition:stroke .25s;
+}
+.gp-gate-input:focus ~ .gp-gate-input-icon{stroke:#222}
+.gp-gate-btn{
+  width:100%;height:48px;border:none;border-radius:14px;
+  background:#111;color:#fff;font-size:14px;font-weight:700;letter-spacing:.5px;
+  cursor:pointer;font-family:inherit;
+  transition:transform .15s,opacity .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.gp-gate-btn:active{transform:scale(.97);opacity:.85}
+.gp-gate-cancel{
+  width:100%;height:40px;border:none;border-radius:12px;
+  background:none;color:#bbb;font-size:13px;font-weight:500;
+  cursor:pointer;font-family:inherit;margin-top:6px;transition:.15s;
+}
+.gp-gate-cancel:active{color:#666}
+.gp-gate-footer{padding:0 28px 24px;text-align:center}
+.gp-gate-hint{font-size:10px;color:#ccc;line-height:1.6;letter-spacing:.3px}
+.gp-gate-divider{
+  height:1px;margin:0 28px;
+  background:linear-gradient(90deg,transparent,#e8e8e8,transparent);
+}
+.gp-gate-status{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 28px;font-size:10px;color:#bbb;letter-spacing:.5px;
+}
+.gp-gate-status-dot{
+  width:5px;height:5px;border-radius:50%;background:#ddd;
+  animation:gpStatusPulse 2s infinite;
+}
+@keyframes gpStatusPulse{
+  0%,100%{opacity:.4}
+  50%{opacity:1}
+}
+@keyframes gpGateShake{
+  0%,100%{transform:translateX(0)}
+  15%{transform:translateX(-8px)}
+  30%{transform:translateX(6px)}
+  45%{transform:translateX(-4px)}
+  60%{transform:translateX(2px)}
+}
+.gp-gate.shake{animation:gpGateShake .4s ease}
+.gp-gate.shake .gp-gate-input{
+  border-color:#e11d48 !important;
+  background:#fff5f7 !important;
+}
+.gp-gate.success .gp-gate-lock{border-color:#059669;background:#ecfdf5}
+.gp-gate.success .gp-gate-lock svg{stroke:#059669}
+.gp-gate.success .gp-gate-input{border-color:#059669 !important;background:#ecfdf5 !important}
+
+/* 深色模式 */
+[data-theme="dark"] .gp-gate-overlay{background:rgba(0,0,0,.7)}
+[data-theme="dark"] .gp-gate{background:#1a1a1a;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+[data-theme="dark"] .gp-gate-strip{background:linear-gradient(90deg,#e0e0e0 0%,#999 50%,#e0e0e0 100%)}
+[data-theme="dark"] .gp-gate-lock{background:#222;border-color:#333}
+[data-theme="dark"] .gp-gate-lock::before{border-color:#333}
+[data-theme="dark"] .gp-gate-lock svg{stroke:#ccc}
+[data-theme="dark"] .gp-gate-title{color:#e0e0e0}
+[data-theme="dark"] .gp-gate-sub{color:#666}
+[data-theme="dark"] .gp-gate-sub strong{color:#999}
+[data-theme="dark"] .gp-gate-input{background:#222;border-color:#333;color:#e0e0e0}
+[data-theme="dark"] .gp-gate-input:focus{border-color:#e0e0e0;background:#1a1a1a;box-shadow:0 0 0 4px rgba(255,255,255,.04)}
+[data-theme="dark"] .gp-gate-input::placeholder{color:#444}
+[data-theme="dark"] .gp-gate-input-icon{stroke:#444}
+[data-theme="dark"] .gp-gate-input:focus ~ .gp-gate-input-icon{stroke:#ccc}
+[data-theme="dark"] .gp-gate-btn{background:#e0e0e0;color:#111}
+[data-theme="dark"] .gp-gate-cancel{color:#555}
+[data-theme="dark"] .gp-gate-hint{color:#444}
+[data-theme="dark"] .gp-gate-divider{background:linear-gradient(90deg,transparent,#2a2a2a,transparent)}
+[data-theme="dark"] .gp-gate-status{color:#444}
+[data-theme="dark"] .gp-gate-status-dot{background:#444}
+
+/* ===== 创作者信息弹窗 ===== */
+.gp-gate-author-link{
+  color:#222;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:underline;
+  text-decoration-style:dotted;
+  text-underline-offset:3px;
+  transition:.15s;
+}
+.gp-gate-author-link:active{opacity:.5}
+
+.gp-author-overlay{
+  position:fixed;inset:0;z-index:10001;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.gp-author-overlay.show{opacity:1;pointer-events:auto}
+
+.gp-author-card{
+  width:100%;max-width:340px;
+  background:#fff;
+  border-radius:28px;
+  padding:32px 24px 24px;
+  position:relative;
+  box-shadow:0 24px 80px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.8);
+  transform:scale(.88) translateY(30px);
+  transition:transform .5s cubic-bezier(.16,1,.3,1);
+  max-height:90vh;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.gp-author-card::-webkit-scrollbar{display:none}
+.gp-author-overlay.show .gp-author-card{transform:scale(1) translateY(0)}
+
+.gp-author-close{
+  position:absolute;top:14px;right:14px;
+  width:30px;height:30px;border-radius:50%;
+  background:#f5f5f5;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.15s;z-index:2;
+}
+.gp-author-close:active{transform:scale(.85);background:#eee}
+.gp-author-close svg{width:12px;height:12px;stroke:#666;stroke-width:2.2;fill:none}
+
+.gp-author-header{text-align:center;margin-bottom:8px}
+.gp-author-avatar{
+  width:72px;height:72px;margin:0 auto 14px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#222 0%,#555 100%);
+  color:#fff;font-size:32px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px rgba(0,0,0,.15);
+  position:relative;
+}
+.gp-author-avatar::after{
+  content:"";position:absolute;
+  width:84px;height:84px;border-radius:50%;
+  border:2px solid #f0f0f0;
+}
+.gp-author-name{
+  font-size:22px;font-weight:800;color:#111;
+  letter-spacing:-.5px;margin-bottom:4px;
+}
+.gp-author-title{
+  font-size:11px;color:#999;letter-spacing:.5px;
+  margin-bottom:10px;
+}
+.gp-author-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:20px;
+  background:#ecfdf5;color:#059669;
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+}
+
+.gp-author-divider{
+  height:1px;margin:20px -4px;
+  background:linear-gradient(90deg,transparent,#e8e8e8,transparent);
+}
+
+.gp-author-section{margin-bottom:16px;padding:0 4px}
+.gp-author-section-title{
+  font-size:10px;font-weight:700;color:#bbb;
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:8px;
+}
+.gp-author-section-text{
+  font-size:13px;color:#444;line-height:1.7;
+}
+.gp-author-section-text strong{color:#111;font-weight:700}
+
+.gp-author-warning{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;margin:0 4px 16px;
+  background:linear-gradient(135deg,#fff5f7 0%,#fef3c7 100%);
+  border-radius:14px;
+  border:1px solid #fef3c7;
+}
+.gp-author-warning-icon{font-size:24px;flex-shrink:0}
+.gp-author-warning-text{
+  font-size:12px;color:#78350f;line-height:1.6;flex:1;
+}
+.gp-author-warning-text strong{color:#92400e;font-weight:700}
+
+.gp-author-contact{margin:0 4px 16px}
+.gp-author-contact-label{
+  font-size:10px;font-weight:700;color:#bbb;
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:10px;
+}
+.gp-author-qq{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;
+  background:#fafafa;
+  border:1.5px solid #f0f0f0;
+  border-radius:16px;
+  cursor:pointer;
+  transition:.2s;
+}
+.gp-author-qq:active{
+  transform:scale(.98);
+  background:#f0f0f0;
+  border-color:#e0e0e0;
+}
+.gp-author-qq-icon{
+  width:38px;height:38px;border-radius:10px;
+  background:#222;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.gp-author-qq-icon svg{width:18px;height:18px}
+.gp-author-qq-info{flex:1;min-width:0}
+.gp-author-qq-label{
+  font-size:10px;color:#999;font-weight:600;
+  letter-spacing:.5px;margin-bottom:2px;
+}
+.gp-author-qq-num{
+  font-size:15px;font-weight:700;color:#111;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.3px;
+}
+.gp-author-qq-copy{
+  font-size:10px;color:#999;font-weight:600;
+  padding:4px 10px;border-radius:8px;
+  background:#fff;border:1px solid #e0e0e0;
+  flex-shrink:0;letter-spacing:.3px;
+}
+
+.gp-author-tip{
+  text-align:center;padding:12px 0 0;
+  font-size:11px;color:#666;line-height:1.7;
+  border-top:1px dashed #eee;margin-top:4px;
+}
+.gp-author-tip strong{color:#222;font-weight:700}
+
+/* 深色模式 */
+[data-theme="dark"] .gp-gate-author-link{color:#e0e0e0}
+[data-theme="dark"] .gp-author-card{
+  background:#1a1a1a;
+  box-shadow:0 24px 80px rgba(0,0,0,.6);
+}
+[data-theme="dark"] .gp-author-close{background:#2a2a2a}
+[data-theme="dark"] .gp-author-close svg{stroke:#999}
+[data-theme="dark"] .gp-author-avatar{
+  background:linear-gradient(135deg,#e0e0e0 0%,#999 100%);
+  color:#111;
+}
+[data-theme="dark"] .gp-author-avatar::after{border-color:#2a2a2a}
+[data-theme="dark"] .gp-author-name{color:#e0e0e0}
+[data-theme="dark"] .gp-author-title{color:#666}
+[data-theme="dark"] .gp-author-badge{background:#0a2a1a;color:#4ade80}
+[data-theme="dark"] .gp-author-divider{background:linear-gradient(90deg,transparent,#2a2a2a,transparent)}
+[data-theme="dark"] .gp-author-section-title{color:#555}
+[data-theme="dark"] .gp-author-section-text{color:#aaa}
+[data-theme="dark"] .gp-author-section-text strong{color:#e0e0e0}
+[data-theme="dark"] .gp-author-warning{
+  background:linear-gradient(135deg,#2a1a1e 0%,#2a2418 100%);
+  border-color:#3a2a1a;
+}
+[data-theme="dark"] .gp-author-warning-text{color:#fbbf24}
+[data-theme="dark"] .gp-author-warning-text strong{color:#fde68a}
+[data-theme="dark"] .gp-author-contact-label{color:#555}
+[data-theme="dark"] .gp-author-qq{background:#222;border-color:#2a2a2a}
+[data-theme="dark"] .gp-author-qq:active{background:#2a2a2a;border-color:#333}
+[data-theme="dark"] .gp-author-qq-icon{background:#e0e0e0;color:#111}
+[data-theme="dark"] .gp-author-qq-label{color:#666}
+[data-theme="dark"] .gp-author-qq-num{color:#e0e0e0}
+[data-theme="dark"] .gp-author-qq-copy{background:#1a1a1a;border-color:#333;color:#777}
+[data-theme="dark"] .gp-author-tip{color:#888;border-top-color:#2a2a2a}
+[data-theme="dark"] .gp-author-tip strong{color:#e0e0e0}
 </style>
 </head>
 <body>
@@ -5299,6 +5635,121 @@ input[type="range"]::-webkit-slider-thumb{
   </div>
 </div>
 
+<!-- 文字图片发送弹窗 (找回丢失的代码) -->
+<div class="img-send-modal" id="textImgModal">
+  <div class="img-send-panel">
+    <div class="img-send-title">
+      <span>发送文字图片</span>
+      <button class="modal-close" onclick="closeTextImgModal()">✕</button>
+    </div>
+    <div style="font-size:11px;color:#999;margin-bottom:12px;line-height:1.5">
+      输入一段文字来模拟图片。AI 会“看”到这张图。
+    </div>
+    <textarea class="img-send-textarea" id="textImgDesc" placeholder="例如：一张在海边的背影 / 桌子上的两杯咖啡..."></textarea>
+    <button class="btn btn-primary" onclick="confirmSendTextImg()">发送</button>
+    <button class="btn btn-secondary" onclick="closeTextImgModal()">取消</button>
+  </div>
+</div>
+
+<!-- ===== 群聊准入验证弹窗 ===== -->
+<div class="gp-gate-overlay" id="gpAccessModal">
+  <div class="gp-gate" id="gpGate">
+    <div class="gp-gate-strip"></div>
+    <div class="gp-gate-body">
+      <div class="gp-gate-lock">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="gp-gate-title">群聊准入验证</div>
+      <div class="gp-gate-sub">
+        为防止服务器过载，群聊功能<strong>仅对受邀用户</strong>开放<br>
+        请输入验证暗号以继续
+      </div>
+      <div class="gp-gate-input-wrap">
+        <input class="gp-gate-input" id="gpAccessInput" type="text" placeholder="输入暗号..." autocomplete="off" onkeydown="if(event.key==='Enter')verifyGpAccess()">
+        <svg class="gp-gate-input-icon" viewBox="0 0 24 24">
+          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+        </svg>
+      </div>
+      <button class="gp-gate-btn" onclick="verifyGpAccess()">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        验证并进入
+      </button>
+      <button class="gp-gate-cancel" onclick="closeGpAccessModal()">返回</button>
+    </div>
+    <div class="gp-gate-divider"></div>
+    <div class="gp-gate-status">
+      <div class="gp-gate-status-dot"></div>
+      <span>服务运行中</span>
+    </div>
+    <div class="gp-gate-footer">
+      <div class="gp-gate-hint">没有暗号？请联系<span class="gp-gate-author-link" onclick="openAuthorModal()">创作者</span>审核身份获取</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 创作者信息弹窗 ===== -->
+<div class="gp-author-overlay" id="gpAuthorModal">
+  <div class="gp-author-card">
+    <div class="gp-author-close" onclick="closeAuthorModal()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+
+    <div class="gp-author-header">
+      <div class="gp-author-avatar">骨</div>
+      <div class="gp-author-name">诅骨</div>
+      <div class="gp-author-title">骨骨小手机 · 唯一制作者</div>
+      <div class="gp-author-badge">
+        <svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2.5;fill:none"><polyline points="20 6 9 17 4 12"/></svg>
+        已认证
+      </div>
+    </div>
+
+    <div class="gp-author-divider"></div>
+
+    <div class="gp-author-section">
+      <div class="gp-author-section-title">关于此功能</div>
+      <div class="gp-author-section-text">
+        群聊是一个<strong>与朋友联机互动</strong>的扩展玩法，<strong>并非骨骨小手机的必备功能</strong>。
+      </div>
+    </div>
+
+    <div class="gp-author-warning">
+      <div class="gp-author-warning-icon">⚠️</div>
+      <div class="gp-author-warning-text">
+        如一定想使用，请确保你<strong>已成年</strong><br>
+        并愿意给我一点夸夸 ♡
+      </div>
+    </div>
+
+    <div class="gp-author-contact">
+      <div class="gp-author-contact-label">联系方式</div>
+      <div class="gp-author-qq" onclick="copyAuthorQQ()">
+        <div class="gp-author-qq-icon">
+          <svg viewBox="0 0 24 24" style="stroke:currentColor;stroke-width:1.8;fill:none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <div class="gp-author-qq-info">
+          <div class="gp-author-qq-label">QQ</div>
+          <div class="gp-author-qq-num">1791114831</div>
+        </div>
+        <div class="gp-author-qq-copy">点击复制</div>
+      </div>
+    </div>
+
+    <div class="gp-author-tip">
+      <strong>加我时请注明来意</strong><br>
+      <span style="color:#bbb;font-size:10px">恶意骚扰者请自重 ♡</span>
+    </div>
+
+  </div>
+</div>
+
 <!-- 语音发送弹窗 -->
 <div class="img-send-modal" id="voiceSendModal">
   <div class="img-send-panel">
@@ -5620,21 +6071,6 @@ input[type="range"]::-webkit-slider-thumb{
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-
-// ★ VAPID 公钥（你从 vapidkeys.com 生成的那个 Public Key）
-var VAPID_PUBLIC_KEY = 'BK-MySfa8wUJHiouBPfsjOg9cdZJjcfoQMd4ZLZvFIiJsXi8xGtd-O1GoGnugBHhEdm1_RVNXbpOsYF19w6T8Ek';
-
-// 把 base64 转成 Uint8Array
-function urlBase64ToUint8Array(base64String) {
-  var padding = '='.repeat((4 - base64String.length % 4) % 4);
-  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  var rawData = window.atob(base64);
-  var outputArray = new Uint8Array(rawData.length);
-  for (var i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
 
 // 启动时迁移老的图库数据
 (function migrateOldGallery(){
@@ -7418,32 +7854,27 @@ if(isVoice){
   }
   
   if(isRealImg){
-    var realCaption = (isRealImg[1] || '').trim();
-    var realImgSrc = '';
-    if(chatFriend){
-      var h = getChatHist(chatFriend.id);
-      for(var ri = h.length - 1; ri >= 0; ri--){
-        if(h[ri].content === text && h[ri].image){
-          realImgSrc = h[ri].image;
-          break;
-        }
+  var realCaption = (isRealImg[1] || '').trim();
+  var realImgSrc = '';
+  if(chatFriend){
+    var h = getChatHist(chatFriend.id);
+    for(var ri = h.length - 1; ri >= 0; ri--){
+      if(h[ri].content === text && h[ri].image){
+        realImgSrc = h[ri].image;
+        break;
       }
     }
-    imgCardHtml = '<div class="ct-img-card">';
-    if(realImgSrc){
-      imgCardHtml += '<img src="' + realImgSrc + '" onclick="event.stopPropagation();previewFullImg(this.src)">';
-    }
-    if(realCaption){
-      imgCardHtml += '<div class="ct-img-desc">' +
-        '<div class="ct-img-desc-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4" fill="none"/></svg></div>' +
-        '<div class="ct-img-desc-text">' + escapeHTML(realCaption) + '</div>' +
-      '</div>';
-    }
-    imgCardHtml += '</div>';
   }
-  
-  // 检测图库图片
-// 替换为更宽容的正则，只要包含这个结构就能提取出来
+  imgCardHtml = '<div class="ct-img-card">';
+  if(realImgSrc){
+    // 把描述文字传给 previewFullImg，并且不在气泡里显示 desc
+    var safeCaption = realCaption ? escapeHTML(realCaption).replace(/'/g, "\\'") : '';
+    imgCardHtml += '<img src="' + realImgSrc + '" onclick="event.stopPropagation();previewFullImg(this.src, \'' + safeCaption + '\')">';
+  }
+  imgCardHtml += '</div>';
+}
+
+// 检测图库图片
 var isGalImgMatch = text.match(/[\[【]图库图片[:：]\s*([\w]+)[\]】]/);
 var isGalImg = isGalImgMatch ? isGalImgMatch : null;
 
@@ -7455,11 +7886,9 @@ if(isGalImg){
     // 先用缩略图占位，异步加载大图
     var imgElId = 'galInline_' + galId + '_' + Math.random().toString(36).substr(2,4);
     imgCardHtml = '<div class="ct-img-card">';
+    // 不再生成 ct-img-desc 这个 div 了
     imgCardHtml += '<img id="' + imgElId + '" src="' + (galImg.thumb || '') + '" onclick="event.stopPropagation();previewGalleryImg(\'' + galId + '\')">';
-    imgCardHtml += '<div class="ct-img-desc">';
-    imgCardHtml += '<div class="ct-img-desc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
-    imgCardHtml += '<div class="ct-img-desc-text">' + escapeHTML(galImg.desc) + '</div>';
-    imgCardHtml += '</div></div>';
+    imgCardHtml += '</div>';
     
     // 异步替换为大图
     setTimeout(function(){
@@ -7474,7 +7903,6 @@ if(isGalImg){
     imgCardHtml += '</div>';
   }
 }
-
 var isImgMsg = !!(isTextImg || isRealImg || isGalImg);
   
   // ★ 内联图片检测：消息中混有 [图片:xxx] 但不是纯图片消息
@@ -8255,18 +8683,14 @@ if(memoryItems.length > 0 && activeFriendId){
   hideTyping(activeFriendId);
   appendRealtimeBubble('assistant', cleanText, time, finalQuote);
 }
-if(!stillInChat){
-  showNtf(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
-  var _fl = getFriends();
-  var _fo = _fl.find(function(x){ return x.id === activeFriendId; });
-  if(_fo){ _fo.unread = (_fo.unread||0)+1; setFriends(_fl); }
-  // ★ 新增：云端推送
-  triggerCloudPush(activeFriend.name, cleanText, activeFriendId, activeFriend.avatarKey);
-} else if(document.hidden){
-  sendBrowserNotify(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
-  // ★ 新增：网页在后台也发云推送（双保险）
-  triggerCloudPush(activeFriend.name, cleanText, activeFriendId, activeFriend.avatarKey);
-}
+        if(!stillInChat){
+          showNtf(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
+          var _fl = getFriends();
+          var _fo = _fl.find(function(x){ return x.id === activeFriendId; });
+          if(_fo){ _fo.unread = (_fo.unread||0)+1; setFriends(_fl); }
+        } else if(document.hidden){
+          sendBrowserNotify(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
+        }
         
 if(i===parsedMsgs.length-1){
   updateFriendLastMsg(cleanText,time,activeFriendId);
@@ -13500,12 +13924,6 @@ function initServiceWorker(){
   navigator.serviceWorker.register('./sw.js').then(function(reg){
     swRegistration = reg;
     console.log('[SW] 注册成功');
-    
-    if(browserNotifyEnabled && Notification.permission === 'granted'){
-  setTimeout(function(){
-    subscribePushNotification();
-  }, 1000);
-}
     // 更新状态显示
     var el = document.getElementById('swStatusText');
     if(el) el.textContent = '✅ 已就绪';
@@ -13584,168 +14002,16 @@ function toggleBrowserNotify(){
   localStorage.setItem('browserNotify', browserNotifyEnabled ? 'true' : 'false');
   var sw = document.getElementById('notifySwitch');
   if(sw) sw.classList.toggle('on', browserNotifyEnabled);
-  
   if(browserNotifyEnabled){
     requestNotifyPermission(function(ok){
       if(!ok){
         browserNotifyEnabled = false;
         localStorage.setItem('browserNotify', 'false');
         if(sw) sw.classList.remove('on');
-        return;
       }
-      // ★ 授权成功后，同时注册云端推送
-      subscribePushNotification();
     });
   } else {
     showToast('通知已关闭', 'ok');
-    // ★ 取消云端订阅
-    unsubscribePushNotification();
-  }
-}
-
-// ★ 订阅云端推送
-async function subscribePushNotification(){
-  try {
-    if(!('serviceWorker' in navigator) || !('PushManager' in window)){
-      showToast('此浏览器不支持推送', 'err');
-      return;
-    }
-    
-    var reg = await navigator.serviceWorker.ready;
-    
-    // 检查是否已订阅
-    var existing = await reg.pushManager.getSubscription();
-    if(existing){
-      console.log('[推送] 已订阅过');
-      await savePushSubscriptionToCloud(existing);
-      return;
-    }
-    
-    // 新订阅
-    var subscription = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
-    
-    console.log('[推送] 订阅成功', subscription);
-    await savePushSubscriptionToCloud(subscription);
-    showToast('云端推送已开启 ✓', 'ok');
-  } catch(err) {
-    console.log('[推送] 订阅失败:', err);
-    showToast('云端推送开启失败: ' + err.message, 'err');
-  }
-}
-
-// ★ 把订阅信息存到 Supabase
-async function savePushSubscriptionToCloud(subscription){
-  var sb = getSB();
-  if(!sb) return;
-  
-  var userId = genUserId(); // 用群聊那套的用户ID
-  var json = subscription.toJSON();
-  var deviceInfo = navigator.userAgent.substring(0, 100);
-  
-  try {
-    await sb.from('push_subscriptions').upsert({
-      user_id: userId,
-      endpoint: json.endpoint,
-      p256dh: json.keys.p256dh,
-      auth: json.keys.auth,
-      device_info: deviceInfo,
-      last_used_at: new Date().toISOString()
-    }, { onConflict: 'endpoint' });
-    console.log('[推送] 已保存到云端');
-  } catch(e) {
-    console.log('[推送] 保存失败:', e);
-  }
-}
-
-// ★ 触发云端推送
-async function triggerCloudPush(friendName, msgText, friendId, avatarKey){
-  var sb = getSB();
-  if(!sb) return;
-  
-  // 只在网页不在前台时才发云推送，避免重复通知
-  if(!document.hidden && document.getElementById('chatPage').classList.contains('show')){
-    var chatFriendNow = chatFriend && chatFriend.id === friendId;
-    if(chatFriendNow) return; // 正在看这个聊天，不需要推送
-  }
-  
-  try {
-    // 从 Supabase 拿所有订阅（后续可以改成只推给当前用户）
-    var userId = genUserId();
-    var { data: subs } = await sb
-      .from('push_subscriptions')
-      .select('*')
-      .eq('user_id', userId);
-    
-    if(!subs || subs.length === 0){
-      console.log('[推送] 没有订阅');
-      return;
-    }
-    
-    var body = msgText.length > 80 ? msgText.substring(0, 80) + '…' : msgText;
-    var payload = {
-      title: friendName + ' 发来消息',
-      body: body,
-      tag: 'push_' + friendId,
-      friendId: friendId,
-      url: './'
-    };
-    
-    // 调用 Edge Function 发推送
-    var edgeUrl = SUPABASE_URL + '/functions/v1/send-push';
-    
-    for(var i = 0; i < subs.length; i++){
-      var sub = subs[i];
-      var subscription = {
-        endpoint: sub.endpoint,
-        keys: {
-          p256dh: sub.p256dh,
-          auth: sub.auth
-        }
-      };
-      
-      fetch(edgeUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + SUPABASE_KEY
-        },
-        body: JSON.stringify({
-          subscription: subscription,
-          payload: payload
-        })
-      }).then(function(res){
-        if(res.ok) console.log('[推送] 发送成功');
-        else console.log('[推送] 发送失败:', res.status);
-      }).catch(function(e){
-        console.log('[推送] 请求失败:', e);
-      });
-    }
-  } catch(e) {
-    console.log('[推送] 触发失败:', e);
-  }
-}
-
-// ★ 取消订阅
-async function unsubscribePushNotification(){
-  try {
-    if(!('serviceWorker' in navigator)) return;
-    var reg = await navigator.serviceWorker.ready;
-    var subscription = await reg.pushManager.getSubscription();
-    if(subscription){
-      var endpoint = subscription.endpoint;
-      await subscription.unsubscribe();
-      
-      // 从 Supabase 删除
-      var sb = getSB();
-      if(sb){
-        await sb.from('push_subscriptions').delete().eq('endpoint', endpoint);
-      }
-    }
-  } catch(e) {
-    console.log('[推送] 取消失败:', e);
   }
 }
 
@@ -14240,13 +14506,14 @@ function confirmSendImg(){
 }
 
 // 点击真实图片放大预览
-function previewFullImg(src){
+// 点击真实图片放大预览（增加描述文字显示）
+function previewFullImg(src, desc){
   var old = document.getElementById('imgFullPreview');
   if(old) old.remove();
   
   var overlay = document.createElement('div');
   overlay.id = 'imgFullPreview';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .3s';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .3s;flex-direction:column;';
   overlay.onclick = function(){ 
     overlay.style.opacity = '0';
     setTimeout(function(){ overlay.remove(); }, 300);
@@ -14254,8 +14521,18 @@ function previewFullImg(src){
   
   var img = document.createElement('img');
   img.src = src;
-  img.style.cssText = 'max-width:95%;max-height:90vh;object-fit:contain;border-radius:8px';
+  // 为底部的文字留出一点空间
+  img.style.cssText = 'max-width:100%;max-height:85vh;object-fit:contain;transition:transform .2s';
   overlay.appendChild(img);
+  
+  // 如果有描述，在底部显示微信朋友圈/相册风格的文字
+  if (desc && desc.trim() !== '') {
+    var textDiv = document.createElement('div');
+    textDiv.style.cssText = 'position:absolute;bottom:0;left:0;right:0;padding:40px 20px calc(24px + env(safe-area-inset-bottom, 0px));background:linear-gradient(transparent, rgba(0,0,0,0.85));color:rgba(255,255,255,0.9);font-size:15px;line-height:1.6;text-align:center;word-break:break-all;text-shadow:0 1px 4px rgba(0,0,0,0.6);';
+    textDiv.textContent = desc;
+    overlay.appendChild(textDiv);
+  }
+  
   document.body.appendChild(overlay);
   
   requestAnimationFrame(function(){
@@ -15641,8 +15918,23 @@ function genRoomCode(){
   return code;
 }
 
-// 打开群聊入口
+// 打开群聊入口（加了验证）
 function openGroupModal(){
+  if(sessionStorage.getItem('gp_verified') === 'true'){
+    showRealGroupModal();
+  } else {
+    document.getElementById('gpAccessInput').value = '';
+    document.getElementById('gpAccessInput').disabled = false;
+    document.getElementById('gpGate').classList.remove('success','shake');
+    document.getElementById('gpAccessModal').classList.add('show');
+    setTimeout(function(){
+      document.getElementById('gpAccessInput').focus();
+    }, 400);
+  }
+}
+
+// 原来的群聊逻辑改名
+function showRealGroupModal(){
   var nameInput = document.getElementById('gpMyName');
   nameInput.value = localStorage.getItem('gpMyName') || getActivePersona().name || '我';
 
@@ -15654,11 +15946,86 @@ function openGroupModal(){
 
   document.getElementById('gpInviteCode').value = '';
   document.getElementById('gpStatus').innerHTML = '';
-
-  // 渲染房间列表
   renderGpRoomList();
-
   openModal('groupModal');
+}
+
+// 关闭验证弹窗
+function closeGpAccessModal(){
+  document.getElementById('gpAccessModal').classList.remove('show');
+}
+
+// 验证暗号
+async function verifyGpAccess(){
+  var input = document.getElementById('gpAccessInput').value.trim();
+  if(!input) return;
+
+  var msgUint8 = new TextEncoder().encode(input);
+  var hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+  var hashArray = Array.from(new Uint8Array(hashBuffer));
+  var hashHex = hashArray.map(function(b){ return b.toString(16).padStart(2,'0') }).join('');
+
+  // 有效的暗号指纹列表（可以加多个）
+  var validHashes = [
+    "3bf10a0cf7ca80da5cb25100472bf1af33c4ac8b88d4d71971af59feb99e17dd"
+    // 想加新暗号就在这里加逗号，换行粘贴新的指纹
+  ];
+
+  var gate = document.getElementById('gpGate');
+
+  if(validHashes.indexOf(hashHex) >= 0){
+    // 成功
+    gate.classList.add('success');
+    document.getElementById('gpAccessInput').value = '✓ 验证通过';
+    document.getElementById('gpAccessInput').disabled = true;
+    sessionStorage.setItem('gp_verified', 'true');
+
+    setTimeout(function(){
+      closeGpAccessModal();
+      setTimeout(function(){
+        showRealGroupModal();
+      }, 300);
+    }, 900);
+  } else {
+    // 失败抖动
+    gate.classList.remove('shake');
+    void gate.offsetWidth;
+    gate.classList.add('shake');
+    setTimeout(function(){
+      gate.classList.remove('shake');
+    }, 500);
+
+    if(navigator.vibrate) navigator.vibrate(100);
+  }
+}
+
+// 打开创作者弹窗
+function openAuthorModal(){
+  document.getElementById('gpAuthorModal').classList.add('show');
+}
+
+// 关闭创作者弹窗
+function closeAuthorModal(){
+  document.getElementById('gpAuthorModal').classList.remove('show');
+}
+
+// 点击遮罩关闭
+document.getElementById('gpAuthorModal').addEventListener('click', function(e){
+  if(e.target === this) closeAuthorModal();
+});
+
+// 复制 QQ 号
+function copyAuthorQQ(){
+  var qq = '1791114831';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(qq).then(function(){
+      showToast('QQ号已复制: ' + qq, 'ok');
+    }).catch(function(){
+      fallbackCopy(qq);
+    });
+  } else {
+    fallbackCopy(qq);
+  }
 }
 
 async function gpCreate(){
@@ -17933,7 +18300,8 @@ function previewGalleryImg(galId){
   var img = galImages.find(function(g){ return g.id === galId; });
   if(!img) return;
   getGalleryFullUrl(img, function(url){
-    if(url) previewFullImg(url);
+    // 把图库里的描述传给全屏预览函数
+    if(url) previewFullImg(url, img.desc);
   });
 }
 
