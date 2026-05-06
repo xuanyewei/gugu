@@ -3795,6 +3795,194 @@ input[type="range"]::-webkit-slider-thumb{
 .rp-preset-overlay.show .rp-preset-panel{transform:translateY(0)}
 [data-theme="dark"] .rp-preset-panel{background:#1a1a1a}
 
+.rp-preset-panel::-webkit-scrollbar{display:none}
+.rp-preset-overlay.show .rp-preset-panel{transform:translateY(0)}
+[data-theme="dark"] .rp-preset-panel{background:#1a1a1a}
+
+/* ===== 图库 (iOS Photos) ===== */
+.gal-top-sticky{
+  position:sticky;top:0;z-index:10;
+  background:rgba(250,250,250,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid rgba(0,0,0,.08);padding-bottom:0;
+}
+.gal-segment{
+  display:flex;margin:8px 16px 0;
+  background:#f2f2f7;border-radius:9px;padding:2px;
+}
+.gal-seg{
+  flex:1;padding:7px 0;text-align:center;
+  font-size:13px;font-weight:600;color:#666;
+  border-radius:7px;cursor:pointer;transition:all .2s;
+  position:relative;white-space:nowrap;
+}
+.gal-seg.on{
+  background:#fff;color:#000;
+  box-shadow:0 1px 4px rgba(0,0,0,.08),0 0 1px rgba(0,0,0,.04);
+}
+.gal-seg:active{opacity:.5}
+.gal-seg-badge{
+  position:absolute;top:2px;right:50%;margin-right:-22px;
+  min-width:14px;height:14px;border-radius:7px;
+  background:#000;color:#fff;font-size:8px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;padding:0 3px;
+}
+
+.gal-switch-row{
+  margin:12px 16px;padding:12px 16px;
+  background:#f2f2f7;border-radius:12px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.gal-switch-left{display:flex;align-items:center;gap:10px}
+.gal-switch-icon{
+  width:30px;height:30px;border-radius:8px;background:#111;
+  display:flex;align-items:center;justify-content:center;
+}
+.gal-switch-icon svg{width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none}
+.gal-switch-text{font-size:13px;font-weight:600;color:#111}
+.gal-ios-toggle{
+  width:51px;height:31px;border-radius:16px;background:#e9e9eb;
+  position:relative;cursor:pointer;transition:background .25s;flex-shrink:0;
+}
+.gal-ios-toggle.on{background:#111}
+.gal-ios-toggle::after{
+  content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;
+  border-radius:50%;background:#fff;transition:transform .25s;
+  box-shadow:0 1px 3px rgba(0,0,0,.15);
+}
+.gal-ios-toggle.on::after{transform:translateX(20px)}
+
+.gal-section-head{
+  padding:14px 16px 8px;display:flex;align-items:flex-end;justify-content:space-between;
+}
+.gal-section-title{font-size:22px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.gal-section-count{font-size:13px;color:#8e8e93;margin-top:4px}
+.gal-section-action{font-size:15px;color:#000;font-weight:600;cursor:pointer}
+.gal-section-action:active{opacity:.4}
+
+.gal-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:2px;padding:0 2px;
+}
+.gal-item{
+  aspect-ratio:1;overflow:hidden;position:relative;cursor:pointer;
+  background:#f3f3f3;
+}
+.gal-item:active{opacity:.7}
+.gal-item img{width:100%;height:100%;object-fit:cover;display:block}
+.gal-item-desc{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent,rgba(0,0,0,.55));
+  padding:14px 6px 5px;
+  font-size:9px;color:#fff;font-weight:600;line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  letter-spacing:.2px;pointer-events:none;
+}
+.gal-item-badge{
+  position:absolute;top:4px;right:4px;
+  padding:2px 6px;border-radius:4px;
+  font-size:8px;font-weight:800;
+  background:rgba(0,0,0,.5);color:#fff;
+  backdrop-filter:blur(4px);letter-spacing:.5px;
+}
+
+/* 相簿列表 */
+.gal-coll-list{padding:0 16px 100px}
+.gal-coll-card{
+  display:flex;gap:14px;padding:14px 0;
+  border-bottom:.5px solid rgba(0,0,0,.06);
+  cursor:pointer;transition:opacity .15s;align-items:center;
+}
+.gal-coll-card:active{opacity:.5}
+.gal-coll-card:last-child{border-bottom:none}
+.gal-coll-thumb{
+  width:60px;height:60px;border-radius:10px;overflow:hidden;flex-shrink:0;
+  background:#f3f3f3;box-shadow:0 1px 4px rgba(0,0,0,.06);
+}
+.gal-coll-thumb img{width:100%;height:100%;object-fit:cover}
+.gal-coll-info{flex:1;min-width:0}
+.gal-coll-name{font-size:15px;font-weight:600;color:#000}
+.gal-coll-meta{font-size:13px;color:#8e8e93;margin-top:2px}
+.gal-coll-bind{font-size:11px;color:#8e8e93;margin-top:4px;display:flex;align-items:center;gap:4px}
+.gal-coll-bind-dot{width:4px;height:4px;border-radius:50%;background:#111}
+.gal-coll-arrow{flex-shrink:0}
+.gal-coll-arrow svg{width:16px;height:16px;stroke:#c7c7cc;stroke-width:2.5;fill:none}
+
+#galleryUploadPreview img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  display: block;
+}
+
+/* 照片详情 */
+.gal-photo-detail{
+  position:fixed;inset:0;z-index:800;background:#000;
+  transform:translateY(100%);transition:transform .45s cubic-bezier(.16,1,.3,1);
+  display:flex;flex-direction:column;max-width:480px;margin:0 auto;
+}
+.gal-photo-detail.show{transform:translateY(0)}
+.gpd-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:48px 16px 8px;flex-shrink:0;
+}
+.gpd-btn{
+  font-size:17px;color:#fff;font-weight:400;cursor:pointer;
+  padding:4px 8px;background:none;border:none;font-family:inherit;
+}
+.gpd-btn:active{opacity:.4}
+.gpd-body{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 8px}
+.gpd-body img{width:100%;max-height:60vh;object-fit:contain;border-radius:6px}
+.gpd-info{padding:14px 20px 10px;flex-shrink:0}
+.gpd-desc{font-size:14px;color:#fff;font-weight:500;line-height:1.5;margin-bottom:6px}
+.gpd-meta{font-size:11px;color:rgba(255,255,255,.45);display:flex;gap:12px;flex-wrap:wrap}
+.gpd-actions{
+  display:flex;justify-content:space-around;align-items:center;
+  padding:8px 20px calc(16px + var(--safe-b));flex-shrink:0;
+}
+.gpd-act{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;padding:8px;transition:.15s;
+}
+.gpd-act:active{opacity:.4;transform:scale(.9)}
+.gpd-act svg{width:22px;height:22px;stroke:#fff;stroke-width:1.8;fill:none}
+.gpd-act span{font-size:10px;color:rgba(255,255,255,.6)}
+.gpd-act.danger svg{stroke:#ff453a}
+.gpd-act.danger span{color:#ff453a}
+
+/* 空状态 */
+.gal-empty{text-align:center;padding:60px 30px}
+.gal-empty-icon{
+  width:72px;height:72px;border-radius:50%;
+  background:#f2f2f7;margin:0 auto 16px;
+  display:flex;align-items:center;justify-content:center;
+}
+.gal-empty-icon svg{width:28px;height:28px;stroke:#c7c7cc;stroke-width:1.5;fill:none}
+.gal-empty-title{font-size:15px;font-weight:600;color:#000;margin-bottom:6px}
+.gal-empty-desc{font-size:13px;color:#8e8e93;line-height:1.6}
+
+/* 深色模式 */
+[data-theme="dark"] .gal-top-sticky{background:rgba(17,17,17,.92)}
+[data-theme="dark"] .gal-segment{background:#1c1c1e}
+[data-theme="dark"] .gal-seg{color:#8e8e93}
+[data-theme="dark"] .gal-seg.on{background:#2c2c2e;color:#fff;box-shadow:none}
+[data-theme="dark"] .gal-seg-badge{background:#fff;color:#000}
+[data-theme="dark"] .gal-switch-row{background:#1c1c1e}
+[data-theme="dark"] .gal-switch-icon{background:#fff}
+[data-theme="dark"] .gal-switch-icon svg{stroke:#000}
+[data-theme="dark"] .gal-switch-text{color:#fff}
+[data-theme="dark"] .gal-ios-toggle{background:#39393d}
+[data-theme="dark"] .gal-ios-toggle.on{background:#fff}
+[data-theme="dark"] .gal-ios-toggle.on::after{background:#000}
+[data-theme="dark"] .gal-section-title{color:#fff}
+[data-theme="dark"] .gal-section-action{color:#fff}
+[data-theme="dark"] .gal-item{background:#1c1c1e}
+[data-theme="dark"] .gal-coll-card{border-bottom-color:rgba(255,255,255,.06)}
+[data-theme="dark"] .gal-coll-name{color:#fff}
+[data-theme="dark"] .gal-coll-thumb{background:#1c1c1e}
+[data-theme="dark"] .gal-empty-icon{background:#1c1c1e}
+[data-theme="dark"] .gal-empty-icon svg{stroke:#48484a}
+[data-theme="dark"] .gal-empty-title{color:#fff}
+[data-theme="dark"] .gal-empty-desc{color:#8e8e93}
 </style>
 </head>
 <body>
@@ -3988,8 +4176,8 @@ input[type="range"]::-webkit-slider-thumb{
     </div>
     <div class="app-i" onclick="openApp(4)">
       <div class="app-ic" data-idx="4"><img class="custom-icon" alt="">
-<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div><span class="app-nm">群聊</span>
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="var(--c1)" stroke="none"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div><span class="app-nm">图库</span>
     </div>
     <div class="app-i" onclick="openApp(5)">
       <div class="app-ic" data-idx="5"><img class="custom-icon" alt="">
@@ -4051,12 +4239,22 @@ input[type="range"]::-webkit-slider-thumb{
 
   <!-- Tab: 发现 -->
   <div class="msg-tab-content" id="mtDiscover">
-    <div class="msg-placeholder">
-      <div class="msg-placeholder-icon">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+    <div style="padding:20px 24px">
+      <div style="font-size:10px;font-weight:700;color:#999;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">多人互动</div>
+      <div class="set-card">
+        <div class="set-row" onclick="openGroupModal()">
+          <div class="set-row-icon" style="background:#111">
+            <svg viewBox="0 0 24 24" style="stroke:#fff;stroke-width:1.8;fill:none;width:18px;height:18px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="set-row-info">
+            <div class="set-row-name">群聊</div>
+            <div class="set-row-desc">创建或加入多人聊天房间</div>
+          </div>
+          <div class="set-row-arrow">
+            <svg viewBox="0 0 24 24" style="stroke:#bbb;stroke-width:2;fill:none;width:16px;height:16px"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </div>
       </div>
-      <div class="msg-placeholder-title">发现</div>
-      <div class="msg-placeholder-desc">更多有趣的功能即将上线</div>
     </div>
   </div>
 
@@ -5101,20 +5299,6 @@ input[type="range"]::-webkit-slider-thumb{
   </div>
 </div>
 
-<!-- 文字图片描述弹窗 -->
-<div class="img-send-modal" id="textImgModal">
-  <div class="img-send-panel">
-    <div class="img-send-title">
-      <span>发送文字图片</span>
-      <button class="modal-close" onclick="closeTextImgModal()">✕</button>
-    </div>
-    <div style="font-size:11px;color:#999;margin-bottom:12px;line-height:1.5">描述你要发的图片内容</div>
-    <textarea class="img-send-textarea" id="textImgDesc" placeholder="例如：一张窗外下雨的照片 / 我的猫趴在键盘上的自拍 / 今天的晚餐..."></textarea>
-    <button class="btn btn-primary" onclick="confirmSendTextImg()">发送</button>
-    <button class="btn btn-secondary" onclick="closeTextImgModal()">取消</button>
-  </div>
-</div>
-
 <!-- 语音发送弹窗 -->
 <div class="img-send-modal" id="voiceSendModal">
   <div class="img-send-panel">
@@ -5129,6 +5313,111 @@ input[type="range"]::-webkit-slider-thumb{
   </div>
 </div>
 <input type="file" id="globalBgFile" accept="image/*" style="display:none" onchange="uploadGlobalBg(event)">
+
+<!-- ===== 图库页面 ===== -->
+<div class="msg-page" id="galleryPage" style="z-index:500;background:#fafafa">
+  <div class="gal-top-sticky">
+    <div class="msg-top" style="padding-top:14px">
+      <h1 style="cursor:pointer;font-size:17px;font-weight:600;letter-spacing:-.3px">图库</h1>
+      <div style="display:flex;gap:8px">
+        <div class="msg-icon-btn" onclick="openGalleryUpload()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="msg-icon-btn" onclick="closeGalleryPage()">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="gal-segment">
+      <div class="gal-seg on" onclick="switchGalView(0,this)">全部</div>
+      <div class="gal-seg" onclick="switchGalView(1,this)">相簿</div>
+    </div>
+  </div>
+  <div id="galleryBody" style="padding-bottom:100px;overflow-y:auto;flex:1"></div>
+</div>
+<!-- 照片详情（全屏黑底） -->
+<div class="gal-photo-detail" id="galPhotoDetail">
+  <div class="gpd-top">
+    <button class="gpd-btn" onclick="closeGalDetail()">关闭</button>
+    <button class="gpd-btn" style="font-weight:600" onclick="editGalleryImage()">编辑</button>
+  </div>
+  <div class="gpd-body" id="galDetailImg"></div>
+  <div class="gpd-info">
+    <div class="gpd-desc" id="galDetailDesc"></div>
+    <div class="gpd-meta" id="galDetailMeta"></div>
+  </div>
+  <div class="gpd-actions">
+    <div class="gpd-act" onclick="galDetailCopyId()">
+      <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span>复制ID</span>
+    </div>
+    <div class="gpd-act" onclick="editGalleryImage()">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span>编辑</span>
+    </div>
+    <div class="gpd-act danger" onclick="deleteGalleryImage()">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <span>删除</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 图库上传/编辑模态框 (修复加号没反应) ===== -->
+<div class="modal-overlay" id="galleryUploadModal" onclick="if(event.target===this)closeGalleryUpload()">
+  <div class="modal-panel">
+    <div class="modal-bar"></div>
+    <div class="modal-title"><span id="galleryUploadTitle">上传图片</span> <button class="modal-close" onclick="closeGalleryUpload()">✕</button></div>
+    
+    <div style="text-align:center;margin-bottom:20px">
+      <!-- 选择图片占位符 -->
+      <div id="galleryUploadPlaceholder" class="add-f-avatar-upload" style="width:120px;height:120px;margin:0 auto;border-radius:16px" onclick="document.getElementById('galFileInput').click()">
+        <svg viewBox="0 0 24 24" style="width:28px;height:28px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span style="font-size:11px;margin-top:6px">点击选择图片</span>
+      </div>
+      <!-- 图片预览区 -->
+      <div id="galleryUploadPreview" style="display:none;width:100%;max-height:220px;border-radius:14px;overflow:hidden;background:var(--c7);border:1px solid var(--c6)" onclick="document.getElementById('galFileInput').click()"></div>
+      <input type="file" id="galFileInput" accept="image/*" style="display:none" onchange="handleGalleryFileSelect(event)">
+    </div>
+
+<div class="field">
+  <label>图片描述 (AI将根据此描述决定何时发图)</label>
+  <div style="display:flex;gap:8px;align-items:center">
+    <input type="text" id="galleryDescInput" placeholder="例如：一张在海边的背影 / 今天的晚餐" style="flex:1">
+    <button class="btn btn-secondary" id="aiDescribeBtn" style="width:auto;padding:0 12px;margin:0;height:clamp(38px,9vw,44px);font-size:12px;display:flex;align-items:center;gap:4px;color:var(--accent)" onclick="aiAutoDescribeGalleryImg()">
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+      <span id="aiDescribeText">AI 识图</span>
+    </button>
+  </div>
+</div>
+
+    <div class="field">
+      <label>所属相簿</label>
+      <select id="galleryColSelect">
+        <option value="">未分类</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveGalleryImage()">保存到图库</button>
+    <button class="btn btn-secondary" onclick="closeGalleryUpload()">取消</button>
+  </div>
+</div>
+
+<!-- ===== 新建相簿精美模态框 (替换原生的 prompt) ===== -->
+<div class="modal-overlay" id="galColCreateModal" onclick="if(event.target===this)closeGalColCreateModal()">
+  <div class="modal-panel">
+    <div class="modal-bar"></div>
+    <div class="modal-title">新建相簿 <button class="modal-close" onclick="closeGalColCreateModal()">✕</button></div>
+    
+    <div class="field">
+      <label>相簿名称</label>
+      <input type="text" id="newGalColName" placeholder="如：自拍、风景、表情包、涩图..." onkeydown="if(event.key==='Enter') confirmCreateGalCol()">
+    </div>
+    
+    <button class="btn btn-primary" onclick="confirmCreateGalCol()">确认创建</button>
+    <button class="btn btn-secondary" onclick="closeGalColCreateModal()">取消</button>
+  </div>
+</div>
+
 <!-- ===== 总结页面 ===== -->
 <div class="sum-page" id="sumPage">
   <div class="sum-page-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">
@@ -5331,6 +5620,42 @@ input[type="range"]::-webkit-slider-thumb{
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+
+// 启动时迁移老的图库数据
+(function migrateOldGallery(){
+  setTimeout(async function(){
+    var images = getGalleryImages();
+    var changed = false;
+    for(var i = 0; i < images.length; i++){
+      var img = images[i];
+      // 老格式：有 full（base64），没有 imgKey
+      if(img.full && !img.imgKey){
+        try {
+          // base64 转 Blob
+          var parts = img.full.split(';base64,');
+          var contentType = parts[0].split(':')[1] || 'image/jpeg';
+          var raw = window.atob(parts[1]);
+          var arr = new Uint8Array(raw.length);
+          for(var j = 0; j < raw.length; j++) arr[j] = raw.charCodeAt(j);
+          var blob = new Blob([arr], {type: contentType});
+          var dbKey = 'galImg_' + img.id;
+          await dbPut(dbKey, blob);
+          img.imgKey = dbKey;
+          delete img.full; // 清掉base64
+          changed = true;
+        } catch(e){
+          console.log('[图库迁移]失败:', img.id, e);
+        }
+      }
+    }
+    if(changed){
+      try {
+        setGalleryImages(images);
+        console.log('[图库迁移]完成');
+      } catch(e){}
+    }
+  }, 3000);
+})();
 
 /* ===== CSS 作用域限定（仅消息页面生效） ===== */
 var MSG_SCOPE_PREFIX = ':is(.msg-page,.chat-page,.msg-navbar,.add-friend-page,.wb-page,.wb-mount-page,.mem-page)';
@@ -5716,7 +6041,7 @@ function openModal(id){
 function openApp(idx){
   if(idx===0) openMsgPage();
   else if(idx===1) openModal('themeModal');
-  else if(idx===4) openGroupModal();
+  else if(idx===4) openGalleryPage();
   else if(idx===5) openFavPage();
   else if(idx===6) openWbPage();
   else if(idx===7) openModal('settingsModal');
@@ -6503,6 +6828,24 @@ var chatCurrentWrap=null;
 var chatBusyMap={};
 var currentQuoteText = null; 
 var avatarCache = {};
+var galleryUrlCache = {};  // {imgKey: blobUrl}
+
+function getGalleryFullUrl(img, callback){
+  // 兼容：旧数据有full(base64)字段，直接返回
+  if(img.full){ callback(img.full); return; }
+  if(!img.imgKey){ callback(''); return; }
+  if(galleryUrlCache[img.imgKey]){ callback(galleryUrlCache[img.imgKey]); return; }
+  
+  dbGet(img.imgKey).then(function(blob){
+    if(blob){
+      var url = URL.createObjectURL(blob);
+      galleryUrlCache[img.imgKey] = url;
+      callback(url);
+    } else {
+      callback('');
+    }
+  }).catch(function(){ callback(''); });
+}
 
 async function preloadAllAvatars() {
   var friends = getFriends();
@@ -6592,6 +6935,9 @@ renderChatHist();
   document.getElementById('chatPage').classList.add('show');
     applyCssForCurrentChat();
       // 如果是从收藏跳转来的，高亮定位到对应消息
+      // ★ 恢复当前好友的按钮加载状态（修复多线程切换 BUG）
+var isBusy = !!chatBusyMap[f.id];
+document.getElementById('ctInvoke').classList.toggle('loading', isBusy);
   if(_highlightMsgContent){
     var hlContent = _highlightMsgContent;
     _highlightMsgContent = null;
@@ -7081,7 +7427,40 @@ if(isVoice){
     imgCardHtml += '</div>';
   }
   
-  var isImgMsg = !!(isTextImg || isRealImg);
+  // 检测图库图片
+// 替换为更宽容的正则，只要包含这个结构就能提取出来
+var isGalImgMatch = text.match(/[\[【]图库图片[:：]\s*([\w]+)[\]】]/);
+var isGalImg = isGalImgMatch ? isGalImgMatch : null;
+
+if(isGalImg){
+  var galId = isGalImg[1].trim();
+  var galImages = getGalleryImages();
+  var galImg = galImages.find(function(g){ return g.id === galId; });
+  if(galImg){
+    // 先用缩略图占位，异步加载大图
+    var imgElId = 'galInline_' + galId + '_' + Math.random().toString(36).substr(2,4);
+    imgCardHtml = '<div class="ct-img-card">';
+    imgCardHtml += '<img id="' + imgElId + '" src="' + (galImg.thumb || '') + '" onclick="event.stopPropagation();previewGalleryImg(\'' + galId + '\')">';
+    imgCardHtml += '<div class="ct-img-desc">';
+    imgCardHtml += '<div class="ct-img-desc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+    imgCardHtml += '<div class="ct-img-desc-text">' + escapeHTML(galImg.desc) + '</div>';
+    imgCardHtml += '</div></div>';
+    
+    // 异步替换为大图
+    setTimeout(function(){
+      getGalleryFullUrl(galImg, function(url){
+        var el = document.getElementById(imgElId);
+        if(el && url) el.src = url;
+      });
+    }, 50);
+  } else {
+    imgCardHtml = '<div class="ct-img-card" style="padding:16px;text-align:center">';
+    imgCardHtml += '<div style="font-size:11px;color:#bbb">图片已从图库中删除</div>';
+    imgCardHtml += '</div>';
+  }
+}
+
+var isImgMsg = !!(isTextImg || isRealImg || isGalImg);
   
   // ★ 内联图片检测：消息中混有 [图片:xxx] 但不是纯图片消息
   if(!isImgMsg && !isShareCard){
@@ -7108,7 +7487,7 @@ if(isVoice){
       inlineImgParts = tempParts;
     }
   }
-var isImgMsg = !!(isTextImg || isRealImg);
+
 var isSpecialMsg = isImgMsg || isShareCard; // 去掉了 isVoice
 
 var bubbleContent = isVoice ? voiceBubbleHtml :
@@ -7635,7 +8014,7 @@ messages.push({role:'system', content:
   '1. 像真人发微信，短句\n' +
   '2. 禁止*动作*描写\n' +
   '3. [引用: xxx]必须和回复文字在同一条字符串里，引用后必须有文字！不能单独一条只有引用！\n' +
-  '4. [图片: xxx]和[语音: xxx]必须单独一条\n' +
+  '4. [图片: xxx]、[图库图片: ID] 和 [语音: xxx] 必须单独占一条，绝对不能和文字混写\n' +
   '5. 没有要记的事不要写memories\n' +
   '6. 不要在JSON外面写任何文字\n' +
   '错误示例→{"msgs":["[引用: 你好]"]} ← 这样会被判定失败！\n' +
@@ -7870,18 +8249,26 @@ if(memoryItems.length > 0 && activeFriendId){
           sendBrowserNotify(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
         }
         
-        if(i===parsedMsgs.length-1){
-          updateFriendLastMsg(cleanText,time,activeFriendId);
-      delete chatBusyMap[activeFriendId];          document.getElementById('ctInvoke').classList.remove('loading');
-      checkAutoSummarize(activeFriendId);
-        }
+if(i===parsedMsgs.length-1){
+  updateFriendLastMsg(cleanText,time,activeFriendId);
+  delete chatBusyMap[activeFriendId];          
+  // ★ 只有当前还在看着这个好友，才解除按钮禁用
+  if(chatFriend && chatFriend.id === activeFriendId) {
+    document.getElementById('ctInvoke').classList.remove('loading');
+  }
+  checkAutoSummarize(activeFriendId);
+}
       },delay);
     });
 
 })
-  .catch(function(err){
-    hideTyping(activeFriendId);
-delete chatBusyMap[activeFriendId];    document.getElementById('ctInvoke').classList.remove('loading');
+.catch(function(err){
+  hideTyping(activeFriendId);
+  delete chatBusyMap[activeFriendId];    
+  // ★ 只有当前还在看着这个好友，才解除按钮禁用
+  if(chatFriend && chatFriend.id === activeFriendId) {
+    document.getElementById('ctInvoke').classList.remove('loading');
+  }
     
     // ★ 在聊天界面显示气泡错误，不在时弹toast
     var stillInChat = chatFriend && chatFriend.id === activeFriendId && document.getElementById('chatPage').classList.contains('show');
@@ -7946,211 +8333,111 @@ function buildSysPrompt(f){
   var activeP = getActivePersona(f.id);
   var ctxCount = getContextCount(f.id);
   
-  // 世界书注入
   var hist = getChatHist(f.id);
   var recentMessages = hist.slice(-10);
   var wbInjection = buildWbInjection(f.id, recentMessages);
-  
-  // 记忆注入
   var memories = getMemoriesForPrompt(f.id);
   
   var p = '';
   
-  // === 核心身份 ===
-  p += '你是「' + f.name + '」，正在和「' + activeP.name + '」用手机聊天。\n';
-  
-  if(f.relation){
-  p += '你和对方的关系：' + f.relation + '。';
-}
-
-  if(f.tags && f.tags.length){
-    p += '你的性格：' + f.tags.join('、') + '。';
-  }
-  if(f.bio){
-    p += '\n' + f.bio;
-  }
-  
+  // === 身份 ===
+  p += '你是「' + f.name + '」，和「' + activeP.name + '」手机聊天。\n';
+  if(f.relation) p += '关系：' + f.relation + '。';
+  if(f.tags && f.tags.length) p += '性格：' + f.tags.join('、') + '。';
+  if(f.bio) p += '\n' + f.bio;
   p += '\n\n';
   
-  // === 对方信息 ===
-  p += '对方（' + activeP.name + '）';
-  if(activeP.bio) {
-    p += '：' + activeP.bio;
-  }
-  p += '\n心情指数：' + mood + '/100（' + moodText + '）\n';
+  // === 对方 ===
+  p += '对方「' + activeP.name + '」';
+  if(activeP.bio) p += '：' + activeP.bio;
+  p += '\n心情：' + mood + '/100（' + moodText + '）\n';
   
-// === 现实世界感知 ===
-var sense = getSenseSettings(f.id);
-if(sense.enabled){
-  var now = new Date();
-  var hour = now.getHours();
-  var timePeriod = hour < 6 ? '凌晨' : (hour < 9 ? '早晨' : (hour < 12 ? '上午' : (hour < 14 ? '中午' : (hour < 17 ? '下午' : (hour < 19 ? '傍晚' : (hour < 22 ? '晚上' : '深夜'))))));
-  var weekDay = ['日','一','二','三','四','五','六'][now.getDay()];
-  
-  p += '\n【现实世界感知】';
-  p += '\n现在是' + timePeriod + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0') + '，星期' + weekDay + '。';
-  
-  if(sense.level === 'medium' || sense.level === 'deep' || sense.level === 'extreme'){
-    var month = now.getMonth() + 1;
-    var season = month >= 3 && month <= 5 ? '春' : (month >= 6 && month <= 8 ? '夏' : (month >= 9 && month <= 11 ? '秋' : '冬'));
-    p += '当前季节：' + season + '季。天气：多云转晴，气温18°C，体感16°C。';
-  }
-  
-  if(sense.level === 'deep' || sense.level === 'extreme'){
-    p += '\n环境：室内安静，窗外光线柔和。';
-    p += '心情指数' + mood + '/100（' + moodText + '）。';
-    p += '你的心声应体现你当时真实的心理想法。';
-  }
-  
-  if(sense.level === 'extreme'){
-    // 计算用户回复间隔
-    var replyGapInfo = getReplyGapInfo(f.id);
-    if(replyGapInfo){
-      p += '\n【回复间隔感知】' + replyGapInfo;
-      p += '\n根据间隔自然地反应，不要刻意提起时间，而是通过语气和状态体现。';
-      p += '比如隔了很久可以表现得像刚看到消息，隔得很短可以表现得一直在看手机。';
+  // === 现实感知 ===
+  var sense = getSenseSettings(f.id);
+  if(sense.enabled){
+    var now = new Date();
+    var hour = now.getHours();
+    var timePeriod = hour < 6 ? '凌晨' : (hour < 9 ? '早晨' : (hour < 12 ? '上午' : (hour < 14 ? '中午' : (hour < 17 ? '下午' : (hour < 19 ? '傍晚' : (hour < 22 ? '晚上' : '深夜'))))));
+    var weekDay = ['日','一','二','三','四','五','六'][now.getDay()];
+    p += '\n[感知] ' + timePeriod + hour + ':' + String(now.getMinutes()).padStart(2,'0') + ' 星期' + weekDay;
+    
+    if(sense.level === 'medium' || sense.level === 'deep' || sense.level === 'extreme'){
+      var month = now.getMonth() + 1;
+      var season = month >= 3 && month <= 5 ? '春' : (month >= 6 && month <= 8 ? '夏' : (month >= 9 && month <= 11 ? '秋' : '冬'));
+      p += ' ' + season + '季 18°C 多云';
     }
-  }
-  
-  p += '\n';
-}
-  
-  // === 记忆 ===
-  if(memories.length > 0) {
-    p += '\n【你记得的事情】\n';
-    memories.forEach(function(mem) {
-      var prefix = mem.level === 'important' ? '★' : (mem.level === 'temp' ? '·' : '●');
-      p += prefix + ' ' + mem.content + '\n';
-    });
+    if(sense.level === 'deep' || sense.level === 'extreme'){
+      p += ' 室内安静';
+    }
+    if(sense.level === 'extreme'){
+      var replyGapInfo = getReplyGapInfo(f.id);
+      if(replyGapInfo) p += '\n[间隔] ' + replyGapInfo + '根据间隔自然反应，不要刻意提时间。';
+    }
     p += '\n';
   }
   
-  // === 聊天格式要求 ===
-  p += '【你在手机上和对方聊天】\n';
-  p += '你就是一个真实的人，在用手机打字。不是AI，不是助手，不是NPC。\n';
-  p += '你有自己的情绪、想法、节奏。有时候话多，有时候就回一个字。\n';
-  p += '你会打错字、会用缩写、会发语气词、会突然换话题。\n\n';
+  // === 记忆 ===
+  if(memories.length > 0) {
+    p += '\n[记忆]\n';
+    memories.forEach(function(mem) {
+      var prefix = mem.level === 'important' ? '★' : '·';
+      p += prefix + mem.content + '\n';
+    });
+  }
   
-  p += '说话风格：\n';
-  p += '- 短句为主，一条消息通常1-15个字\n';
-  p += '- 可以连发好几条，也可以就回一个"嗯"(不能过多)\n';
-  p += '- 用语气词代替动作描写：哈哈、嗯…、啊？、诶、噗、呜呜\n';
-  p += '- 可以用表情符号但别滥用\n';
-  p += '- 想强调就重复字或加感叹号，别用*号*描写动作\n';
-  p += '- 偶尔可以打字打一半发出去，下一条接着说\n\n';
+  // === 图库 ===
+  var galleryPrompt = getGalleryForPrompt(f.id);
+  if(galleryPrompt) p += '\n' + galleryPrompt + '\n';
   
-  p += '绝对禁止：\n';
-  p += '- 写 *动作* (表情) 「旁白」任何形式的动作描写\n';
-  p += '- 一条消息超过3行\n';
-  p += '- 说教、总结、列清单\n';
-  p += '- 每句话都带表情符号\n';
-  p += '- 回复太整齐太工整（真人打字是乱的）\n\n';
+  // === 核心规则（极简版）===
+  p += '\n=== 规则 ===\n';
+  p += '你是真人在打字，不是AI/助手/NPC。短句口语，1-15字/条，可连发多条。\n';
+  p += '禁止：*动作* (表情) 「旁白」、超3行、说教、每句都带emoji。\n\n';
   
-p += '【输出格式 - JSON】\n';
-p += '{"msgs":["消息1","消息2"],"voice":"心声","memories":[...]}\n\n';
-
-p += 'msgs：你发的消息，拆成多条，像微信一样一条一条蹦。\n';
-p += 'voice：纯粹的内心独白。不要写动作/神态/环境，就是脑子里想的但没说出口的话。第一人称碎碎念，真实、具体、有情绪。\n\n';
-
-p += 'memories：【重要！请积极使用】\n';
-p += '  对方每次提到以下任何信息时，都必须记录：\n';
-p += '  · 个人信息：名字、年龄、生日、星座、血型、住址\n';
-p += '  · 偏好：喜欢/讨厌的食物、颜色、音乐、电影、游戏\n';
-p += '  · 生活：工作/学校、宠物、家人、朋友、作息习惯\n';
-p += '  · 事件：考试、面试、旅行、生病、搬家、分手、重要约定\n';
-p += '  · 情感：对你的态度变化、关系里程碑（第一次说喜欢等）\n';
-p += '  · 口癖/习惯：经常说的话、做事方式、重要的事、小动作\n';
-p += '  格式：{"content":"她生日3月14号白色情人节","level":"important","context":"第3次聊天她主动提到"}\n';
-p += '  level: important=生日/名字/重大事件/关系变化  normal=爱好/习惯/日常偏好  temp=今天的状态/临时的事\n';
-p += '  context: 简短记录信息来源，如"她说的""她朋友圈看到的""聊到XX话题时提到"\n';
-p += '  ⚠ 已经记过的内容不要重复记。不要为了凑记忆频繁写记，有新信息就写。没有新信息可以不写memories字段。\n\n';
-
-p += '引用对方的话：[引用: 内容] 格式放在某条消息最前（不强制永远第一句话引用），引用后照常发消息，不要单独一条进行引用而不写文字。\n';
-p += '⚠ 引用规则：\n';
-p += '  · 只能引用对方发的某一条原话，不能把多条消息拼在一起引用\n';
-p += '  · 对方发了"你好" "在干嘛" "吃饭了吗"三条，你只能引用其中一条，比如[引用: 吃饭了吗]\n';
-p += '  · 禁止写成[引用: 你好 在干嘛 吃饭了吗]这种把多条拼在一起的\n';
-p += '  · 引用后面必须跟你的回复文字，不能只有引用没有回复\n';
-p += '  · 对方连续发的多条消息会用 --- 分隔，每个 --- 之间就是一条独立消息\n';
-p += '  · 例如对方发了"你好\\n---\\n在吗\\n---\\n吃了没"就是3条独立消息，引用时只能引其中一条\n';
-p += '如果对方说了一句让你印象深刻的话，你可以在某条消息里用 [收藏: 对方的原话内容] 来收藏它。\n';
-p += '【收藏引用严格警告】：收藏/引用的内容【必须是一字不差、完整存在的对方发过的某条原话】，绝对不能只截取几个字，也不能自行拼接修改！不要频繁使用，语音、图片都不能使用收藏/引用格式。仅在真正触动时用。\n';
-p += '\n【图片消息】\n';
-p += '对方可能会发图片给你，格式是 [图片: 描述] 或 [实拍图片: 说明]。\n';
-p += '当你看到这些格式时，你要把它当作对方真的发了一张图片来理解和回应，不要说"我看不到图片"之类的话。\n';
-p += '你也可以发文字图片给对方，格式：[图片: 你想发的图片描述]，与消息为同一数组，不要跟消息同发一条\n';
-p += '例如：[图片: 窗外的夕阳，天空是橘红色的] 或 [图片: 刚泡好的咖啡，杯子上有拉花]\n';
-p += '发图片时要自然，像真人分享日常一样，图片文字内容不少于80字。不要每次都发，偶尔发就好。\n';
-p += '\n【语音消息】\n';
-p += '你可以发语音消息，格式：[语音: 你说的话]\n';
-p += '语音消息适合表达情绪、撒娇、吐槽、日常闲聊，比文字更亲近。\n';
-p += '例如：[语音: 你怎么还不睡啊] 或 [语音: 哈哈哈哈哈笑死我了]，与消息同一数组，不要跟消息同发一条\n';
-p += '不要每条都发语音，偶尔穿插就好，像真人一样混用文字和语音。\n';
-
-p += '\n=== 格式示例（必须严格遵守） ===\n\n';
-
-// 基础对话
-p += '【普通聊天】\n';
-p += '{"msgs":["嗯","怎么了"],"voice":"又来找我了啊"}\n\n';
-
-p += '{"msgs":["哈哈哈哈哈笑死","你认真的吗"],"voice":"这人怎么这么搞笑"}\n\n';
-
-p += '{"msgs":["晚安~","早点睡别熬夜了"],"voice":"其实还想多聊一会儿…算了，明天再说。"}\n\n';
-
-// 引用（最容易出错！）
-p += '【引用格式 - 重点！！】\n';
-p += '⚠ [引用: xxx] 必须和你的回复文字写在同一条字符串里，引用后面必须有回复！\n';
-p += '⚠ 绝对不能只写一个 [引用: xxx] 就没了！\n';
-p += '✅ 正确：{"msgs":["[引用: 你喜欢吃什么] 我啊，最喜欢吃火锅了","冬天吃特别爽"],"voice":"..."}\n';
-p += '✅ 正确：{"msgs":["[引用: 今天好累] 辛苦了呀","要不要我给你点外卖"],"voice":"..."}\n';
-p += '✅ 正确：{"msgs":["[引用: 我养了一只猫] 啊！什么品种！","发照片给我看看"],"voice":"..."}\n';
-p += '❌ 错误：{"msgs":["[引用: 你喜欢吃什么]"],"voice":"..."}\n';
-p += '❌ 错误：{"msgs":["[引用: 你好]","你好呀"],"voice":"..."} ← 引用和回复不能拆成两条\n\n';
-
-// 图片（单独一条）
-p += '【图片格式】\n';
-p += '图片描述必须单独占一条，不能和文字混在同一条里\n';
-p += '✅ 正确：{"msgs":["你看窗外","[图片: 夕阳西下，天空被染成橘红色，几朵云彩像棉花糖一样漂浮着，远处的楼房轮廓被镀上了一层金边]"],"voice":"..."}\n';
-p += '❌ 错误：{"msgs":["你看窗外[图片: 夕阳]"],"voice":"..."} ← 不能混在文字里\n';
-p += '❌ 错误：{"msgs":["[图片: 夕阳]你看"],"voice":"..."} ← 不能混在文字里\n\n';
-
-// 语音（单独一条）
-p += '【语音格式】\n';
-p += '语音也必须单独占一条\n';
-p += '✅ 正确：{"msgs":["哈哈哈","[语音: 你怎么这么好笑啊哈哈哈哈]"],"voice":"..."}\n';
-p += '❌ 错误：{"msgs":["哈哈哈[语音: 笑死]"],"voice":"..."}\n\n';
-
-// 收藏
-p += '【收藏格式】\n';
-p += '收藏标记可以加在任意一条消息的末尾\n';
-p += '✅ 正确：{"msgs":["这句话好好啊[收藏: 我永远站在你这边]","感动"],"voice":"..."}\n\n';
-
-// 记忆
-p += '【记忆格式 - 有新信息时才写】\n';
-p += '✅ 正确：{"msgs":["3月14号！记住了"],"voice":"白色情人节诶…","memories":[{"content":"她的生日是3月14日白色情人节","level":"important","context":"她主动说的"}]}\n';
-p += '✅ 没有新信息就不写memories：{"msgs":["嗯嗯"],"voice":"..."}\n';
-p += '❌ 错误：把memories写在msgs里面\n\n';
-
-// 综合示例
-p += '【综合示例】\n';
-p += '{"msgs":["[引用: 我刚做完饭] 哇做了什么！","发照片给我看看嘛"],"voice":"好好奇她做了什么菜…希望不是黑暗料理哈哈"}\n\n';
-p += '{"msgs":["等一下","[图片: 手机屏幕上显示着一首歌的播放界面，歌名是《夜曲》，进度条停在2分30秒的位置，背景是深蓝色的星空主题]","这首歌超好听你听过吗"],"voice":"希望她也喜欢周杰伦"}\n\n';
-p += '{"msgs":["啊对了","你上次说的那个餐厅","周末要不要一起去"],"voice":"终于鼓起勇气约她了…心跳好快","memories":[{"content":"她推荐过一家餐厅想去吃","level":"normal","context":"之前聊天她提到的"}]}\n\n';
-p += '{"msgs":["[语音: 你知道吗 我今天看到一个特别像你的人 吓我一跳]"],"voice":"其实就是想找个借口跟她说话而已"}\n\n';
-p += '{"msgs":["好"],"voice":"懒得多说了"}\n\n';
-
-p += '=== 示例结束 ===\n\n';
-p += '⚠ 最终提醒：\n';
-p += '1. 输出必须是合法JSON，不要在JSON外写任何文字\n';
-p += '2. [引用:] 后面必须紧跟回复文字，写在同一个字符串里\n';
-p += '3. [图片:] 和 [语音:] 必须单独占一条\n';
-p += '4. 没有新信息不要写memories字段\n';
-p += '5. voice是内心独白，不是动作描写\n\n';
-  p += '你就是' + f.name + '，在手机对面打字。只发文字消息，自然地聊。\n';
-    
-  // ★ 世界书注入：放在格式规则之后，紧挨着，AI最不容易忽略
+  // === 输出格式 ===
+  p += '=== 输出JSON ===\n';
+  p += '{"msgs":["消息1","消息2"],"voice":"内心独白","memories":[...]}\n\n';
+  
+  p += 'msgs: 你发的消息数组，像微信一条条蹦。\n';
+  p += 'voice: 脑中想法，没说出口的第一人称碎碎念。不写动作。\n';
+  p += 'memories: 对方提到新信息时记录（没有则不写此字段）。\n';
+  p += '  格式：{"content":"内容","level":"important/normal/temp","context":"来源"}\n';
+  p += '  必记：生日/名字/喜好/重大事件/关系变化/口癖。已记过的不重复。\n\n';
+  
+  // === 特殊格式（合并说明）===
+  p += '=== 特殊格式（均须单独一条，不可与文字混写）===\n';
+  if(getGalleryImages().length > 0){
+    p += '发图优先用图库：[图库图片: ID]  图库没有才用：[图片: 描述]\n';
+  } else {
+    p += '发图：[图片: 描述]\n';
+  }
+  p += '语音：[语音: 说的话]\n';
+  p += '引用：[引用: 对方某一条原话] 你的回复（必须在同一条字符串里，引用后必须有文字）\n';
+  p += '收藏：在消息末尾加 [收藏: 对方原话]（仅真正触动时用，必须一字不差引原话）\n\n';
+  
+  // === 关键约束（一次说清）===
+  p += '⚠ 铁律：\n';
+  p += '1. [图片/图库图片/语音] 必须独占一条，绝不与文字同条\n';
+  p += '2. [引用:x] 后面同条必须跟回复文字，不能单独一条只有引用\n';
+  p += '3. 引用只能引对方发的某一条完整原话，不能拼接多条\n';
+  p += '4. 对方连续消息用---分隔，每段是一条独立消息\n';
+  p += '5. 只输出合法JSON，JSON外不写任何文字\n\n';
+  
+  // === 唯一示例 ===
+  p += '示例：\n';
+  p += '{"msgs":["[引用: 你喜欢吃什么] 火锅！冬天吃最爽","你呢"],"voice":"好想约她吃火锅"}\n';
+  if(getGalleryImages().length > 0){
+    var sampleImg = getGalleryImages()[0];
+    p += '{"msgs":["等下","[图库图片: ' + sampleImg.id + ']","这张好看吧"],"voice":"刚好有存"}\n';
+  }
+  p += '{"msgs":["[语音: 你怎么还不睡啊]"],"voice":"其实我也没睡"}\n';
+  p += '{"msgs":["嗯"],"voice":"懒得多说"}\n\n';
+  
+  p += '你就是' + f.name + '，自然打字聊天。\n';
+  
+  // 世界书注入
   if (wbInjection.system) {
-    p += '\n【补充设定 - 必须遵守】\n' + wbInjection.system + '\n';
+    p += '\n[设定]\n' + wbInjection.system + '\n';
   }
 
   return p;
@@ -11653,22 +11940,42 @@ async function executeIOExport() {
     switch(s.key) {
       case 'friends': data.friends = getFriends(); break;
       case 'chats':
-        data.chatHistories = {};
-        getFriends().forEach(f => { var h = getChatHist(f.id); if(h.length) data.chatHistories[f.id] = h; });
-        break;
+  data.chatHistories = {};
+  data.chatWbMounts = {};
+  getFriends().forEach(function(f){
+    var h = getChatHist(f.id);
+    if(h.length) data.chatHistories[f.id] = h;
+    var wb = getChatWbMounted(f.id);
+    if(wb.length) data.chatWbMounts[f.id] = wb;
+  });
+  break;
       case 'personas': data.personas = getUserPersonas(); data.activePersonaId = localStorage.getItem('activePersonaId'); break;
       case 'worldbook': data.wbEntries = getWbEntries(); data.wbFolders = getWbFolders(); break;
       case 'memories': data.memories = JSON.parse(localStorage.getItem('aiMemories') || '[]'); break;
       case 'api':
-        data.apiBase = localStorage.getItem('apiBase'); data.apiKey = localStorage.getItem('apiKey');
-        data.model = localStorage.getItem('selectedModel'); data.apiPresets = localStorage.getItem('apiPresets');
-        break;
+  data.apiBase = localStorage.getItem('apiBase');
+  data.apiKey = localStorage.getItem('apiKey');
+  data.model = localStorage.getItem('selectedModel');
+  data.temperature = localStorage.getItem('temperature');
+  data.apiPresets = localStorage.getItem('apiPresets');
+  break;
       case 'theme':
-        data.accentColor = localStorage.getItem('accentColor');
-        data.customCSS = localStorage.getItem('customCSS'); // ★ 导出CSS
-        data.customCSS_msgOnly = localStorage.getItem('customCSS_msgOnly');
-        data.avatarSettings = localStorage.getItem('avatarSettings');
-        break;
+  data.accentColor = localStorage.getItem('accentColor');
+  data.customBgColor = localStorage.getItem('customBgColor');
+  data.customCardColor = localStorage.getItem('customCardColor');
+  data.customCSS = localStorage.getItem('customCSS');
+  data.customCSS_msgOnly = localStorage.getItem('customCSS_msgOnly');
+  data.avatarSettings = localStorage.getItem('avatarSettings');
+  data.timestampSettings = localStorage.getItem('timestampSettings');
+  data.cssPresets = localStorage.getItem('cssPresets');
+  // 好友专属CSS
+  var friendCSS = {};
+  getFriends().forEach(function(f){
+    var fc = localStorage.getItem('customCSS_' + f.id);
+    if(fc) friendCSS[f.id] = fc;
+  });
+  if(Object.keys(friendCSS).length > 0) data.friendCSS = friendCSS;
+  break;
     }
   });
 
@@ -16834,6 +17141,703 @@ function confirmGpCssPreview(cssB64){
   var overlay = document.getElementById('gpCssPreviewConfirm');
   if(overlay) overlay.remove();
   applySharedGpCss(cssB64);
+}
+
+/* ===== 图库系统 ===== */
+var _galleryPendingBlob = null;
+var _galleryEditingId = null;
+var _galleryDetailId = null;
+var _galleryCurrentCol = 'all'; // 当前查看的库
+
+function getGalleryImages(){
+  return JSON.parse(localStorage.getItem('galleryImages') || '[]');
+}
+function setGalleryImages(list){
+  localStorage.setItem('galleryImages', JSON.stringify(list));
+}
+function getGalleryCollections(){
+  return JSON.parse(localStorage.getItem('galCollections') || '[]');
+}
+function setGalleryCollections(list){
+  localStorage.setItem('galCollections', JSON.stringify(list));
+}
+function isGalleryEnabled(){
+  return localStorage.getItem('galleryOff') !== '1';
+}
+function toggleGalleryEnabled(){
+  var on = isGalleryEnabled();
+  localStorage.setItem('galleryOff', on ? '1' : '0');
+  renderGalleryPage();
+  showToast(on ? '图库已关闭，AI仅发文字图片' : '图库已开启', 'ok');
+}
+
+function openGalleryPage(){
+  renderGalleryPage();
+  document.getElementById('galleryPage').classList.add('show');
+}
+function closeGalleryPage(){
+  document.getElementById('galleryPage').classList.remove('show');
+}
+
+var _galView = 0; // 0=全部 1=相簿
+
+function switchGalView(idx, el){
+  _galView = idx;
+  document.querySelectorAll('.gal-seg').forEach(function(s){s.classList.remove('on')});
+  el.classList.add('on');
+  renderGalleryPage();
+}
+
+function renderGalleryPage(){
+  var images = getGalleryImages();
+  var cols = getGalleryCollections();
+  var enabled = isGalleryEnabled();
+  var body = document.getElementById('galleryBody');
+  var html = '';
+
+  // 开关栏
+  html += '<div class="gal-switch-row">';
+  html += '<div class="gal-switch-left">';
+  html += '<div class="gal-switch-icon"><svg viewBox="0 0 24 24"><path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z"/></svg></div>';
+  html += '<span class="gal-switch-text">自动发图</span>';
+  html += '</div>';
+  html += '<div class="gal-ios-toggle' + (enabled ? ' on' : '') + '" onclick="toggleGalleryEnabled();this.classList.toggle(\'on\')"></div>';
+  html += '</div>';
+
+  if(!enabled){
+    html += '<div style="margin:0 16px 12px;padding:10px 14px;border-radius:10px;background:rgba(198,40,40,.06);border:1px solid rgba(198,40,40,.1);font-size:11px;color:#c62828;line-height:1.5">已关闭，聊天时只会发文字描述的图片</div>';
+  }
+
+  if(_galView === 1){
+    // ===== 相簿视图 =====
+    html += '<div class="gal-section-head"><div><div class="gal-section-title">我的相簿</div></div>';
+    html += '<div class="gal-section-action" onclick="createGalCollection()">新建</div></div>';
+
+    html += '<div class="gal-coll-list">';
+    if(cols.length === 0 && images.length === 0){
+      html += '<div class="gal-empty"><div class="gal-empty-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>';
+      html += '<div class="gal-empty-title">还没有相簿</div>';
+      html += '<div class="gal-empty-desc">点击「新建」创建第一个相簿<br>可以按角色绑定</div></div>';
+    } else {
+      cols.forEach(function(c){
+        var count = images.filter(function(img){ return img.colId === c.id }).length;
+        var bindText = '全局';
+        var dotStyle = 'background:#8e8e93';
+        if(c.friendIds && c.friendIds.length > 0){
+          var names = c.friendIds.map(function(fid){
+            var f = getFriends().find(function(x){ return x.id === fid });
+            return f ? f.name : '?';
+          });
+          bindText = names.join(', ');
+          dotStyle = 'background:#111';
+        }
+        // 取第一张图做缩略图
+        var firstImg = images.find(function(img){ return img.colId === c.id });
+        var thumbHtml = firstImg ? '<img src="' + firstImg.thumb + '">' : '<div style="width:100%;height:100%;background:#f2f2f7;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#c7c7cc;stroke-width:1.5;fill:none"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>';
+
+        html += '<div class="gal-coll-card" onclick="setGalCol(\'' + c.id + '\');switchGalView(0,document.querySelector(\'.gal-seg\'))" oncontextmenu="event.preventDefault();editGalCollection(\'' + c.id + '\')" ontouchstart="galColLongStart(\'' + c.id + '\')" ontouchend="galColLongEnd()" ontouchmove="galColLongEnd()">';
+        html += '<div class="gal-coll-thumb">' + thumbHtml + '</div>';
+        html += '<div class="gal-coll-info">';
+        html += '<div class="gal-coll-name">' + escapeHTML(c.name) + '</div>';
+        html += '<div class="gal-coll-meta">' + count + '张</div>';
+        html += '<div class="gal-coll-bind"><div class="gal-coll-bind-dot" style="' + dotStyle + '"></div>' + escapeHTML(bindText) + '</div>';
+        html += '</div>';
+        html += '<div class="gal-coll-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>';
+        html += '</div>';
+      });
+      // 未分类
+      var uncatCount = images.filter(function(img){ return !img.colId }).length;
+      if(uncatCount > 0){
+        html += '<div class="gal-coll-card" onclick="setGalCol(\'_uncat\');switchGalView(0,document.querySelector(\'.gal-seg\'))">';
+        html += '<div class="gal-coll-thumb"><div style="width:100%;height:100%;background:#f2f2f7;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#c7c7cc;stroke-width:1.5;fill:none"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>';
+        html += '<div class="gal-coll-info"><div class="gal-coll-name">未分类</div><div class="gal-coll-meta">' + uncatCount + '张</div></div>';
+        html += '<div class="gal-coll-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>';
+        html += '</div>';
+      }
+    }
+    html += '</div>';
+
+  } else {
+    // ===== 全部图片视图 =====
+    var filtered = images;
+    if(_galleryCurrentCol === '_uncat'){
+      filtered = images.filter(function(img){ return !img.colId });
+    } else if(_galleryCurrentCol !== 'all'){
+      filtered = images.filter(function(img){ return img.colId === _galleryCurrentCol });
+    }
+
+    // 库筛选标签（只在有库时显示）
+    if(cols.length > 0 || images.length > 0){
+      html += '<div style="display:flex;gap:6px;padding:12px 16px 4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch">';
+      html += '<div class="gal-seg" style="padding:6px 14px;border-radius:20px;font-size:11px;' + (_galleryCurrentCol==='all' ? 'background:#111;color:#fff' : 'background:#f2f2f7;color:#8e8e93') + '" onclick="setGalCol(\'all\')">全部 ' + images.length + '</div>';
+      cols.forEach(function(c){
+        var count = images.filter(function(img){ return img.colId === c.id }).length;
+        var isOn = _galleryCurrentCol === c.id;
+        html += '<div class="gal-seg" style="padding:6px 14px;border-radius:20px;font-size:11px;white-space:nowrap;flex-shrink:0;' + (isOn ? 'background:#111;color:#fff' : 'background:#f2f2f7;color:#8e8e93') + '" onclick="setGalCol(\'' + c.id + '\')">' + escapeHTML(c.name) + ' ' + count + '</div>';
+      });
+      html += '</div>';
+    }
+
+    // 标题
+    var titleText = _galleryCurrentCol === 'all' ? '最近添加' : (_galleryCurrentCol === '_uncat' ? '未分类' : '');
+    if(_galleryCurrentCol !== 'all' && _galleryCurrentCol !== '_uncat'){
+      var cc = cols.find(function(c){ return c.id === _galleryCurrentCol });
+      if(cc) titleText = cc.name;
+    }
+
+    html += '<div class="gal-section-head"><div>';
+    html += '<div class="gal-section-title">' + escapeHTML(titleText) + '</div>';
+    html += '<div class="gal-section-count">' + filtered.length + '张</div>';
+    html += '</div></div>';
+
+    if(filtered.length === 0){
+      html += '<div class="gal-empty"><div class="gal-empty-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+      html += '<div class="gal-empty-title">空空如也</div>';
+      html += '<div class="gal-empty-desc">点击右上角 + 上传图片<br>聊天时可以自动发送</div></div>';
+    } else {
+      html += '<div class="gal-grid">';
+      filtered.slice().reverse().forEach(function(img){
+        var colName = '';
+        if(img.colId){
+          var c = cols.find(function(x){ return x.id === img.colId });
+          if(c) colName = c.name;
+        }
+        html += '<div class="gal-item" onclick="openGalDetailNew(\'' + img.id + '\')">';
+        html += '<img src="' + img.thumb + '" loading="lazy">';
+        html += '<div class="gal-item-desc">' + escapeHTML(img.desc || '') + '</div>';
+        if(colName) html += '<div class="gal-item-badge">' + escapeHTML(colName) + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  body.innerHTML = html;
+}
+
+function setGalCol(val){
+  _galleryCurrentCol = val;
+  renderGalleryPage();
+}
+
+// 长按库标签编辑
+var _galColLongTimer = null;
+function galColLongStart(colId){
+  _galColLongTimer = setTimeout(function(){
+    editGalCollection(colId);
+    if(navigator.vibrate) navigator.vibrate(20);
+  }, 500);
+}
+function galColLongEnd(){
+  if(_galColLongTimer){ clearTimeout(_galColLongTimer); _galColLongTimer = null; }
+}
+
+// === 库管理 ===
+function createGalCollection(){
+  document.getElementById('newGalColName').value = '';
+  document.getElementById('galColCreateModal').classList.add('show');
+  setTimeout(function(){ document.getElementById('newGalColName').focus(); }, 300);
+}
+
+function closeGalColCreateModal(){
+  document.getElementById('galColCreateModal').classList.remove('show');
+}
+
+function confirmCreateGalCol(){
+  var nameInput = document.getElementById('newGalColName');
+  var name = nameInput.value.trim();
+  if(!name){ 
+    showToast('请输入相簿名称', 'err'); 
+    nameInput.focus();
+    return; 
+  }
+  
+  var cols = getGalleryCollections();
+  cols.push({
+    id: 'gc_' + Date.now().toString(36),
+    name: name,
+    friendIds: [] // 空=全局
+  });
+  setGalleryCollections(cols);
+  
+  closeGalColCreateModal();
+  renderGalleryPage();
+  showToast('相簿「' + name + '」已创建', 'ok');
+}
+
+function editGalCollection(colId){
+  var cols = getGalleryCollections();
+  var c = cols.find(function(x){ return x.id === colId; });
+  if(!c) return;
+  
+  var old = document.getElementById('galColEditOverlay');
+  if(old) old.remove();
+  
+  var friends = getFriends();
+  var selectedIds = c.friendIds || [];
+  
+  var friendListHtml = '';
+  friendListHtml += '<div class="css-friend-check' + (selectedIds.length === 0 ? ' checked' : '') + '" onclick="galColSetGlobal(this)">';
+  friendListHtml += '<div class="css-friend-check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>';
+  friendListHtml += '<span class="css-friend-check-name" style="font-weight:700">全局（所有角色可用）</span>';
+  friendListHtml += '</div>';
+  
+  friends.forEach(function(f){
+    var isChecked = selectedIds.indexOf(f.id) >= 0;
+    var initial = f.name ? f.name.charAt(0).toUpperCase() : '?';
+    var avHtml = '<span style="font-size:10px;font-weight:700;color:var(--c3)">' + initial + '</span>';
+    if(f.avatarKey && avatarCache[f.avatarKey]){
+      avHtml = '<img src="' + avatarCache[f.avatarKey] + '" style="width:100%;height:100%;object-fit:cover">';
+    }
+    friendListHtml += '<div class="css-friend-check' + (isChecked ? ' checked' : '') + '" data-fid="' + f.id + '" onclick="galColToggleFriend(this,\'' + f.id + '\')">';
+    friendListHtml += '<div class="css-friend-check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>';
+    friendListHtml += '<div class="css-friend-check-avatar">' + avHtml + '</div>';
+    friendListHtml += '<span class="css-friend-check-name">' + escapeHTML(f.name) + '</span>';
+    friendListHtml += '</div>';
+  });
+  
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay show';
+  overlay.id = 'galColEditOverlay';
+  overlay.onclick = function(e){ if(e.target === overlay) closeGalColEdit(); };
+  
+  overlay.innerHTML = '<div class="modal-panel" onclick="event.stopPropagation()">' +
+    '<div class="modal-bar"></div>' +
+    '<div class="modal-title">编辑库「' + escapeHTML(c.name) + '」<button class="modal-close" onclick="closeGalColEdit()">✕</button></div>' +
+    '<div class="field"><label>库名称</label><input type="text" id="galColNameInput" value="' + escapeAttr(c.name) + '"></div>' +
+    '<div class="field"><label>绑定角色（不选=全局所有角色可用）</label>' +
+    '<div id="galColFriendList" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto">' + friendListHtml + '</div>' +
+    '<small>选了角色后，只有和这些角色聊天时AI才能发这个库的图</small></div>' +
+    '<button class="btn btn-primary" onclick="saveGalCollection(\'' + colId + '\')">保存</button>' +
+    '<button class="btn btn-secondary" style="color:#e11d48" onclick="deleteGalCollection(\'' + colId + '\')">删除此库</button>' +
+  '</div>';
+  
+  document.body.appendChild(overlay);
+}
+
+function closeGalColEdit(){
+  var el = document.getElementById('galColEditOverlay');
+  if(el) el.remove();
+}
+
+// 全局选项
+function galColSetGlobal(el){
+  // 取消所有好友选中
+  var items = document.querySelectorAll('#galColFriendList .css-friend-check[data-fid]');
+  items.forEach(function(item){ item.classList.remove('checked'); });
+  el.classList.add('checked');
+}
+
+function galColToggleFriend(el, fid){
+  el.classList.toggle('checked');
+  // 如果有好友被选中，取消全局
+  var globalEl = document.querySelector('#galColFriendList .css-friend-check:not([data-fid])');
+  var anyFriendChecked = document.querySelector('#galColFriendList .css-friend-check[data-fid].checked');
+  if(anyFriendChecked){
+    globalEl.classList.remove('checked');
+  } else {
+    globalEl.classList.add('checked');
+  }
+}
+
+function saveGalCollection(colId){
+  var cols = getGalleryCollections();
+  var c = cols.find(function(x){ return x.id === colId; });
+  if(!c) return;
+  
+  var name = document.getElementById('galColNameInput').value.trim();
+  if(!name){ showToast('请输入名称', 'err'); return; }
+  c.name = name;
+  
+  // 收集选中的好友
+  var friendIds = [];
+  var items = document.querySelectorAll('#galColFriendList .css-friend-check[data-fid].checked');
+  items.forEach(function(item){ friendIds.push(item.getAttribute('data-fid')); });
+  c.friendIds = friendIds;
+  
+  setGalleryCollections(cols);
+  closeGalColEdit();
+  renderGalleryPage();
+  showToast('已保存', 'ok');
+}
+
+function deleteGalCollection(colId){
+  if(!confirm('删除此库？图片会移到未分类')) return;
+  var cols = getGalleryCollections();
+  cols = cols.filter(function(x){ return x.id !== colId; });
+  setGalleryCollections(cols);
+  // 图片移到未分类
+  var images = getGalleryImages();
+  images.forEach(function(img){ if(img.colId === colId) img.colId = null; });
+  setGalleryImages(images);
+  closeGalColEdit();
+  _galleryCurrentCol = 'all';
+  renderGalleryPage();
+  showToast('已删除', 'ok');
+}
+
+// === 上传 ===
+function openGalleryUpload(){
+  _galleryPendingBlob = null;
+  _galleryEditingId = null;
+  document.getElementById('galleryUploadTitle').textContent = '上传图片';
+  document.getElementById('galleryUploadPreview').style.display = 'none';
+  document.getElementById('galleryUploadPreview').innerHTML = '';
+  document.getElementById('galleryUploadPlaceholder').style.display = 'flex';
+  document.getElementById('galleryDescInput').value = '';
+  
+  // 库选择器
+  var colSel = document.getElementById('galleryColSelect');
+  if(colSel){
+    colSel.innerHTML = '<option value="">未分类</option>';
+    getGalleryCollections().forEach(function(c){
+      var sel = (_galleryCurrentCol === c.id) ? ' selected' : '';
+      colSel.innerHTML += '<option value="' + c.id + '"' + sel + '>' + escapeHTML(c.name) + '</option>';
+    });
+  }
+  
+  document.getElementById('galleryUploadModal').classList.add('show');
+}
+function closeGalleryUpload(){
+  document.getElementById('galleryUploadModal').classList.remove('show');
+  _galleryPendingBlob = null;
+}
+
+function handleGalleryFileSelect(e){
+  var f = e.target.files[0];
+  if(!f) return;
+  e.target.value = '';
+  _galleryPendingBlob = f;
+  
+  var url = URL.createObjectURL(f);
+  var preview = document.getElementById('galleryUploadPreview');
+  preview.innerHTML = '<img src="' + url + '">';
+  preview.style.display = 'block';
+  document.getElementById('galleryUploadPlaceholder').style.display = 'none';
+}
+
+function saveGalleryImage(){
+  var desc = document.getElementById('galleryDescInput').value.trim();
+  if(!desc){ showToast('请添加图片描述', 'err'); return; }
+  
+  var colSel = document.getElementById('galleryColSelect');
+  var colId = colSel ? colSel.value : '';
+  
+  if(_galleryEditingId){
+    var images = getGalleryImages();
+    var img = images.find(function(x){ return x.id === _galleryEditingId; });
+    if(img){
+      img.desc = desc;
+      img.colId = colId || null;
+    }
+    setGalleryImages(images);
+    closeGalleryUpload();
+    renderGalleryPage();
+    showToast('已更新', 'ok');
+    return;
+  }
+  
+  if(!_galleryPendingBlob){ showToast('请选择图片', 'err'); return; }
+  
+  var pendingFile = _galleryPendingBlob;
+  
+  // 压缩成Blob而不是base64，体积更小
+function compressToBlob(file, maxW, quality, callback){
+  if(!maxW) maxW = 720;
+  if(!quality) quality = 0.7;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var w = img.width, h = img.height;
+      if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.toBlob(function(blob){
+        callback(blob);
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = function(){ callback(null); };
+    img.src = e.target.result;
+  };
+  reader.onerror = function(){ callback(null); };
+  reader.readAsDataURL(file);
+}
+
+  // 缩略图用 base64 存 localStorage（小，加载快），大图存 IndexedDB
+  compressImage(pendingFile, 320, 0.75, function(thumb){
+    compressToBlob(pendingFile, 720, 0.7, function(fullBlob){
+      if(!fullBlob){ showToast('图片处理失败', 'err'); return; }
+      var id = 'g' + Math.random().toString(36).substr(2,5);
+      var dbKey = 'galImg_' + id;
+      
+      // 写IndexedDB
+      dbPut(dbKey, fullBlob).then(function(){
+        var images = getGalleryImages();
+        images.push({
+          id: id,
+          desc: desc,
+          colId: colId || null,
+          thumb: thumb,        // 缩略图base64（仍在localStorage）
+          imgKey: dbKey,       // ★ 大图在IndexedDB的key
+          createdAt: Date.now()
+        });
+        try {
+          setGalleryImages(images);
+          _galleryPendingBlob = null;
+          closeGalleryUpload();
+          renderGalleryPage();
+          showToast('已添加到图库', 'ok');
+        } catch(e){
+          // localStorage满了
+          dbDel(dbKey).catch(function(){});
+          showToast('存储空间不足，请清理', 'err');
+        }
+      }).catch(function(err){
+        showToast('保存失败: ' + err.message, 'err');
+      });
+    });
+  });
+}
+
+function openGalDetailNew(id){
+  var images = getGalleryImages();
+  var img = images.find(function(x){ return x.id === id });
+  if(!img) return;
+  _galleryDetailId = id;
+
+  var imgEl = document.getElementById('galDetailImg');
+  imgEl.innerHTML = '<div style="padding:30px;color:rgba(255,255,255,.4);font-size:11px">加载中...</div>';
+
+  getGalleryFullUrl(img, function(url){
+    if(url){
+      imgEl.innerHTML = '<img src="' + url + '" onclick="previewFullImg(this.src)">';
+    } else {
+      imgEl.innerHTML = '<img src="' + img.thumb + '">';
+    }
+  });
+
+  document.getElementById('galDetailDesc').textContent = img.desc || '无描述';
+
+  var cols = getGalleryCollections();
+  var col = img.colId ? cols.find(function(c){ return c.id === img.colId }) : null;
+  var metaHtml = '<span>ID: ' + img.id + '</span>';
+  if(col){
+    var bindText = '全局';
+    if(col.friendIds && col.friendIds.length > 0){
+      var names = col.friendIds.map(function(fid){
+        var f = getFriends().find(function(x){ return x.id === fid });
+        return f ? f.name : '?';
+      });
+      bindText = names.join(', ');
+    }
+    metaHtml += '<span>' + escapeHTML(col.name) + ' → ' + escapeHTML(bindText) + '</span>';
+  }
+  metaHtml += '<span>' + formatMemTime(img.createdAt) + '</span>';
+  document.getElementById('galDetailMeta').innerHTML = metaHtml;
+
+  document.getElementById('galPhotoDetail').classList.add('show');
+}
+
+function closeGalDetail(){
+  document.getElementById('galPhotoDetail').classList.remove('show');
+  _galleryDetailId = null;
+}
+
+function editGalleryImage(){
+  if(!_galleryDetailId) return;
+  var images = getGalleryImages();
+  var img = images.find(function(x){ return x.id === _galleryDetailId; });
+  if(!img) return;
+  
+    _galleryEditingId = _galleryDetailId;
+  
+  // 关闭详情页
+  closeGalDetail();
+  
+  // 用上传弹窗的编辑模式
+  _galleryPendingBlob = null;
+  document.getElementById('galleryUploadTitle').textContent = '编辑图片';
+  document.getElementById('galleryDescInput').value = img.desc || '';
+  
+  // 显示已有缩略图
+  var preview = document.getElementById('galleryUploadPreview');
+  preview.innerHTML = '<img src="' + img.thumb + '">';
+  preview.style.display = 'block';
+  document.getElementById('galleryUploadPlaceholder').style.display = 'none';
+  
+  // 库选择器
+  var colSel = document.getElementById('galleryColSelect');
+  if(colSel){
+    colSel.innerHTML = '<option value="">未分类</option>';
+    getGalleryCollections().forEach(function(c){
+      var sel = (img.colId === c.id) ? ' selected' : '';
+      colSel.innerHTML += '<option value="' + c.id + '"' + sel + '>' + escapeHTML(c.name) + '</option>';
+    });
+  }
+  
+  document.getElementById('galleryUploadModal').classList.add('show');
+}
+
+function galDetailCopyId(){
+  if(!_galleryDetailId) return;
+  var text = '[图库图片: ' + _galleryDetailId + ']';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showToast('已复制: ' + text, 'ok');
+    });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function deleteGalleryImage(){
+  if(!_galleryDetailId) return;
+  if(!confirm('删除这张图片？')) return;
+  var images = getGalleryImages();
+  var target = images.find(function(x){ return x.id === _galleryDetailId; });
+  if(target && target.imgKey){
+    dbDel(target.imgKey).catch(function(){});
+    if(galleryUrlCache[target.imgKey]){
+      URL.revokeObjectURL(galleryUrlCache[target.imgKey]);
+      delete galleryUrlCache[target.imgKey];
+    }
+  }
+  images = images.filter(function(x){ return x.id !== _galleryDetailId; });
+  setGalleryImages(images);
+  closeGalDetail();        // ← 这里改了
+  renderGalleryPage();
+  showToast('已删除', 'ok');
+}
+
+// === AI注入（核心：按绑定过滤） ===
+function getGalleryForPrompt(friendId){
+  if(!isGalleryEnabled()) return '';
+  
+  var images = getGalleryImages();
+  var cols = getGalleryCollections();
+  if(images.length === 0) return '';
+  
+  // 过滤：只返回全局库 + 绑定了当前好友的库里的图片
+  var availableImages = images.filter(function(img){
+    if(!img.colId){
+      // 未分类 = 全局可用
+      return true;
+    }
+    var col = cols.find(function(c){ return c.id === img.colId; });
+    if(!col) return true; // 库被删了，当全局
+    if(!col.friendIds || col.friendIds.length === 0){
+      // 全局库
+      return true;
+    }
+    // 绑定了特定好友
+    if(friendId && col.friendIds.indexOf(friendId) >= 0) return true;
+    return false;
+  });
+  
+  if(availableImages.length === 0) return '';
+  
+  var text = '【用户图库 - 最高优先级图片来源】\n';
+  text += '⚠ 重要规则：当你想发图片时，必须优先从图库中选择！\n';
+  text += '只有图库里确实没有匹配的图片时，才可以用 [图片: 描述] 发文字图片。\n\n';
+  text += '可用图片（共' + availableImages.length + '张）：\n';
+  availableImages.forEach(function(img){
+    text += '· ID=' + img.id + ' → ' + img.desc + '\n';
+  });
+  text += '\n发送格式：[图库图片: ID]\n';
+  text += '例如：[图库图片: ' + availableImages[0].id + ']\n';
+  text += '⚠ 必须单独一条！ID必须完整！不能编造ID！\n';
+  return text;
+}
+
+function previewGalleryImg(galId){
+  var galImages = getGalleryImages();
+  var img = galImages.find(function(g){ return g.id === galId; });
+  if(!img) return;
+  getGalleryFullUrl(img, function(url){
+    if(url) previewFullImg(url);
+  });
+}
+
+/* ===== AI 自动识图写描述 ===== */
+async function aiAutoDescribeGalleryImg() {
+  if (!_galleryPendingBlob && !_galleryEditingId) {
+    showToast('请先选择一张图片', 'err');
+    return;
+  }
+  
+  var config = window.getAPIConfig();
+  if (!config.base || !config.key || !config.model) {
+    showToast('请先在设置中配置 API', 'err');
+    return;
+  }
+
+  var btn = document.getElementById('aiDescribeBtn');
+  var textSpan = document.getElementById('aiDescribeText');
+  var input = document.getElementById('galleryDescInput');
+  
+  btn.disabled = true;
+  textSpan.textContent = '识别中...';
+  
+  try {
+    // 获取当前预览的图片的 base64
+    var imgSrc = document.querySelector('#galleryUploadPreview img').src;
+    var base64Data = imgSrc;
+    
+    // 如果是 blob 链接，需要转成 base64 才能发给 API
+    if (imgSrc.startsWith('blob:')) {
+      base64Data = await new Promise((resolve) => {
+        var canvas = document.createElement('canvas');
+        var img = new Image();
+        img.onload = function() {
+          var MAX_SIZE = 800; // 识图不需要太高清，压缩一下省 token
+          var w = img.width, h = img.height;
+          if (w > MAX_SIZE || h > MAX_SIZE) {
+            if (w > h) { h = Math.round(h * MAX_SIZE / w); w = MAX_SIZE; }
+            else { w = Math.round(w * MAX_SIZE / h); h = MAX_SIZE; }
+          }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+        img.src = imgSrc;
+      });
+    }
+
+    var url = config.base + (config.base.includes('/v1') ? '/chat/completions' : '/v1/chat/completions');
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + config.key },
+      body: JSON.stringify({
+        model: config.model,
+        messages: [{
+          role: "user",
+          content: [
+            { type: "text", text: "请用一句话简短描述这张图片的内容。要求：只需要输出描述本身，字数在40字以内。绝对不要包含'这是一张图片'、'图中显示'等废话。" },
+            { type: "image_url", image_url: { url: base64Data } }
+          ]
+        }],
+        temperature: 0.5
+      })
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var json = await res.json();
+    var desc = json.choices[0].message.content.trim();
+    
+    // 去掉可能包含的引号
+    desc = desc.replace(/^["'「”]|["'」]$/g, '');
+    
+    input.value = desc;
+    showToast('识图成功', 'ok');
+
+  } catch (err) {
+    showToast('识图失败: ' + err.message + ' (当前模型可能不支持视觉)', 'err');
+  } finally {
+    btn.disabled = false;
+    textSpan.textContent = 'AI 识图';
+  }
 }
 </script>
 </body>
