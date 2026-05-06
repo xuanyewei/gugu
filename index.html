@@ -8255,14 +8255,18 @@ if(memoryItems.length > 0 && activeFriendId){
   hideTyping(activeFriendId);
   appendRealtimeBubble('assistant', cleanText, time, finalQuote);
 }
-        if(!stillInChat){
-          showNtf(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
-          var _fl = getFriends();
-          var _fo = _fl.find(function(x){ return x.id === activeFriendId; });
-          if(_fo){ _fo.unread = (_fo.unread||0)+1; setFriends(_fl); }
-        } else if(document.hidden){
-          sendBrowserNotify(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
-        }
+if(!stillInChat){
+  showNtf(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
+  var _fl = getFriends();
+  var _fo = _fl.find(function(x){ return x.id === activeFriendId; });
+  if(_fo){ _fo.unread = (_fo.unread||0)+1; setFriends(_fl); }
+  // ★ 新增：云端推送
+  triggerCloudPush(activeFriend.name, cleanText, activeFriendId, activeFriend.avatarKey);
+} else if(document.hidden){
+  sendBrowserNotify(activeFriendId, activeFriend.name, cleanText, activeFriend.avatarKey);
+  // ★ 新增：网页在后台也发云推送（双保险）
+  triggerCloudPush(activeFriend.name, cleanText, activeFriendId, activeFriend.avatarKey);
+}
         
 if(i===parsedMsgs.length-1){
   updateFriendLastMsg(cleanText,time,activeFriendId);
@@ -13653,6 +13657,74 @@ async function savePushSubscriptionToCloud(subscription){
     console.log('[推送] 已保存到云端');
   } catch(e) {
     console.log('[推送] 保存失败:', e);
+  }
+}
+
+// ★ 触发云端推送
+async function triggerCloudPush(friendName, msgText, friendId, avatarKey){
+  var sb = getSB();
+  if(!sb) return;
+  
+  // 只在网页不在前台时才发云推送，避免重复通知
+  if(!document.hidden && document.getElementById('chatPage').classList.contains('show')){
+    var chatFriendNow = chatFriend && chatFriend.id === friendId;
+    if(chatFriendNow) return; // 正在看这个聊天，不需要推送
+  }
+  
+  try {
+    // 从 Supabase 拿所有订阅（后续可以改成只推给当前用户）
+    var userId = genUserId();
+    var { data: subs } = await sb
+      .from('push_subscriptions')
+      .select('*')
+      .eq('user_id', userId);
+    
+    if(!subs || subs.length === 0){
+      console.log('[推送] 没有订阅');
+      return;
+    }
+    
+    var body = msgText.length > 80 ? msgText.substring(0, 80) + '…' : msgText;
+    var payload = {
+      title: friendName + ' 发来消息',
+      body: body,
+      tag: 'push_' + friendId,
+      friendId: friendId,
+      url: './'
+    };
+    
+    // 调用 Edge Function 发推送
+    var edgeUrl = SUPABASE_URL + '/functions/v1/send-push';
+    
+    for(var i = 0; i < subs.length; i++){
+      var sub = subs[i];
+      var subscription = {
+        endpoint: sub.endpoint,
+        keys: {
+          p256dh: sub.p256dh,
+          auth: sub.auth
+        }
+      };
+      
+      fetch(edgeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SUPABASE_KEY
+        },
+        body: JSON.stringify({
+          subscription: subscription,
+          payload: payload
+        })
+      }).then(function(res){
+        if(res.ok) console.log('[推送] 发送成功');
+        else console.log('[推送] 发送失败:', res.status);
+      }).catch(function(e){
+        console.log('[推送] 请求失败:', e);
+      });
+    }
+  } catch(e) {
+    console.log('[推送] 触发失败:', e);
   }
 }
 
