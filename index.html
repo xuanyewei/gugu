@@ -5621,6 +5621,21 @@ input[type="range"]::-webkit-slider-thumb{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 
+// ★ VAPID 公钥（你从 vapidkeys.com 生成的那个 Public Key）
+var VAPID_PUBLIC_KEY = 'BK-MySfa8wUJHiouBPfsjOg9cdZJjcfoQMd4ZLZvFIiJsXi8xGtd-O1GoGnugBHhEdm1_RVNXbpOsYF19w6T8Ek';
+
+// 把 base64 转成 Uint8Array
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var rawData = window.atob(base64);
+  var outputArray = new Uint8Array(rawData.length);
+  for (var i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 // 启动时迁移老的图库数据
 (function migrateOldGallery(){
   setTimeout(async function(){
@@ -13481,6 +13496,12 @@ function initServiceWorker(){
   navigator.serviceWorker.register('./sw.js').then(function(reg){
     swRegistration = reg;
     console.log('[SW] 注册成功');
+    
+    if(browserNotifyEnabled && Notification.permission === 'granted'){
+  setTimeout(function(){
+    subscribePushNotification();
+  }, 1000);
+}
     // 更新状态显示
     var el = document.getElementById('swStatusText');
     if(el) el.textContent = '✅ 已就绪';
@@ -13559,16 +13580,100 @@ function toggleBrowserNotify(){
   localStorage.setItem('browserNotify', browserNotifyEnabled ? 'true' : 'false');
   var sw = document.getElementById('notifySwitch');
   if(sw) sw.classList.toggle('on', browserNotifyEnabled);
+  
   if(browserNotifyEnabled){
     requestNotifyPermission(function(ok){
       if(!ok){
         browserNotifyEnabled = false;
         localStorage.setItem('browserNotify', 'false');
         if(sw) sw.classList.remove('on');
+        return;
       }
+      // ★ 授权成功后，同时注册云端推送
+      subscribePushNotification();
     });
   } else {
     showToast('通知已关闭', 'ok');
+    // ★ 取消云端订阅
+    unsubscribePushNotification();
+  }
+}
+
+// ★ 订阅云端推送
+async function subscribePushNotification(){
+  try {
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)){
+      showToast('此浏览器不支持推送', 'err');
+      return;
+    }
+    
+    var reg = await navigator.serviceWorker.ready;
+    
+    // 检查是否已订阅
+    var existing = await reg.pushManager.getSubscription();
+    if(existing){
+      console.log('[推送] 已订阅过');
+      await savePushSubscriptionToCloud(existing);
+      return;
+    }
+    
+    // 新订阅
+    var subscription = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    
+    console.log('[推送] 订阅成功', subscription);
+    await savePushSubscriptionToCloud(subscription);
+    showToast('云端推送已开启 ✓', 'ok');
+  } catch(err) {
+    console.log('[推送] 订阅失败:', err);
+    showToast('云端推送开启失败: ' + err.message, 'err');
+  }
+}
+
+// ★ 把订阅信息存到 Supabase
+async function savePushSubscriptionToCloud(subscription){
+  var sb = getSB();
+  if(!sb) return;
+  
+  var userId = genUserId(); // 用群聊那套的用户ID
+  var json = subscription.toJSON();
+  var deviceInfo = navigator.userAgent.substring(0, 100);
+  
+  try {
+    await sb.from('push_subscriptions').upsert({
+      user_id: userId,
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+      device_info: deviceInfo,
+      last_used_at: new Date().toISOString()
+    }, { onConflict: 'endpoint' });
+    console.log('[推送] 已保存到云端');
+  } catch(e) {
+    console.log('[推送] 保存失败:', e);
+  }
+}
+
+// ★ 取消订阅
+async function unsubscribePushNotification(){
+  try {
+    if(!('serviceWorker' in navigator)) return;
+    var reg = await navigator.serviceWorker.ready;
+    var subscription = await reg.pushManager.getSubscription();
+    if(subscription){
+      var endpoint = subscription.endpoint;
+      await subscription.unsubscribe();
+      
+      // 从 Supabase 删除
+      var sb = getSB();
+      if(sb){
+        await sb.from('push_subscriptions').delete().eq('endpoint', endpoint);
+      }
+    }
+  } catch(e) {
+    console.log('[推送] 取消失败:', e);
   }
 }
 
