@@ -4319,6 +4319,82 @@ input[type="range"]::-webkit-slider-thumb{
 [data-theme="dark"] .gp-author-qq-copy{background:#1a1a1a;border-color:#333;color:#777}
 [data-theme="dark"] .gp-author-tip{color:#888;border-top-color:#2a2a2a}
 [data-theme="dark"] .gp-author-tip strong{color:#e0e0e0}
+
+/* ===== 开发者后台 ===== */
+.dev-panel{color:var(--c1)}
+.dev-section{margin-bottom:20px}
+.dev-section-title{
+  font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--c4);margin-bottom:10px;
+}
+.dev-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dev-stat{
+  background:var(--c7);border-radius:12px;padding:12px 14px;
+}
+.dev-stat-label{font-size:8px;font-weight:700;letter-spacing:1px;color:var(--c4);text-transform:uppercase}
+.dev-stat-val{font-size:13px;font-weight:700;color:var(--c1);margin-top:4px;font-variant-numeric:tabular-nums}
+.dev-raw-card{
+  background:var(--c7);border-radius:14px;margin-bottom:8px;overflow:hidden;
+  border:1px solid var(--c6);
+}
+.dev-raw-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;cursor:pointer;transition:background .15s;
+}
+.dev-raw-head:active{background:var(--c6)}
+.dev-raw-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dev-raw-dot.ok{background:#059669}
+.dev-raw-dot.err{background:#e11d48}
+.dev-raw-time{font-size:9px;color:var(--c4);font-weight:600;font-variant-numeric:tabular-nums}
+.dev-raw-badge{font-size:8px;font-weight:700;letter-spacing:.5px;padding:3px 8px;border-radius:6px}
+.dev-raw-badge.ok{background:rgba(5,150,105,.08);color:#059669}
+.dev-raw-badge.err{background:rgba(225,29,72,.08);color:#e11d48}
+.dev-raw-body{display:none;padding:0 16px 14px}
+.dev-raw-card.open .dev-raw-body{display:block}
+.dev-raw-label{font-size:8px;font-weight:700;letter-spacing:1.5px;color:var(--c4);margin-bottom:4px;margin-top:10px}
+.dev-raw-pre{
+  font-size:10px;color:var(--c2);background:var(--card);
+  border:1px solid var(--c6);
+  padding:10px 12px;border-radius:10px;overflow-x:auto;white-space:pre-wrap;
+  word-break:break-all;max-height:150px;overflow-y:auto;margin:0 0 8px;
+  font-family:'SF Mono','Fira Code','Consolas',monospace;line-height:1.6;
+  scrollbar-width:none;
+}
+.dev-raw-pre::-webkit-scrollbar{display:none}
+.dev-editor{
+  width:100%;min-height:200px;max-height:45vh;padding:12px 14px;
+  border:1.5px solid var(--c5);border-radius:14px;font-size:11px;
+  background:var(--c7);color:var(--c1);outline:none;
+  font-family:'SF Mono','Fira Code','Consolas',monospace;
+  resize:vertical;line-height:1.7;tab-size:2;scrollbar-width:none;
+  transition:border .2s;
+}
+.dev-editor:focus{border-color:var(--accent)}
+.dev-editor::-webkit-scrollbar{display:none}
+.dev-btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.dev-btn{
+  height:34px;padding:0 14px;border:none;border-radius:10px;
+  font-size:11px;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:.15s;display:flex;align-items:center;gap:5px;
+}
+.dev-btn:active{transform:scale(.95)}
+.dev-btn-primary{background:var(--accent);color:#fff}
+.dev-btn-ghost{background:var(--c7);color:var(--c3);border:1px solid var(--c6)}
+.dev-btn-danger{background:rgba(225,29,72,.06);color:#e11d48;border:1px solid rgba(225,29,72,.12)}
+.dev-prompt-view{
+  background:var(--c7);border:1px solid var(--c6);border-radius:14px;
+  padding:14px 16px;max-height:280px;overflow-y:auto;scrollbar-width:none;
+  font-size:11px;color:var(--c2);line-height:1.8;white-space:pre-wrap;
+  word-break:break-all;font-family:'SF Mono','Consolas',monospace;
+}
+.dev-prompt-view::-webkit-scrollbar{display:none}
+.dev-tab-row{display:flex;gap:0;margin-top:16px;margin-bottom:14px;background:var(--c7);border-radius:10px;padding:3px}
+.dev-tab{
+  flex:1;padding:8px 0;text-align:center;font-size:11px;font-weight:600;color:var(--c4);
+  cursor:pointer;transition:.2s;border-radius:8px;
+}
+.dev-tab.on{color:var(--c1);background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.dev-tab:active{opacity:.5}
 </style>
 </head>
 <body>
@@ -4728,6 +4804,18 @@ input[type="range"]::-webkit-slider-thumb{
             <svg viewBox="0 0 24 24" style="stroke:#bbb;stroke-width:2;fill:none;width:16px;height:16px"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
         </div>
+        <div class="set-row" onclick="openDataDebugPanel()">
+  <div class="set-row-icon" style="background:#444">
+    <svg viewBox="0 0 24 24" style="stroke:#fff;stroke-width:1.8;fill:none;width:18px;height:18px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+  </div>
+  <div class="set-row-info">
+    <div class="set-row-name">数据调试 & 云备份</div>
+    <div class="set-row-desc">查看存储状态，GitHub 自动备份</div>
+  </div>
+  <div class="set-row-arrow">
+    <svg viewBox="0 0 24 24" style="stroke:#bbb;stroke-width:2;fill:none;width:16px;height:16px"><polyline points="9 18 15 12 9 6"/></svg>
+  </div>
+</div>
         <div class="set-row" onclick="clearAllCache()">
           <div class="set-row-icon" style="background:#333">
             <svg viewBox="0 0 24 24" style="stroke:#fff;stroke-width:1.8;fill:none;width:18px;height:18px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -4806,7 +4894,7 @@ input[type="range"]::-webkit-slider-thumb{
     <div class="ct-user">
       <div class="ct-av" id="ctAv"><span id="ctAvLetter">?</span></div>
       <div class="ct-info">
-        <div class="ct-name" id="ctName">--</div>
+        <div class="ct-name" id="ctName" ondblclick="openDevPanel()">--</div>
         <div class="ct-status"><div class="ct-status-dot on"></div><span id="ctStatusText">在线</span></div>
       </div>
     </div>
@@ -4841,6 +4929,11 @@ input[type="range"]::-webkit-slider-thumb{
         上下文轮数
       </div>
       <div class="ct-menu-divider"></div>
+      <div class="ct-menu-item" onclick="openBranchPanel()">
+  <svg viewBox="0 0 24 24"><path d="M6 3v12"/><path d="M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M15 6a9 9 0 0 1-9 9"/></svg>
+  聊天分支
+</div>
+<div class="ct-menu-divider"></div>
       <div class="ct-menu-item" onclick="clearChatHistory()">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
         清空记录
@@ -5120,6 +5213,15 @@ input[type="range"]::-webkit-slider-thumb{
   </div>
 </div>
 
+<!-- ===== 数据调试 & 云备份面板 ===== -->
+<div class="modal-overlay" id="dataDebugModal" onclick="if(event.target===this)closeModal('dataDebugModal')">
+  <div class="modal-panel" style="max-height:92vh">
+    <div class="modal-bar"></div>
+    <div class="modal-title">数据调试 & 云备份 <button class="modal-close" onclick="closeModal('dataDebugModal')">✕</button></div>
+    <div id="dataDebugBody"></div>
+  </div>
+</div>
+
 <!-- ===== 数据管理模态框 ===== -->
 <div class="modal-overlay" id="ioModal" onclick="if(event.target===this)closeModal('ioModal')">
   <div class="modal-panel">
@@ -5176,6 +5278,15 @@ input[type="range"]::-webkit-slider-thumb{
   </div>
 </div>
 <!-- personaModal 结束 -->
+
+<!-- ===== 开发者后台面板 ===== -->
+<div class="modal-overlay" id="devPanelModal" onclick="if(event.target===this)closeModal('devPanelModal')">
+  <div class="modal-panel" style="max-height:92vh">
+    <div class="modal-bar"></div>
+    <div class="modal-title">开发者后台 <button class="modal-close" onclick="closeModal('devPanelModal')">✕</button></div>
+    <div id="devPanelBody"></div>
+  </div>
+</div>
 
 <!-- ===== 头像设置模态框 ===== -->
 <div class="modal-overlay" id="avatarSettingsModal" onclick="if(event.target===this)closeModal('avatarSettingsModal')">
@@ -5292,6 +5403,29 @@ input[type="range"]::-webkit-slider-thumb{
 
     <button class="btn btn-primary" onclick="saveAvatarSettings()">保存</button>
     <button class="btn btn-secondary" onclick="closeModal('avatarSettingsModal')">取消</button>
+  </div>
+</div>
+
+<!-- ===== 聊天分支面板 ===== -->
+<div class="modal-overlay" id="branchModal" onclick="if(event.target===this)closeModal('branchModal')">
+  <div class="modal-panel">
+    <div class="modal-bar"></div>
+    <div class="modal-title">聊天分支 <button class="modal-close" onclick="closeModal('branchModal')">✕</button></div>
+    
+    <div style="font-size:11px;color:#999;line-height:1.6;margin-bottom:14px">
+      每条分支是独立的时间线，设置共享。可以随时切换。
+    </div>
+    
+    <div id="branchList" style="margin-bottom:14px"></div>
+    
+    <div style="font-size:11px;font-weight:700;color:#999;letter-spacing:1px;margin:16px 0 10px">创建新分支</div>
+    
+    <button class="btn btn-primary" onclick="createBranchFresh()">从头开始（空白分支）</button>
+    <button class="btn btn-secondary" onclick="showBranchFromMsg()">从某条消息处分叉</button>
+    
+    <div id="branchMsgList" style="display:none;max-height:35vh;overflow-y:auto;border:1px solid var(--c6);border-radius:12px;padding:8px;margin-top:10px;scrollbar-width:none"></div>
+    
+    <button class="btn btn-secondary" style="margin-top:12px" onclick="closeModal('branchModal')">关闭</button>
   </div>
 </div>
 
@@ -5495,13 +5629,12 @@ input[type="range"]::-webkit-slider-thumb{
     <div id="senseLevelArea" style="display:none">
       <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px">感知范围</div>
       <div class="ct-sense-level" id="senseLevelRow">
-        <span data-slv="light" onclick="setSenseLevel('light',this)">轻度</span>
-        <span data-slv="medium" class="on" onclick="setSenseLevel('medium',this)">中度</span>
-        <span data-slv="deep" onclick="setSenseLevel('deep',this)">深度</span>
-        <span data-slv="extreme" onclick="setSenseLevel('extreme',this)">极强</span>
-      </div>
+  <span data-slv="light" onclick="setSenseLevel('light',this)">轻度</span>
+  <span data-slv="medium" class="on" onclick="setSenseLevel('medium',this)">中度</span>
+  <span data-slv="deep" onclick="setSenseLevel('deep',this)">重度</span>
+</div>
       <div style="margin-top:10px;font-size:10px;color:#999;line-height:1.6">
-轻度=仅时间日期 / 中度=时间+天气+季节 / 深度=全部+心情+环境 / 极强=全部+回复间隔时间感知
+轻度=仅注入当前时间日期 / 中度=消息带时间戳，AI感知时间流逝 / 重度=全部+计算回复间隔
       </div>
     </div>
     <div class="ctx-btns" style="margin-top:16px">
@@ -5723,7 +5856,7 @@ input[type="range"]::-webkit-slider-thumb{
     <div class="gp-author-warning">
       <div class="gp-author-warning-icon">⚠️</div>
       <div class="gp-author-warning-text">
-        如一定想使用，请确保你<strong>已成年</strong><br>
+        如一定想使用，请确保你<strong>已成年是女性</strong><br>
         并愿意给我一点夸夸 ♡
       </div>
     </div>
@@ -8377,13 +8510,12 @@ if(sumSettings.enabled && summaries.length > 0){
   if (wbInjection.assistant) {
     messages.push({ role: 'system', content: '回复前先参考以下信息：\n' + wbInjection.assistant });
   }
-  // ★ 合并连续同角色消息，让AI能分辨每条的边界
+
 var mergedRecent = [];
 recent.forEach(function(m){
   var msgRole = m.role === 'user' ? 'user' : 'assistant';
   var isVision = m.image && m.msgType === 'realImg';
   
-  // vision格式的图片消息不合并，单独发
   if(isVision){
     var parts = [];
     var captionMatch = m.content.match(/^\[实拍图片[:：]\s*([\s\S]*?)\]$/);
@@ -8397,26 +8529,42 @@ recent.forEach(function(m){
   var last = mergedRecent.length > 0 ? mergedRecent[mergedRecent.length - 1] : null;
   
   if(last && last.role === msgRole && !last.isVision){
-    // 同角色连续消息：用分隔符拼接，让AI知道是多条
     last.content += '\n---\n' + m.content;
     last.msgCount = (last.msgCount || 1) + 1;
   } else {
-    mergedRecent.push({role:msgRole, content:m.content, msgCount:1});
+    // ★ 保留时间信息
+    var timeLabel = m.time || '';
+    if(!timeLabel && m.ts){
+      var d = new Date(m.ts);
+      timeLabel = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+    }
+    mergedRecent.push({role:msgRole, content:m.content, msgCount:1, time:timeLabel});
   }
 });
 
-// 给合并的消息加上提示
+// 给合并的消息加上提示（中度感知时带时间戳）
+var _senseForCtx = getSenseSettings(activeFriendId);
+var _addTimePrefix = _senseForCtx.enabled && (_senseForCtx.level === 'medium' || _senseForCtx.level === 'deep');
+
 mergedRecent.forEach(function(m){
   if(m.isVision){
     messages.push({role:m.role, content:m.content});
-  } else if(m.msgCount > 1){
-    // 告诉AI这是多条分开发的消息
-    var prefix = m.role === 'user' 
-      ? '（以下是对方连续发的' + m.msgCount + '条消息，用---分隔）\n' 
-      : '';
-    messages.push({role:m.role, content: prefix + m.content});
   } else {
-    messages.push({role:m.role, content:m.content});
+    var finalContent = m.content;
+    
+    // 中度感知：给消息加时间前缀
+    if(_addTimePrefix && m.time){
+      finalContent = '[' + m.time + '] ' + finalContent;
+    }
+    
+    if(m.msgCount > 1){
+      var prefix = m.role === 'user' 
+        ? '（以下是对方连续发的' + m.msgCount + '条消息，用---分隔）\n' 
+        : '';
+      finalContent = prefix + finalContent;
+    }
+    
+    messages.push({role:m.role, content: finalContent});
   }
 });
   
@@ -8488,6 +8636,8 @@ messages.push({role:'system', content:
     }
         var content=json.choices[0].message.content||'';
     content=content.trim();
+    // 记录到开发者面板
+var _devEntry = { ts: Date.now(), raw: content, parsed: null, error: null };
     
     // === 解析JSON格式回复 ===
     var parsedMsgs = [];
@@ -8568,6 +8718,9 @@ messages.push({role:'system', content:
       }
       
       if(parsedMsgs.length === 0) parsedMsgs = ['...'];
+      _devEntry.parsed = { msgs: parsedMsgs, voice: innerVoice, memories: memoryItems };
+_devRawHistory.push(_devEntry);
+if(_devRawHistory.length > 20) _devRawHistory.shift();
       
     } catch(err) {
       // 完全失败，当纯文本处理
@@ -8706,6 +8859,8 @@ if(i===parsedMsgs.length-1){
 
 })
 .catch(function(err){
+_devRawHistory.push({ ts: Date.now(), raw: '(请求失败)', parsed: null, error: err.message });
+if(_devRawHistory.length > 20) _devRawHistory.shift();
   hideTyping(activeFriendId);
   delete chatBusyMap[activeFriendId];    
   // ★ 只有当前还在看着这个好友，才解除按钮禁用
@@ -8795,29 +8950,30 @@ function buildSysPrompt(f){
   if(activeP.bio) p += '：' + activeP.bio;
   p += '\n心情：' + mood + '/100（' + moodText + '）\n';
   
-  // === 现实感知 ===
-  var sense = getSenseSettings(f.id);
-  if(sense.enabled){
-    var now = new Date();
-    var hour = now.getHours();
-    var timePeriod = hour < 6 ? '凌晨' : (hour < 9 ? '早晨' : (hour < 12 ? '上午' : (hour < 14 ? '中午' : (hour < 17 ? '下午' : (hour < 19 ? '傍晚' : (hour < 22 ? '晚上' : '深夜'))))));
-    var weekDay = ['日','一','二','三','四','五','六'][now.getDay()];
-    p += '\n[感知] ' + timePeriod + hour + ':' + String(now.getMinutes()).padStart(2,'0') + ' 星期' + weekDay;
-    
-    if(sense.level === 'medium' || sense.level === 'deep' || sense.level === 'extreme'){
-      var month = now.getMonth() + 1;
-      var season = month >= 3 && month <= 5 ? '春' : (month >= 6 && month <= 8 ? '夏' : (month >= 9 && month <= 11 ? '秋' : '冬'));
-      p += ' ' + season + '季 18°C 多云';
-    }
-    if(sense.level === 'deep' || sense.level === 'extreme'){
-      p += ' 室内安静';
-    }
-    if(sense.level === 'extreme'){
-      var replyGapInfo = getReplyGapInfo(f.id);
-      if(replyGapInfo) p += '\n[间隔] ' + replyGapInfo + '根据间隔自然反应，不要刻意提时间。';
-    }
-    p += '\n';
+// === 现实感知 ===
+var sense = getSenseSettings(f.id);
+if(sense.enabled){
+  var now = new Date();
+  var hour = now.getHours();
+  var min = String(now.getMinutes()).padStart(2,'0');
+  var timePeriod = hour < 6 ? '凌晨' : (hour < 9 ? '早晨' : (hour < 12 ? '上午' : (hour < 14 ? '中午' : (hour < 17 ? '下午' : (hour < 19 ? '傍晚' : (hour < 22 ? '晚上' : '深夜'))))));
+  var weekDay = ['日','一','二','三','四','五','六'][now.getDay()];
+  var dateStr = now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日';
+  
+  // 轻度：仅时间
+  p += '\n[感知] ' + dateStr + ' ' + timePeriod + hour + ':' + min + ':' + String(now.getSeconds()).padStart(2,'0') + ' 星期' + weekDay + '\n';
+  
+  // 中度：提示AI注意消息时间戳
+  if(sense.level === 'medium' || sense.level === 'deep'){
+    p += '对话中每条消息前的[时间]标记是真实发送时间，请自然感知时间流逝，功能为辅助你理解时间，你绝对禁止直接输出类似的时间戳，如果用户问起时间，自然提到“几点几十分”即可，不能输出[时间]\n';
   }
+  
+  // 重度：回复间隔
+  if(sense.level === 'deep'){
+    var replyGapInfo = getReplyGapInfo(f.id);
+    if(replyGapInfo) p += '[间隔] ' + replyGapInfo + '根据间隔自然反应，不要刻意提时间。\n';
+  }
+}
   
   // === 记忆 ===
   if(memories.length > 0) {
@@ -9234,16 +9390,33 @@ function ctActRecall(wrap){
   var row=wrap.closest('.ct-row');
   var bubble=wrap.querySelector('.ct-bubble');
   
-  // 优先用 data-raw 拿原始消息内容，这样收藏卡片等特殊格式也能正确匹配
   var text = bubble.getAttribute('data-raw');
   if(!text){
-    // 兜底：老方法，从DOM文本里提取
     var temp = bubble.cloneNode(true);
     var q = temp.querySelector('.ct-msg-quote'); 
     if(q) q.remove();
     var ts = temp.querySelector('.ct-bubble-time-inside');
     if(ts) ts.remove();
     text = temp.textContent.trim();
+  }
+  
+  // ★ 删除前：如果这条有心声，转移给前一条AI消息
+  if(chatFriend){
+    var h = getChatHist(chatFriend.id);
+    for(var i = h.length - 1; i >= 0; i--){
+      if(h[i].content === text && h[i].role === 'assistant'){
+        if(h[i].innerVoice){
+          // 往前找上一条AI消息，把心声转移过去
+          for(var j = i - 1; j >= 0; j--){
+            if(h[j].role === 'assistant'){
+              if(!h[j].innerVoice) h[j].innerVoice = h[i].innerVoice;
+              break;
+            }
+          }
+        }
+        break;
+      }
+    }
   }
   
   removeFromHist(text);
@@ -12137,25 +12310,25 @@ function openIOImport() {
   // 选择文件
   var input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.json';
-  input.onchange = function(e) {
-    var f = e.target.files[0];
-    if(!f) return;
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      try {
-        var data = JSON.parse(ev.target.result);
-        if(!data._ggphone_backup) throw new Error('不是骨骨小手机备份文件');
-        ioImportData = data;
-        ioMode = 'import';
-        ioChecked = {};
-        renderIOPanel();
-      } catch(err) {
-        showIOStatus('文件解析失败: ' + err.message, 'err');
-      }
-    };
-    reader.readAsText(f);
-  };
+input.accept = '.json,.gz';
+input.onchange = function(e) {
+  var f = e.target.files[0];
+  if(!f) return;
+  (async function(){
+    try{
+      var text = await decompressData(f);
+      var data = JSON.parse(text);
+      if(!data._ggphone_backup) throw new Error('不是骨骨小手机备份文件');
+      ioImportData = data;
+      ioMode = 'import';
+      ioChecked = {};
+      renderIOPanel();
+      openModal('ioModal');
+    }catch(err){
+      showIOStatus('文件解析失败: ' + err.message, 'err');
+    }
+  })();
+};
   input.click();
 }
 
@@ -12427,13 +12600,21 @@ async function executeIOExport() {
     data.images = await collectAllImages(); 
   } catch(e) { console.error("图片打包失败", e); }
 
-  var blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = '骨骨小手机备份_' + new Date().getTime() + '.json';
-  a.click();
-  showIOStatus('导出成功！已包含所有头像和样式', 'ok');
+var jsonStr = JSON.stringify(data);
+var rawSize = (jsonStr.length / 1024 / 1024).toFixed(2);
+showIOStatus('正在压缩 (' + rawSize + ' MB)...', 'info');
+var blob = await compressData(jsonStr);
+var compressedSize = (blob.size / 1024 / 1024).toFixed(2);
+var isGzip = blob.type === 'application/gzip';
+var ext = isGzip ? '.json.gz' : '.json';
+var url = URL.createObjectURL(blob);
+var a = document.createElement('a');
+a.href = url;
+a.download = '骨骨小手机备份_' + new Date().getTime() + ext;
+a.click();
+URL.revokeObjectURL(url);
+var ratio = isGzip ? Math.round((1 - blob.size / (jsonStr.length * 2)) * 100) : 0;
+showIOStatus('导出成功！' + rawSize + ' MB → ' + compressedSize + ' MB' + (isGzip ? ' (压缩' + ratio + '%)' : ''), 'ok');
 }
 
 async function executeIOImport(){
@@ -15404,19 +15585,28 @@ function rpInvokeReply(){
   if(myP.bio) sys += '：' + myP.bio;
   sys += '\n\n';
   
-  sys += '【线下RP规则】\n';
-  sys += '你们面对面，实时发生的场景。\n';
-  sys += '- 第三人称描写动作、神态、心理，第二人称user。\n';
-  sys += '- 对话用「」包裹\n';
-  var rpWc = parseInt(localStorage.getItem('rpWordCount_' + f.id) || '0');
+var rpWc = parseInt(localStorage.getItem('rpWordCount_' + f.id) || '0');
+
+// 字数要求提到最前面，作为硬性约束
 if(rpWc > 0){
-  sys += '- 每次回复必须写' + rpWc + '字左右（±50字），不要太短也不要太长\n';
-} else {
+  var wcMin = Math.max(50, rpWc - 30);
+  var wcMax = rpWc + 30;
+  sys += '\n【⚠ 硬性字数要求 - 违反即失败】\n';
+  sys += '本次回复必须在 ' + wcMin + ' ~ ' + wcMax + ' 字之间（目标 ' + rpWc + ' 字）。\n';
+  sys += '输出前请默数字数，不够就继续扩写，超了就精简。\n';
+  sys += '宁可停在' + wcMax + '字，也绝不超过' + (wcMax + 20) + '字。\n\n';
+}
+
+sys += '【线下RP规则】\n';
+sys += '你们面对面，实时发生的场景。\n';
+sys += '- 第三人称描写动作、神态、心理，第二人称user。\n';
+sys += '- 对话用「」包裹\n';
+if(rpWc <= 0){
   sys += '- 每次500-800字，细腻感官描写\n';
 }
-  sys += '- 不要控制user角色\n';
-  sys += '- 保持性格一致\n';
-  sys += '直接输出文本，不要JSON/前缀/解释。\n';
+sys += '- 不要控制user角色\n';
+sys += '- 保持性格一致\n';
+sys += '直接输出文本，不要JSON/前缀/解释。\n';
   
   // ★ RP预设注入（优先级最高）
   var rpPresets = getRpPresets(f.id);
@@ -15468,9 +15658,19 @@ if(rpWc > 0){
   });
   
   var lastRole = rpMsgs.length > 0 ? rpMsgs[rpMsgs.length - 1].role : null;
-  if(!lastRole || lastRole === 'assistant'){
-    messages.push({role:'user', content:'[请你的角色自然地行动或说话，推进剧情。]'});
-  }
+if(!lastRole || lastRole === 'assistant'){
+  messages.push({role:'user', content:'[请你的角色自然地行动或说话，推进剧情。]'});
+}
+
+// 尾部锚点：利用近因效应，在最后再强调一次字数
+if(rpWc > 0){
+  var wcMin2 = Math.max(50, rpWc - 30);
+  var wcMax2 = rpWc + 30;
+  messages.push({
+    role: 'system', 
+    content: '最终提醒：本次输出字数必须在 ' + wcMin2 + '-' + wcMax2 + ' 字。开始写之前先想好结构，控制好篇幅。'
+  });
+}
   
   var url = config.base + (config.base.includes('/v1') ? '/chat/completions' : '/v1/chat/completions');
   
@@ -18383,6 +18583,1424 @@ async function aiAutoDescribeGalleryImg() {
     btn.disabled = false;
     textSpan.textContent = 'AI 识图';
   }
+}
+
+/* ===== 聊天分支系统 ===== */
+
+// 获取好友的所有分支
+function getBranches(friendId){
+  return JSON.parse(localStorage.getItem('branches_' + friendId) || '[]');
+}
+function setBranches(friendId, list){
+  localStorage.setItem('branches_' + friendId, JSON.stringify(list));
+}
+
+// 获取当前活跃分支ID
+function getActiveBranchId(friendId){
+  return localStorage.getItem('activeBranch_' + friendId) || 'main';
+}
+function setActiveBranchId(friendId, branchId){
+  localStorage.setItem('activeBranch_' + friendId, branchId);
+}
+
+// 获取分支的聊天记录（覆盖原来的 getChatHist / setChatHist 逻辑）
+function getBranchHist(friendId, branchId){
+  if(!branchId || branchId === 'main') return JSON.parse(localStorage.getItem('chat_' + friendId) || '[]');
+  return JSON.parse(localStorage.getItem('chat_' + friendId + '_b_' + branchId) || '[]');
+}
+function setBranchHist(friendId, branchId, hist){
+  if(!branchId || branchId === 'main'){
+    localStorage.setItem('chat_' + friendId, JSON.stringify(hist));
+  } else {
+    localStorage.setItem('chat_' + friendId + '_b_' + branchId, JSON.stringify(hist));
+  }
+}
+
+// ★ 重写 getChatHist / setChatHist 让它们自动走分支
+var _origGetChatHist = getChatHist;
+var _origSetChatHist = setChatHist;
+
+getChatHist = function(friendId){
+  var branchId = getActiveBranchId(friendId);
+  return getBranchHist(friendId, branchId);
+};
+
+setChatHist = function(friendId, hist){
+  var branchId = getActiveBranchId(friendId);
+  setBranchHist(friendId, branchId, hist);
+};
+
+// 确保每个好友至少有一个 main 分支
+function ensureMainBranch(friendId){
+  var branches = getBranches(friendId);
+  if(branches.length === 0){
+    branches.push({
+      id: 'main',
+      name: '主线',
+      createdAt: Date.now(),
+      fromBranch: null,
+      fromIdx: null
+    });
+    setBranches(friendId, branches);
+  }
+  return branches;
+}
+
+// 打开分支面板
+function openBranchPanel(){
+  toggleCtMenu();
+  if(!chatFriend) return;
+  
+  ensureMainBranch(chatFriend.id);
+  document.getElementById('branchMsgList').style.display = 'none';
+  renderBranchList();
+  openModal('branchModal');
+}
+
+// 渲染分支列表
+function renderBranchList(){
+  if(!chatFriend) return;
+  var friendId = chatFriend.id;
+  var branches = getBranches(friendId);
+  var activeId = getActiveBranchId(friendId);
+  var container = document.getElementById('branchList');
+  
+  if(branches.length === 0){
+    branches = ensureMainBranch(friendId);
+  }
+  
+  var html = '';
+  branches.forEach(function(b){
+    var isActive = b.id === activeId;
+    var hist = getBranchHist(friendId, b.id);
+    var msgCount = hist.length;
+    var lastMsg = hist.length > 0 ? hist[hist.length - 1] : null;
+    var lastPreview = '';
+    if(lastMsg){
+      lastPreview = lastMsg.content || '';
+      if(lastPreview.length > 25) lastPreview = lastPreview.substring(0, 25) + '…';
+    }
+    var timeStr = b.createdAt ? formatMemTime(b.createdAt) : '';
+    
+    var borderStyle = isActive ? 'border:2px solid var(--accent)' : 'border:1.5px solid var(--c6)';
+    var activeDot = isActive ? '<div style="width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0"></div>' : '';
+    
+    html += '<div style="' + borderStyle + ';border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:transform .15s" onclick="switchBranch(\'' + b.id + '\')" onmousedown="this.style.transform=\'scale(.98)\'" onmouseup="this.style.transform=\'\'" ontouchstart="this.style.transform=\'scale(.98)\'" ontouchend="this.style.transform=\'\'">';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
+    html += activeDot;
+    html += '<span style="font-size:13px;font-weight:700;color:var(--c1);flex:1">' + escapeHTML(b.name) + '</span>';
+    html += '<span style="font-size:10px;color:var(--c4)">' + msgCount + '条</span>';
+    if(!isActive && b.id !== 'main'){
+      html += '<span style="font-size:12px;color:var(--c4);cursor:pointer;padding:2px 6px" onclick="event.stopPropagation();deleteBranch(\'' + b.id + '\')">×</span>';
+    }
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;gap:6px">';
+    if(lastPreview){
+      html += '<span style="font-size:11px;color:var(--c3);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHTML(lastPreview) + '</span>';
+    } else {
+      html += '<span style="font-size:11px;color:var(--c4);font-style:italic;flex:1">空白</span>';
+    }
+    html += '<span style="font-size:9px;color:var(--c4)">' + timeStr + '</span>';
+    html += '</div>';
+    
+    // 来源信息
+    if(b.fromBranch && b.fromIdx !== null){
+      var fromName = '主线';
+      var fromB = branches.find(function(x){ return x.id === b.fromBranch });
+      if(fromB) fromName = fromB.name;
+      html += '<div style="font-size:9px;color:var(--c4);margin-top:4px">↳ 从「' + escapeHTML(fromName) + '」第' + (b.fromIdx + 1) + '条分叉</div>';
+    }
+    
+    html += '</div>';
+  });
+  
+  // 重命名提示
+  html += '<div style="font-size:9px;color:var(--c4);text-align:center;margin-top:6px">长按分支可重命名</div>';
+  
+  container.innerHTML = html;
+  
+  // 给每个分支加长按重命名
+  var cards = container.querySelectorAll('[onclick^="switchBranch"]');
+  cards.forEach(function(card){
+    var onclickStr = card.getAttribute('onclick');
+    var match = onclickStr.match(/switchBranch\('([^']+)'\)/);
+    if(!match) return;
+    var bid = match[1];
+    
+    var longTimer = null;
+    card.addEventListener('touchstart', function(e){
+      longTimer = setTimeout(function(){
+        e.preventDefault();
+        renameBranch(bid);
+      }, 600);
+    });
+    card.addEventListener('touchend', function(){ if(longTimer) clearTimeout(longTimer); });
+    card.addEventListener('touchmove', function(){ if(longTimer) clearTimeout(longTimer); });
+  });
+}
+
+// 切换分支
+function switchBranch(branchId){
+  if(!chatFriend) return;
+  var friendId = chatFriend.id;
+  var currentId = getActiveBranchId(friendId);
+  
+  if(branchId === currentId){
+    showToast('已经在这条分支上', 'info');
+    return;
+  }
+  
+  setActiveBranchId(friendId, branchId);
+  
+  // 更新好友列表的最后消息
+  var hist = getChatHist(friendId);
+  var lastMsg = hist.length > 0 ? hist[hist.length - 1] : null;
+  var list = getFriends();
+  var f = list.find(function(x){ return x.id === friendId });
+  if(f){
+    if(lastMsg){
+      var displayMsg = lastMsg.content || '';
+      if(displayMsg.length > 30) displayMsg = displayMsg.substring(0, 30) + '...';
+      f.lastMsg = displayMsg;
+      f.lastTime = lastMsg.time || '';
+      f.msgCount = hist.length;
+    } else {
+      f.lastMsg = '';
+      f.lastTime = '';
+      f.msgCount = 0;
+    }
+    setFriends(list);
+  }
+  
+  closeModal('branchModal');
+  renderChatHist();
+  
+  var branches = getBranches(friendId);
+  var b = branches.find(function(x){ return x.id === branchId });
+  showToast('已切换到「' + (b ? b.name : '分支') + '」', 'ok');
+}
+
+// 创建空白分支
+function createBranchFresh(){
+  if(!chatFriend) return;
+  var friendId = chatFriend.id;
+  
+  var name = prompt('给新分支取个名字：', '分支 ' + (getBranches(friendId).length + 1));
+  if(!name || !name.trim()) return;
+  name = name.trim();
+  
+  var branchId = 'br_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+  var branches = ensureMainBranch(friendId);
+  
+  branches.push({
+    id: branchId,
+    name: name,
+    createdAt: Date.now(),
+    fromBranch: null,
+    fromIdx: null
+  });
+  setBranches(friendId, branches);
+  
+  // 新分支的记录为空
+  setBranchHist(friendId, branchId, []);
+  
+  // 切换到新分支
+  setActiveBranchId(friendId, branchId);
+  
+  // 更新好友列表
+  var list = getFriends();
+  var f = list.find(function(x){ return x.id === friendId });
+  if(f){ f.lastMsg = ''; f.lastTime = ''; f.msgCount = 0; setFriends(list); }
+  
+  closeModal('branchModal');
+  renderChatHist();
+  showToast('新分支「' + name + '」已创建', 'ok');
+}
+
+// 显示消息列表用于分叉
+function showBranchFromMsg(){
+  if(!chatFriend) return;
+  var friendId = chatFriend.id;
+  var hist = getChatHist(friendId);
+  var listEl = document.getElementById('branchMsgList');
+  
+  if(hist.length === 0){
+    showToast('当前分支没有消息', 'info');
+    return;
+  }
+  
+  // 显示最近50条
+  var showHist = hist.slice(-50);
+  var startIdx = hist.length - showHist.length;
+  
+  var html = '<div style="font-size:10px;color:var(--c4);padding:6px 4px;margin-bottom:4px">点击一条消息，从它这里分叉出新时间线：</div>';
+  
+  showHist.forEach(function(m, i){
+    var realIdx = startIdx + i;
+    var isMe = m.role === 'user';
+    var prefix = isMe ? '我' : (chatFriend ? chatFriend.name : 'AI');
+    var text = m.content || '';
+    
+    if(text.indexOf('[图片:') >= 0 || text.indexOf('[实拍图片') >= 0) text = '[图片]';
+    if(text.indexOf('[语音:') >= 0) text = '[语音]';
+    if(text.indexOf('[收藏卡片:') >= 0) text = '[收藏]';
+    if(text.indexOf('[图库图片:') >= 0) text = '[图库图片]';
+    if(text.length > 35) text = text.substring(0, 35) + '…';
+    
+    var time = m.time || '';
+    var dotColor = isMe ? 'var(--accent)' : 'var(--c5)';
+    
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 8px;border-radius:8px;cursor:pointer;transition:background .15s" onclick="createBranchFromIdx(' + realIdx + ')" onmouseenter="this.style.background=\'rgba(0,0,0,.04)\'" onmouseleave="this.style.background=\'transparent\'">';
+    html += '<div style="width:5px;height:5px;border-radius:50%;background:' + dotColor + ';flex-shrink:0"></div>';
+    html += '<div style="flex:1;min-width:0">';
+    html += '<div style="font-size:10px;color:var(--c3);font-weight:600">' + escapeHTML(prefix) + (time ? ' · ' + time : '') + '</div>';
+    html += '<div style="font-size:12px;color:var(--c1);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHTML(text) + '</div>';
+    html += '</div>';
+    html += '<div style="font-size:9px;color:var(--c4);flex-shrink:0">#' + (realIdx + 1) + '</div>';
+    html += '</div>';
+  });
+  
+  listEl.innerHTML = html;
+  listEl.style.display = 'block';
+  
+  // 滚动到底部
+  requestAnimationFrame(function(){ listEl.scrollTop = listEl.scrollHeight; });
+}
+
+// 从某条消息处创建分支
+function createBranchFromIdx(idx){
+  if(!chatFriend) return;
+  var friendId = chatFriend.id;
+  var currentBranchId = getActiveBranchId(friendId);
+  var hist = getChatHist(friendId);
+  
+  var keepCount = idx + 1;
+  
+  var name = prompt('给新分支取个名字：', '分支 ' + (getBranches(friendId).length + 1));
+  if(!name || !name.trim()) return;
+  name = name.trim();
+  
+  var branchId = 'br_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+  var branches = ensureMainBranch(friendId);
+  
+  branches.push({
+    id: branchId,
+    name: name,
+    createdAt: Date.now(),
+    fromBranch: currentBranchId,
+    fromIdx: idx
+  });
+  setBranches(friendId, branches);
+  
+  // 新分支的记录 = 原分支前 keepCount 条的副本
+  var newHist = JSON.parse(JSON.stringify(hist.slice(0, keepCount)));
+  setBranchHist(friendId, branchId, newHist);
+  
+  // 切换到新分支
+  setActiveBranchId(friendId, branchId);
+  
+  // 更新好友列表
+  var lastMsg = newHist.length > 0 ? newHist[newHist.length - 1] : null;
+  var list = getFriends();
+  var f = list.find(function(x){ return x.id === friendId });
+  if(f && lastMsg){
+    var displayMsg = lastMsg.content || '';
+    if(displayMsg.length > 30) displayMsg = displayMsg.substring(0, 30) + '...';
+    f.lastMsg = displayMsg;
+    f.lastTime = lastMsg.time || '';
+    f.msgCount = newHist.length;
+    setFriends(list);
+  }
+  
+  closeModal('branchModal');
+  renderChatHist();
+  showToast('从第' + keepCount + '条分叉，新分支「' + name + '」', 'ok');
+}
+
+// 删除分支
+function deleteBranch(branchId){
+  if(!chatFriend) return;
+  if(branchId === 'main'){
+    showToast('主线不能删除', 'info');
+    return;
+  }
+  
+  var friendId = chatFriend.id;
+  var branches = getBranches(friendId);
+  var b = branches.find(function(x){ return x.id === branchId });
+  var bName = b ? b.name : '分支';
+  
+  if(!confirm('确认删除分支「' + bName + '」？\n聊天记录将永久丢失。')) return;
+  
+  // 如果正在这个分支上，先切回主线
+  var activeId = getActiveBranchId(friendId);
+  if(activeId === branchId){
+    setActiveBranchId(friendId, 'main');
+  }
+  
+  // 删除记录
+  localStorage.removeItem('chat_' + friendId + '_b_' + branchId);
+  
+  // 从列表移除
+  branches = branches.filter(function(x){ return x.id !== branchId });
+  setBranches(friendId, branches);
+  
+  // 如果切换了分支，刷新聊天
+  if(activeId === branchId){
+    renderChatHist();
+  }
+  
+  renderBranchList();
+  showToast('分支「' + bName + '」已删除', 'ok');
+}
+
+// 重命名分支
+function renameBranch(branchId){
+  if(!chatFriend) return;
+  var friendId = chatFriend.id;
+  var branches = getBranches(friendId);
+  var b = branches.find(function(x){ return x.id === branchId });
+  if(!b) return;
+  
+  var newName = prompt('重命名分支：', b.name);
+  if(!newName || !newName.trim()) return;
+  
+  b.name = newName.trim();
+  setBranches(friendId, branches);
+  renderBranchList();
+  showToast('已重命名为「' + b.name + '」', 'ok');
+}
+
+/* ===== 数据调试 & GitHub 云备份 ===== */
+
+function openDataDebugPanel(){
+  renderDataDebug();
+  openModal('dataDebugModal');
+}
+
+function renderDataDebug(){
+  var body = document.getElementById('dataDebugBody');
+  var html = '';
+  
+  // === 存储状态 ===
+  html += '<div style="font-size:10px;font-weight:700;color:#999;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">存储状态</div>';
+  
+  // localStorage 用量
+  var lsUsed = 0;
+  var lsCount = localStorage.length;
+  for(var i = 0; i < lsCount; i++){
+    var k = localStorage.key(i);
+    var v = localStorage.getItem(k);
+    if(v) lsUsed += k.length + v.length;
+  }
+  var lsMB = (lsUsed * 2 / 1024 / 1024).toFixed(2); // UTF-16 = 2 bytes per char
+  var lsMax = 5; // 大多数浏览器 5MB
+  var lsPct = Math.min(100, Math.round((lsUsed * 2 / 1024 / 1024) / lsMax * 100));
+  var lsColor = lsPct > 80 ? '#e11d48' : (lsPct > 60 ? '#ea580c' : '#059669');
+  
+  html += '<div style="background:var(--c7);border-radius:12px;padding:14px 16px;margin-bottom:10px">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+  html += '<span style="font-size:12px;font-weight:700;color:var(--c1)">localStorage</span>';
+  html += '<span style="font-size:11px;font-weight:700;color:' + lsColor + '">' + lsMB + ' MB / ~' + lsMax + ' MB (' + lsPct + '%)</span>';
+  html += '</div>';
+  html += '<div style="height:4px;background:var(--c6);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + lsPct + '%;background:' + lsColor + ';border-radius:2px"></div></div>';
+  html += '<div style="font-size:10px;color:var(--c4);margin-top:6px">' + lsCount + ' 个键值对</div>';
+  if(lsPct > 70){
+    html += '<div style="font-size:10px;color:#ea580c;margin-top:4px;font-weight:600">⚠ 空间紧张！建议清理或备份后删除旧数据</div>';
+  }
+  html += '</div>';
+  
+  // IndexedDB 状态
+  html += '<div style="background:var(--c7);border-radius:12px;padding:14px 16px;margin-bottom:10px">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+  html += '<span style="font-size:12px;font-weight:700;color:var(--c1)">IndexedDB (图片)</span>';
+  html += '<span style="font-size:11px;color:var(--c3)" id="idbStatus">检测中...</span>';
+  html += '</div>';
+  html += '<div style="font-size:10px;color:var(--c4);margin-top:4px" id="idbDetail">正在统计...</div>';
+  html += '</div>';
+  
+  // 备份状态
+  html += '<div style="background:var(--c7);border-radius:12px;padding:14px 16px;margin-bottom:10px">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:center">';
+  html += '<span style="font-size:12px;font-weight:700;color:var(--c1)">图片备份覆盖率</span>';
+  html += '<span style="font-size:11px;color:var(--c3)" id="backupCoverage">计算中...</span>';
+  html += '</div>';
+  html += '<div style="font-size:10px;color:var(--c4);margin-top:4px" id="backupDetail"></div>';
+  html += '</div>';
+  
+  // === 数据明细 ===
+  html += '<div style="font-size:10px;font-weight:700;color:#999;letter-spacing:1.5px;text-transform:uppercase;margin:16px 0 10px">数据明细</div>';
+  
+  var details = getDataDetails();
+  details.forEach(function(d){
+    var sizeColor = d.size > 500 ? '#ea580c' : (d.size > 100 ? '#999' : 'var(--c4)');
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--c6)">';
+    html += '<div style="flex:1;min-width:0">';
+    html += '<div style="font-size:12px;font-weight:600;color:var(--c1)">' + d.name + '</div>';
+    html += '<div style="font-size:10px;color:var(--c4)">' + d.desc + '</div>';
+    html += '</div>';
+    html += '<span style="font-size:11px;font-weight:700;color:' + sizeColor + ';flex-shrink:0">' + d.sizeStr + '</span>';
+    html += '</div>';
+  });
+  
+  // === 操作按钮 ===
+  html += '<div style="display:flex;gap:8px;margin:16px 0 8px">';
+  html += '<button class="btn btn-secondary" style="flex:1;margin:0;font-size:11px" onclick="verifyDataIntegrity()">完整性检查</button>';
+  html += '<button class="btn btn-secondary" style="flex:1;margin:0;font-size:11px" onclick="forceRebuildBackups()">重建备份</button>';
+  html += '</div>';
+  
+  // === GitHub 云备份 ===
+  html += '<div style="font-size:10px;font-weight:700;color:#999;letter-spacing:1.5px;text-transform:uppercase;margin:20px 0 10px">GitHub 云备份</div>';
+  
+  html += '<div style="font-size:11px;color:var(--c3);line-height:1.6;margin-bottom:12px">';
+  html += '将数据备份到你的 GitHub 私有仓库。每次备份会覆盖上一次。<br>';
+  html += '<strong style="color:var(--c2)">首次使用？</strong> 按以下步骤：<br>';
+  html += '1. 去 GitHub 创建一个<strong>私有仓库</strong>（名字随意，如 gg-backup）<br>';
+  html += '2. 去 <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--accent)">Settings → Tokens</a> 生成 token（勾选 repo 权限）<br>';
+  html += '3. 填到下面保存即可';
+  html += '</div>';
+  
+  var ghUser = localStorage.getItem('gh_user') || '';
+  var ghRepo = localStorage.getItem('gh_repo') || '';
+  var ghToken = localStorage.getItem('gh_token') || '';
+  var ghLastBackup = localStorage.getItem('gh_lastBackup') || '';
+  
+  html += '<div class="field"><label>GitHub 用户名</label>';
+  html += '<input type="text" id="ghUserInput" value="' + escapeAttr(ghUser) + '" placeholder="你的 GitHub 用户名"></div>';
+  
+  html += '<div class="field"><label>仓库名</label>';
+  html += '<input type="text" id="ghRepoInput" value="' + escapeAttr(ghRepo) + '" placeholder="如 gg-backup（必须已创建）"></div>';
+  
+  html += '<div class="field"><label>Personal Access Token</label>';
+  html += '<input type="password" id="ghTokenInput" value="' + escapeAttr(ghToken) + '" placeholder="ghp_xxxx..."></div>';
+  
+  html += '<button class="btn btn-secondary" style="margin-bottom:8px" onclick="saveGhConfig()">保存配置</button>';
+  
+  if(ghLastBackup){
+    html += '<div style="font-size:10px;color:var(--c3);margin-bottom:10px">上次备份: ' + ghLastBackup + '</div>';
+  }
+  
+  html += '<div id="ghStatus"></div>';
+  
+  html += '<div style="display:flex;gap:8px;margin-bottom:8px">';
+  html += '<button class="btn btn-primary" style="flex:1;margin:0" onclick="ghBackup()">☁ 备份到 GitHub</button>';
+  html += '<button class="btn btn-secondary" style="flex:1;margin:0" onclick="ghRestore()">↓ 从 GitHub 恢复</button>';
+  html += '</div>';
+  
+  html += '<div style="display:flex;gap:8px">';
+  html += '<button class="btn btn-secondary" style="flex:1;margin:0;font-size:11px" onclick="ghTestConnection()">测试连接</button>';
+  html += '<button class="btn btn-secondary" style="flex:1;margin:0;font-size:11px" onclick="ghViewBackups()">查看备份记录</button>';
+  html += '</div>';
+  
+  body.innerHTML = html;
+  
+  // 异步统计 IndexedDB
+  countIdbAssets();
+  countBackupCoverage();
+}
+
+// 统计 IndexedDB 资产
+async function countIdbAssets(){
+  try{
+    var db = await openDB();
+    var tx = db.transaction(STORE, 'readonly');
+    var store = tx.objectStore(STORE);
+    var countReq = store.count();
+    countReq.onsuccess = function(){
+      var count = countReq.result;
+      var el = document.getElementById('idbStatus');
+      if(el) el.textContent = count + ' 个文件';
+      
+      // 估算大小
+      var keysReq = store.getAllKeys();
+      keysReq.onsuccess = async function(){
+        var keys = keysReq.result;
+        var totalSize = 0;
+        for(var i = 0; i < keys.length; i++){
+          try{
+            var blob = await dbGet(keys[i]);
+            if(blob && blob.size) totalSize += blob.size;
+          }catch(e){}
+        }
+        var detail = document.getElementById('idbDetail');
+        if(detail){
+          var mb = (totalSize / 1024 / 1024).toFixed(2);
+          detail.textContent = '总计约 ' + mb + ' MB（头像、背景图等）';
+        }
+      };
+    };
+  }catch(e){
+    var el = document.getElementById('idbStatus');
+    if(el) el.textContent = '读取失败';
+  }
+}
+
+// 统计备份覆盖率
+function countBackupCoverage(){
+  var friends = getFriends();
+  var personas = getUserPersonas();
+  var totalKeys = 0;
+  var backedUp = 0;
+  
+  friends.forEach(function(f){
+    if(f.avatarKey){ totalKeys++; if(localStorage.getItem('_imgBackup_' + f.avatarKey)) backedUp++; }
+  });
+  personas.forEach(function(p){
+    if(p.avatarKey){ totalKeys++; if(localStorage.getItem('_imgBackup_' + p.avatarKey)) backedUp++; }
+  });
+  
+  var el = document.getElementById('backupCoverage');
+  var detail = document.getElementById('backupDetail');
+  if(el){
+    if(totalKeys === 0){
+      el.textContent = '无图片';
+    } else {
+      var pct = Math.round(backedUp / totalKeys * 100);
+      el.textContent = backedUp + '/' + totalKeys + ' (' + pct + '%)';
+      el.style.color = pct === 100 ? '#059669' : (pct > 50 ? '#ea580c' : '#e11d48');
+    }
+  }
+  if(detail){
+    if(totalKeys > 0 && backedUp < totalKeys){
+      detail.textContent = '有 ' + (totalKeys - backedUp) + ' 张图片未备份到 localStorage，清除浏览器数据可能丢失';
+    } else if(totalKeys > 0){
+      detail.textContent = '所有图片都有 localStorage 备份 ✓';
+    }
+  }
+}
+
+// 数据明细
+function getDataDetails(){
+  var results = [];
+  
+  // 好友
+  var friends = getFriends();
+  var friendsSize = JSON.stringify(friends).length;
+  results.push({name:'好友列表', desc: friends.length + ' 个好友', size: friendsSize/1024, sizeStr: (friendsSize/1024).toFixed(1) + ' KB'});
+  
+  // 聊天记录（所有好友合计）
+  var chatTotal = 0;
+  var chatMsgCount = 0;
+  friends.forEach(function(f){
+    // 主线
+    var mainHist = localStorage.getItem('chat_' + f.id);
+    if(mainHist){ chatTotal += mainHist.length; chatMsgCount += JSON.parse(mainHist).length; }
+    // 分支
+    var branches = getBranches(f.id);
+    branches.forEach(function(b){
+      if(b.id !== 'main'){
+        var bHist = localStorage.getItem('chat_' + f.id + '_b_' + b.id);
+        if(bHist){ chatTotal += bHist.length; chatMsgCount += JSON.parse(bHist).length; }
+      }
+    });
+  });
+  results.push({name:'聊天记录', desc: chatMsgCount + ' 条消息', size: chatTotal/1024, sizeStr: (chatTotal/1024).toFixed(1) + ' KB'});
+  
+  // 记忆
+  var mems = localStorage.getItem('aiMemories') || '[]';
+  var memCount = JSON.parse(mems).length;
+  results.push({name:'记忆', desc: memCount + ' 条', size: mems.length/1024, sizeStr: (mems.length/1024).toFixed(1) + ' KB'});
+  
+  // 世界书
+  var wb = localStorage.getItem('worldBooks') || '[]';
+  var wbCount = JSON.parse(wb).length;
+  results.push({name:'世界书', desc: wbCount + ' 条目', size: wb.length/1024, sizeStr: (wb.length/1024).toFixed(1) + ' KB'});
+  
+  // 图库
+  var gal = localStorage.getItem('galleryImages') || '[]';
+  var galCount = JSON.parse(gal).length;
+  results.push({name:'图库', desc: galCount + ' 张（含缩略图base64）', size: gal.length/1024, sizeStr: (gal.length/1024).toFixed(1) + ' KB'});
+  
+  // 图片备份
+  var backupSize = 0;
+  var backupCount = 0;
+  for(var i = 0; i < localStorage.length; i++){
+    var k = localStorage.key(i);
+    if(k && k.indexOf('_imgBackup_') === 0){
+      backupSize += localStorage.getItem(k).length;
+      backupCount++;
+    }
+  }
+  results.push({name:'图片备份', desc: backupCount + ' 张压缩备份', size: backupSize/1024, sizeStr: (backupSize/1024).toFixed(1) + ' KB'});
+  
+  // 总结
+  var sumSize = 0;
+  friends.forEach(function(f){
+    var s = localStorage.getItem('chatSummaries_' + f.id);
+    if(s) sumSize += s.length;
+  });
+  results.push({name:'总结', desc: '对话压缩摘要', size: sumSize/1024, sizeStr: (sumSize/1024).toFixed(1) + ' KB'});
+  
+  return results;
+}
+
+// 完整性检查
+async function verifyDataIntegrity(){
+  showGhStatus('正在检查...', 'info');
+  var issues = [];
+  
+  var friends = getFriends();
+  for(var i = 0; i < friends.length; i++){
+    var f = friends[i];
+    if(f.avatarKey){
+      var blob = await dbGet(f.avatarKey);
+      if(!blob) issues.push('好友「' + f.name + '」头像丢失 (key: ' + f.avatarKey + ')');
+    }
+  }
+  
+  var personas = getUserPersonas();
+  for(var j = 0; j < personas.length; j++){
+    var p = personas[j];
+    if(p.avatarKey){
+      var blob2 = await dbGet(p.avatarKey);
+      if(!blob2) issues.push('人设「' + p.name + '」头像丢失');
+    }
+  }
+  
+  // 检查聊天记录是否可解析
+  friends.forEach(function(f){
+    try{ JSON.parse(localStorage.getItem('chat_' + f.id) || '[]'); }
+    catch(e){ issues.push('好友「' + f.name + '」聊天记录损坏'); }
+  });
+  
+  if(issues.length === 0){
+    showGhStatus('✓ 所有数据完整，未发现问题', 'ok');
+  } else {
+    showGhStatus('发现 ' + issues.length + ' 个问题：\n' + issues.join('\n'), 'err');
+  }
+}
+
+// 强制重建所有图片备份
+async function forceRebuildBackups(){
+  showGhStatus('正在重建备份...', 'info');
+  var count = 0;
+  
+  var friends = getFriends();
+  for(var i = 0; i < friends.length; i++){
+    var f = friends[i];
+    if(f.avatarKey){
+      try{
+        var blob = await dbGet(f.avatarKey);
+        if(blob){
+          var b64 = await compressToBase64Backup(blob, 128, 0.6);
+          if(b64){ localStorage.setItem('_imgBackup_' + f.avatarKey, b64); count++; }
+        }
+      }catch(e){}
+    }
+  }
+  
+  var personas = getUserPersonas();
+  for(var j = 0; j < personas.length; j++){
+    var p = personas[j];
+    if(p.avatarKey){
+      try{
+        var blob2 = await dbGet(p.avatarKey);
+        if(blob2){
+          var b642 = await compressToBase64Backup(blob2, 128, 0.6);
+          if(b642){ localStorage.setItem('_imgBackup_' + p.avatarKey, b642); count++; }
+        }
+      }catch(e){}
+    }
+  }
+  
+  showGhStatus('✓ 已重建 ' + count + ' 张图片的备份', 'ok');
+  countBackupCoverage();
+}
+
+// === GitHub 配置 ===
+function saveGhConfig(){
+  localStorage.setItem('gh_user', document.getElementById('ghUserInput').value.trim());
+  localStorage.setItem('gh_repo', document.getElementById('ghRepoInput').value.trim());
+  localStorage.setItem('gh_token', document.getElementById('ghTokenInput').value.trim());
+  showGhStatus('配置已保存', 'ok');
+}
+
+function getGhConfig(){
+  return {
+    user: localStorage.getItem('gh_user') || '',
+    repo: localStorage.getItem('gh_repo') || '',
+    token: localStorage.getItem('gh_token') || ''
+  };
+}
+
+// 测试连接
+async function ghTestConnection(){
+  var cfg = getGhConfig();
+  if(!cfg.user || !cfg.repo || !cfg.token){
+    showGhStatus('请先填写完整配置', 'err');
+    return;
+  }
+  
+  showGhStatus('测试中...', 'info');
+  
+  try{
+    var res = await fetch('https://api.github.com/repos/' + cfg.user + '/' + cfg.repo, {
+      headers: { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    
+    if(res.status === 200){
+      var data = await res.json();
+      showGhStatus('✓ 连接成功！仓库: ' + data.full_name + (data.private ? ' (私有)' : ' (公开⚠)'), 'ok');
+      if(!data.private){
+        showGhStatus('⚠ 仓库是公开的！建议改为私有，否则你的数据所有人可见', 'err');
+      }
+    } else if(res.status === 404){
+      showGhStatus('仓库不存在，请先去 GitHub 创建', 'err');
+    } else if(res.status === 401){
+      showGhStatus('Token 无效或已过期', 'err');
+    } else {
+      showGhStatus('连接失败: HTTP ' + res.status, 'err');
+    }
+  }catch(e){
+    showGhStatus('网络错误: ' + e.message, 'err');
+  }
+}
+
+// 备份到 GitHub
+async function ghBackup(){
+  var cfg = getGhConfig();
+  if(!cfg.user || !cfg.repo || !cfg.token){
+    showGhStatus('请先填写完整配置', 'err');
+    return;
+  }
+  
+  showGhStatus('正在打包数据...', 'info');
+  
+  try{
+    // 复用导出逻辑收集数据
+    var data = { _ggphone_backup: true, version: 3, exportDate: new Date().toISOString(), backupType: 'github_auto' };
+    
+    data.friends = getFriends();
+    data.chatHistories = {};
+    data.chatWbMounts = {};
+    getFriends().forEach(function(f){
+      var h = getChatHist(f.id);
+      if(h.length) data.chatHistories[f.id] = h;
+      var wb = getChatWbMounted(f.id);
+      if(wb.length) data.chatWbMounts[f.id] = wb;
+      // 分支数据
+      var branches = getBranches(f.id);
+      if(branches.length > 0){
+        if(!data.branches) data.branches = {};
+        data.branches[f.id] = { list: branches, active: getActiveBranchId(f.id) };
+        branches.forEach(function(b){
+          if(b.id !== 'main'){
+            var bHist = getBranchHist(f.id, b.id);
+            if(bHist.length) data.chatHistories[f.id + '_b_' + b.id] = bHist;
+          }
+        });
+      }
+    });
+    data.personas = getUserPersonas();
+    data.activePersonaId = localStorage.getItem('activePersonaId');
+    data.wbEntries = getWbEntries();
+    data.wbFolders = getWbFolders();
+    data.memories = JSON.parse(localStorage.getItem('aiMemories') || '[]');
+    data.apiBase = localStorage.getItem('apiBase');
+    data.apiKey = localStorage.getItem('apiKey');
+    data.model = localStorage.getItem('selectedModel');
+    data.temperature = localStorage.getItem('temperature');
+    data.apiPresets = localStorage.getItem('apiPresets');
+    data.accentColor = localStorage.getItem('accentColor');
+    data.customBgColor = localStorage.getItem('customBgColor');
+    data.customCardColor = localStorage.getItem('customCardColor');
+    data.customCSS = localStorage.getItem('customCSS');
+    data.customCSS_msgOnly = localStorage.getItem('customCSS_msgOnly');
+    data.avatarSettings = localStorage.getItem('avatarSettings');
+    data.timestampSettings = localStorage.getItem('timestampSettings');
+    data.cssPresets = localStorage.getItem('cssPresets');
+    data.moodVal = localStorage.getItem('moodVal');
+    data.favorites = getFavorites();
+    data.galleryImages = getGalleryImages();
+    data.galCollections = getGalleryCollections();
+    
+    // 好友专属CSS
+    var friendCSS = {};
+    getFriends().forEach(function(f){
+      var fc = localStorage.getItem('customCSS_' + f.id);
+      if(fc) friendCSS[f.id] = fc;
+    });
+    if(Object.keys(friendCSS).length > 0) data.friendCSS = friendCSS;
+    
+    // 图片
+    showGhStatus('正在打包图片...', 'info');
+    try{ data.images = await collectAllImages(); }catch(e){ data.images = {}; }
+    
+var jsonStr = JSON.stringify(data);
+var rawSize = (jsonStr.length / 1024 / 1024).toFixed(2);
+showGhStatus('正在压缩 (' + rawSize + ' MB)...', 'info');
+var compressedBlob = await compressData(jsonStr);
+var compressedSize = (compressedBlob.size / 1024 / 1024).toFixed(2);
+var isGzip = compressedBlob.type === 'application/gzip';
+var arrayBuf = await compressedBlob.arrayBuffer();
+var bytes = new Uint8Array(arrayBuf);
+var binary = '';
+for(var ci = 0; ci < bytes.length; ci++) binary += String.fromCharCode(bytes[ci]);
+var content = btoa(binary);
+showGhStatus('正在上传到 GitHub (' + compressedSize + ' MB' + (isGzip ? ', 已压缩' : '') + ')...', 'info');
+    
+    showGhStatus('正在上传到 GitHub (' + (jsonStr.length / 1024 / 1024).toFixed(1) + ' MB)...', 'info');
+    
+    // 先获取文件的 SHA（如果已存在需要更新）
+    var filePath = isGzip ? 'backup.json.gz' : 'backup.json';
+    var sha = null;
+    
+    try{
+      var getRes = await fetch('https://api.github.com/repos/' + cfg.user + '/' + cfg.repo + '/contents/' + filePath, {
+        headers: { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if(getRes.status === 200){
+        var fileData = await getRes.json();
+        sha = fileData.sha;
+      }
+    }catch(e){}
+    
+    // 上传/更新文件
+    var putBody = {
+      message: '骨骨小手机自动备份 ' + new Date().toLocaleString('zh-CN'),
+      content: content
+    };
+    if(sha) putBody.sha = sha;
+    
+    var putRes = await fetch('https://api.github.com/repos/' + cfg.user + '/' + cfg.repo + '/contents/' + filePath, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + cfg.token,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(putBody)
+    });
+    
+    if(putRes.status === 200 || putRes.status === 201){
+      var timeStr = new Date().toLocaleString('zh-CN');
+      localStorage.setItem('gh_lastBackup', timeStr);
+      showGhStatus('✓ 备份成功！' + timeStr, 'ok');
+    } else {
+      var errData = await putRes.json().catch(function(){ return {}; });
+      throw new Error('HTTP ' + putRes.status + ': ' + (errData.message || '未知错误'));
+    }
+    
+  }catch(e){
+    showGhStatus('备份失败: ' + e.message, 'err');
+  }
+}
+
+// 从 GitHub 恢复（续）
+async function ghRestore(){
+  var cfg = getGhConfig();
+  if(!cfg.user || !cfg.repo || !cfg.token){
+    showGhStatus('请先填写完整配置', 'err');
+    return;
+  }
+  
+  if(!confirm('从 GitHub 恢复数据？\n\n这会用云端数据覆盖本地所有内容。\n建议先导出一份本地备份以防万一。')) return;
+  
+  showGhStatus('正在从 GitHub 下载...', 'info');
+  
+  try{
+    var filePath = 'backup.json.gz';
+var res = await fetch('https://api.github.com/repos/' + cfg.user + '/' + cfg.repo + '/contents/' + filePath, {
+  headers: { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
+});
+if(res.status === 404){
+  filePath = 'backup.json';
+  res = await fetch('https://api.github.com/repos/' + cfg.user + '/' + cfg.repo + '/contents/' + filePath, {
+    headers: { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
+  });
+}
+    
+    if(res.status === 404){
+      showGhStatus('云端没有备份文件，请先备份一次', 'err');
+      return;
+    }
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    
+    var fileData = await res.json();
+    var content = fileData.content;
+    
+    showGhStatus('正在解析数据...', 'info');
+    
+    // base64 解码
+    var raw = atob(content.replace(/\n/g, ''));
+var bytes = new Uint8Array(raw.length);
+for(var bi = 0; bi < raw.length; bi++) bytes[bi] = raw.charCodeAt(bi);
+var dlBlob = new Blob([bytes]);
+showGhStatus('正在解压...', 'info');
+var jsonStr = await decompressData(dlBlob);
+var data = JSON.parse(jsonStr);
+    
+    if(!data._ggphone_backup) throw new Error('文件格式不正确');
+    
+    showGhStatus('正在恢复...', 'info');
+    
+    // 恢复所有数据（覆盖模式）
+    if(data.friends) setFriends(data.friends);
+    if(data.chatHistories){
+      Object.keys(data.chatHistories).forEach(function(key){
+        // 分支记录的key格式: friendId_b_branchId
+        if(key.indexOf('_b_') >= 0){
+          localStorage.setItem('chat_' + key, JSON.stringify(data.chatHistories[key]));
+        } else {
+          localStorage.setItem('chat_' + key, JSON.stringify(data.chatHistories[key]));
+        }
+      });
+    }
+    if(data.chatWbMounts){
+      Object.keys(data.chatWbMounts).forEach(function(fid){
+        setChatWbMounted(fid, data.chatWbMounts[fid]);
+      });
+    }
+    // 分支数据
+    if(data.branches){
+      Object.keys(data.branches).forEach(function(fid){
+        var bd = data.branches[fid];
+        if(bd.list) setBranches(fid, bd.list);
+        if(bd.active) setActiveBranchId(fid, bd.active);
+      });
+    }
+    if(data.personas) localStorage.setItem('userPersonas', JSON.stringify(data.personas));
+    if(data.activePersonaId) localStorage.setItem('activePersonaId', data.activePersonaId);
+    if(data.wbEntries) setWbEntries(data.wbEntries);
+    if(data.wbFolders) setWbFolders(data.wbFolders);
+    if(data.memories) localStorage.setItem('aiMemories', JSON.stringify(data.memories));
+    if(data.apiBase) localStorage.setItem('apiBase', data.apiBase);
+    if(data.apiKey) localStorage.setItem('apiKey', data.apiKey);
+    if(data.model) localStorage.setItem('selectedModel', data.model);
+    if(data.temperature) localStorage.setItem('temperature', data.temperature);
+    if(data.apiPresets) localStorage.setItem('apiPresets', data.apiPresets);
+    if(data.accentColor){ localStorage.setItem('accentColor', data.accentColor); applyAccent(data.accentColor); }
+    if(data.customBgColor){ localStorage.setItem('customBgColor', data.customBgColor); applyBgColor(data.customBgColor); }
+    if(data.customCardColor){ localStorage.setItem('customCardColor', data.customCardColor); applyCardColor(data.customCardColor); }
+    if(data.customCSS){ localStorage.setItem('customCSS', data.customCSS); applyCustomCSS(data.customCSS, 'global'); }
+    if(data.customCSS_msgOnly) localStorage.setItem('customCSS_msgOnly', data.customCSS_msgOnly);
+    if(data.avatarSettings) localStorage.setItem('avatarSettings', data.avatarSettings);
+    if(data.timestampSettings) localStorage.setItem('timestampSettings', data.timestampSettings);
+    if(data.cssPresets) localStorage.setItem('cssPresets', data.cssPresets);
+    if(data.moodVal){ localStorage.setItem('moodVal', data.moodVal); updateMoodUI(data.moodVal); }
+    if(data.favorites) setFavorites(data.favorites);
+    if(data.galleryImages) setGalleryImages(data.galleryImages);
+    if(data.galCollections) setGalleryCollections(data.galCollections);
+    if(data.friendCSS){
+      Object.keys(data.friendCSS).forEach(function(fid){
+        localStorage.setItem('customCSS_' + fid, data.friendCSS[fid]);
+      });
+    }
+    
+    // 恢复图片
+    var imgCount = 0;
+    if(data.images && typeof data.images === 'object'){
+      showGhStatus('正在恢复图片...', 'info');
+      try{
+        await restoreImages(data.images);
+        imgCount = Object.keys(data.images).length;
+        avatarCache = {};
+        await preloadAllAvatars();
+      }catch(e){
+        console.log('[GitHub恢复] 图片恢复部分失败:', e);
+      }
+    }
+    
+    // 恢复背景图
+    if(data.images && data.images['globalBgImage']){
+      try{
+        var gBlob = base64ToBlob(data.images['globalBgImage']);
+        var gUrl = URL.createObjectURL(gBlob);
+        document.documentElement.style.setProperty('--bg-img','url('+gUrl+')');
+        document.getElementById('V').classList.add('has-global-bg');
+        applyGlobalBgToPages(gUrl);
+      }catch(e){}
+    }
+    if(data.images && data.images['bgImage']){
+      try{ applyBgBlob(base64ToBlob(data.images['bgImage'])); }catch(e){}
+    }
+    // 恢复应用图标
+    for(var ii = 0; ii < 8; ii++){
+      if(data.images && data.images['appIcon_' + ii]){
+        try{ showIcon(ii, base64ToBlob(data.images['appIcon_' + ii])); }catch(e){}
+      }
+    }
+    if(data.images && data.images['musicCover']){
+      try{ showCover(base64ToBlob(data.images['musicCover'])); }catch(e){}
+    }
+    
+    var timeStr = data.exportDate ? new Date(data.exportDate).toLocaleString('zh-CN') : '未知时间';
+    showGhStatus('✓ 恢复成功！数据来自: ' + timeStr + (imgCount > 0 ? '，恢复了 ' + imgCount + ' 张图片' : ''), 'ok');
+    
+    // 刷新界面
+    renderFriendList();
+    renderPresets();
+    if(chatFriend) renderChatHist();
+    
+  }catch(e){
+    showGhStatus('恢复失败: ' + e.message, 'err');
+  }
+}
+
+// 查看备份记录（GitHub commit 历史）
+async function ghViewBackups(){
+  var cfg = getGhConfig();
+  if(!cfg.user || !cfg.repo || !cfg.token){
+    showGhStatus('请先填写完整配置', 'err');
+    return;
+  }
+  
+  showGhStatus('查询中...', 'info');
+  
+  try{
+    var res = await fetch('https://api.github.com/repos/' + cfg.user + '/' + cfg.repo + '/commits?path=backup.json&per_page=10', {
+      headers: { 'Authorization': 'token ' + cfg.token, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    var commits = await res.json();
+    
+    if(commits.length === 0){
+      showGhStatus('还没有备份记录', 'info');
+      return;
+    }
+    
+    var msg = '最近 ' + commits.length + ' 次备份：\n\n';
+    commits.forEach(function(c, i){
+      var date = new Date(c.commit.author.date).toLocaleString('zh-CN');
+      msg += (i + 1) + '. ' + date + '\n   ' + c.commit.message + '\n';
+    });
+    
+    showGhStatus(msg, 'ok');
+  }catch(e){
+    showGhStatus('查询失败: ' + e.message, 'err');
+  }
+}
+
+function showGhStatus(msg, type){
+  var el = document.getElementById('ghStatus');
+  if(!el) return;
+  var cls = type === 'ok' ? 'ok' : (type === 'err' ? 'err' : 'info');
+  el.innerHTML = '<div class="status-msg ' + cls + '" style="white-space:pre-line;max-height:200px;overflow-y:auto">' + escapeHTML(msg) + '</div>';
+  if(type === 'ok') setTimeout(function(){ if(el) el.innerHTML = ''; }, 8000);
+}
+
+/* ===== 数据压缩 ===== */
+async function compressData(jsonStr){
+  if(typeof CompressionStream !== 'undefined'){
+    var blob = new Blob([jsonStr]);
+    var cs = new CompressionStream('gzip');
+    var stream = blob.stream().pipeThrough(cs);
+    var chunks = [];
+    var reader = stream.getReader();
+    while(true){
+      var result = await reader.read();
+      if(result.done) break;
+      chunks.push(result.value);
+    }
+    return new Blob(chunks, {type: 'application/gzip'});
+  }
+  return new Blob([jsonStr], {type: 'application/json'});
+}
+
+async function decompressData(blob){
+  var header = new Uint8Array(await blob.slice(0, 2).arrayBuffer());
+  var isGzip = (header[0] === 0x1f && header[1] === 0x8b);
+  if(isGzip && typeof DecompressionStream !== 'undefined'){
+    var ds = new DecompressionStream('gzip');
+    var stream = blob.stream().pipeThrough(ds);
+    var chunks = [];
+    var reader = stream.getReader();
+    while(true){
+      var result = await reader.read();
+      if(result.done) break;
+      chunks.push(result.value);
+    }
+    var decompressed = new Blob(chunks);
+    return await decompressed.text();
+  }
+  return await blob.text();
+}
+
+/* ===== 开发者后台面板 ===== */
+var _devLastRaw = ''; // 最近一次AI原始输出
+
+// 拦截AI原始输出（在ctInvokeReply的then里记录）
+var _devRawHistory = []; // {ts, raw, parsed, error}
+
+function openDevPanel(){
+  if(!chatFriend) return;
+  renderDevPanel();
+  openModal('devPanelModal');
+}
+
+var _devTab = 'raw'; // raw / editor / prompt
+
+function renderDevPanel(){
+  if(!chatFriend) return;
+  var friendId = chatFriend.id;
+  var hist = getChatHist(friendId);
+  var body = document.getElementById('devPanelBody');
+  
+  var html = '<div class="dev-panel">';
+  
+  // === 状态栏 ===
+  var config = window.getAPIConfig();
+  html += '<div class="dev-stat-grid">';
+  html += '<div class="dev-stat"><div class="dev-stat-label">Messages</div><div class="dev-stat-val">' + hist.length + '</div></div>';
+  html += '<div class="dev-stat"><div class="dev-stat-label">Branch</div><div class="dev-stat-val" style="font-size:10px">' + getActiveBranchId(friendId) + '</div></div>';
+  html += '<div class="dev-stat"><div class="dev-stat-label">Context</div><div class="dev-stat-val">' + getContextCount(friendId) + ' 轮</div></div>';
+  html += '<div class="dev-stat"><div class="dev-stat-label">Model</div><div class="dev-stat-val" style="font-size:9px;word-break:break-all">' + (config.model ? config.model.split('/').pop() : '--') + '</div></div>';
+  html += '</div>';
+  
+  // === Tab 切换 ===
+  html += '<div class="dev-tab-row" style="margin-top:16px">';
+  html += '<div class="dev-tab' + (_devTab==='raw'?' on':'') + '" onclick="switchDevTab(\'raw\')">AI 输出</div>';
+  html += '<div class="dev-tab' + (_devTab==='prompt'?' on':'') + '" onclick="switchDevTab(\'prompt\')">提示词</div>';
+  html += '<div class="dev-tab' + (_devTab==='editor'?' on':'') + '" onclick="switchDevTab(\'editor\')">编辑器</div>';
+  html += '</div>';
+  
+  // === Tab 内容 ===
+  if(_devTab === 'raw'){
+    html += renderDevRawTab();
+  } else if(_devTab === 'prompt'){
+    html += renderDevPromptTab();
+  } else if(_devTab === 'editor'){
+    html += renderDevEditorTab(hist);
+  }
+  
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function switchDevTab(tab){
+  _devTab = tab;
+  renderDevPanel();
+}
+
+function renderDevRawTab(){
+  var html = '<div class="dev-section">';
+  html += '<div class="dev-section-title">Recent AI Outputs</div>';
+  
+  if(_devRawHistory.length === 0){
+    html += '<div style="text-align:center;padding:30px 0;font-size:11px;color:#333;font-style:italic">尚无 AI 回复记录</div>';
+  } else {
+    _devRawHistory.slice(-8).reverse().forEach(function(item, idx){
+      var timeStr = new Date(item.ts).toLocaleTimeString('zh-CN');
+      var isErr = !!item.error;
+      var dotClass = isErr ? 'err' : 'ok';
+      var badgeClass = isErr ? 'err' : 'ok';
+      var badgeText = isErr ? 'ERROR' : 'OK';
+      
+      html += '<div class="dev-raw-card' + (idx === 0 ? ' open' : '') + '" onclick="this.classList.toggle(\'open\')">';
+      html += '<div class="dev-raw-head">';
+      html += '<div style="display:flex;align-items:center;gap:8px">';
+      html += '<div class="dev-raw-dot ' + dotClass + '"></div>';
+      html += '<span class="dev-raw-badge ' + badgeClass + '">' + badgeText + '</span>';
+      html += '</div>';
+      html += '<span class="dev-raw-time">' + timeStr + '</span>';
+      html += '</div>';
+      
+      html += '<div class="dev-raw-body" onclick="event.stopPropagation()">';
+      
+      if(item.error){
+        html += '<div class="dev-raw-label">ERROR</div>';
+        html += '<div style="font-size:11px;color:#ff6b6b;margin-bottom:10px;font-weight:600">' + escapeHTML(item.error) + '</div>';
+      }
+      
+      html += '<div class="dev-raw-label">RAW RESPONSE</div>';
+      html += '<pre class="dev-raw-pre">' + escapeHTML(item.raw.substring(0, 3000)) + (item.raw.length > 3000 ? '\n\n... (' + item.raw.length + ' chars total)' : '') + '</pre>';
+      
+      if(item.parsed){
+        html += '<div class="dev-raw-label">PARSED RESULT</div>';
+        html += '<pre class="dev-raw-pre" style="color:#4ade80">' + escapeHTML(JSON.stringify(item.parsed, null, 2).substring(0, 1500)) + '</pre>';
+      }
+      
+      html += '<div class="dev-btn-row">';
+      html += '<button class="dev-btn dev-btn-ghost" onclick="event.stopPropagation();devCopyRaw(' + (_devRawHistory.length - 1 - idx) + ')">复制原始</button>';
+      html += '</div>';
+      
+      html += '</div></div>';
+    });
+  }
+  
+  html += '</div>';
+  return html;
+}
+
+function renderDevPromptTab(){
+  if(!chatFriend) return '';
+  var prompt = buildSysPrompt(chatFriend);
+  var charCount = prompt.length;
+  var tokenEstimate = Math.round(charCount / 2); // 粗略估算
+  
+  var html = '<div class="dev-section">';
+  html += '<div class="dev-section-title">System Prompt</div>';
+  
+  html += '<div style="display:flex;gap:12px;margin-bottom:12px">';
+  html += '<div class="dev-stat" style="flex:1"><div class="dev-stat-label">Chars</div><div class="dev-stat-val">' + charCount.toLocaleString() + '</div></div>';
+  html += '<div class="dev-stat" style="flex:1"><div class="dev-stat-label">~Tokens</div><div class="dev-stat-val">' + tokenEstimate.toLocaleString() + '</div></div>';
+  html += '</div>';
+  
+  html += '<div class="dev-prompt-view" id="devPromptView">' + escapeHTML(prompt) + '</div>';
+  
+  html += '<div class="dev-btn-row">';
+  html += '<button class="dev-btn dev-btn-primary" onclick="devCopyPrompt()">复制全部</button>';
+  html += '<button class="dev-btn dev-btn-ghost" onclick="devCopyPromptSection(\'记忆\')">复制记忆段</button>';
+  html += '<button class="dev-btn dev-btn-ghost" onclick="devCopyPromptSection(\'图库\')">复制图库段</button>';
+  html += '<button class="dev-btn dev-btn-ghost" onclick="devCopyPromptSection(\'规则\')">复制规则段</button>';
+  html += '</div>';
+  
+  html += '</div>';
+  return html;
+}
+
+function renderDevEditorTab(hist){
+  var histJson = JSON.stringify(hist, null, 2);
+  
+  var html = '<div class="dev-section">';
+  html += '<div class="dev-section-title">Chat History Editor</div>';
+  html += '<div style="font-size:10px;color:#333;margin-bottom:8px;line-height:1.5">直接编辑 JSON 数组。保存后立即重新渲染聊天界面。</div>';
+  
+  html += '<textarea id="devHistTextarea" class="dev-editor">' + escapeHTML(histJson) + '</textarea>';
+  
+  html += '<div class="dev-btn-row">';
+  html += '<button class="dev-btn dev-btn-primary" onclick="devSaveHist()">保存 & 渲染</button>';
+  html += '<button class="dev-btn dev-btn-ghost" onclick="devReloadHist()">重新加载</button>';
+  html += '<button class="dev-btn dev-btn-ghost" onclick="devInjectMsg()">注入消息</button>';
+  html += '<button class="dev-btn dev-btn-danger" onclick="devClearLast5()">删最后5条</button>';
+  html += '</div>';
+  
+  html += '</div>';
+  return html;
+}
+
+// === 操作函数 ===
+function devCopyRaw(idx){
+  if(idx < 0 || idx >= _devRawHistory.length) return;
+  var item = _devRawHistory[idx];
+  var text = '=== RAW ===\n' + item.raw + '\n\n=== PARSED ===\n' + JSON.stringify(item.parsed, null, 2);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ showToast('已复制', 'ok'); });
+  } else { fallbackCopy(text); }
+}
+
+function devCopyPromptSection(keyword){
+  if(!chatFriend) return;
+  var prompt = buildSysPrompt(chatFriend);
+  var lines = prompt.split('\n');
+  var capturing = false;
+  var result = [];
+  
+  for(var i = 0; i < lines.length; i++){
+    if(lines[i].indexOf(keyword) >= 0 || lines[i].indexOf('=== ' + keyword) >= 0){
+      capturing = true;
+    } else if(capturing && lines[i].match(/^===/) && lines[i].indexOf(keyword) < 0){
+      break;
+    }
+    if(capturing) result.push(lines[i]);
+  }
+  
+  var text = result.join('\n') || '未找到「' + keyword + '」段';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ showToast('已复制「' + keyword + '」段', 'ok'); });
+  } else { fallbackCopy(text); }
+}
+
+function devClearLast5(){
+  if(!chatFriend) return;
+  if(!confirm('删除最后5条消息？')) return;
+  var hist = getChatHist(chatFriend.id);
+  hist = hist.slice(0, Math.max(0, hist.length - 5));
+  setChatHist(chatFriend.id, hist);
+  renderChatHist();
+  renderDevPanel();
+  showToast('已删除最后5条', 'ok');
+}
+
+// 保存编辑后的聊天记录
+function devSaveHist(){
+  if(!chatFriend) return;
+  var textarea = document.getElementById('devHistTextarea');
+  var text = textarea.value.trim();
+  
+  try{
+    var parsed = JSON.parse(text);
+    if(!Array.isArray(parsed)) throw new Error('必须是数组');
+    setChatHist(chatFriend.id, parsed);
+    renderChatHist();
+    showToast('已保存并重新渲染 (' + parsed.length + '条)', 'ok');
+  }catch(e){
+    showToast('JSON格式错误: ' + e.message, 'err');
+  }
+}
+
+// 重新加载
+function devReloadHist(){
+  if(!chatFriend) return;
+  var hist = getChatHist(chatFriend.id);
+  var textarea = document.getElementById('devHistTextarea');
+  textarea.value = JSON.stringify(hist, null, 2);
+  showToast('已重新加载', 'ok');
+}
+
+// 复制系统提示词
+function devCopyPrompt(){
+  if(!chatFriend) return;
+  var prompt = buildSysPrompt(chatFriend);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(prompt).then(function(){
+      showToast('系统提示词已复制 (' + prompt.length + '字)', 'ok');
+    });
+  } else {
+    fallbackCopy(prompt);
+  }
+}
+
+// 复制最近发送给API的消息体
+function devCopyLastMessages(){
+  if(!chatFriend) return;
+  var hist = getChatHist(chatFriend.id);
+  var ctxRounds = getContextCount(chatFriend.id);
+  var recent = hist;
+  if(ctxRounds > 0){
+    var roundCount = 0;
+    var cutIdx = hist.length;
+    for(var i = hist.length - 1; i >= 0; i--){
+      if(hist[i].role === 'user'){
+        roundCount++;
+        if(roundCount > ctxRounds){ cutIdx = i + 1; break; }
+      }
+      if(i === 0) cutIdx = 0;
+    }
+    recent = hist.slice(cutIdx);
+  }
+  var text = JSON.stringify(recent, null, 2);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showToast('已复制 ' + recent.length + ' 条消息', 'ok');
+    });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+// 手动注入一条消息
+function devInjectMsg(){
+  if(!chatFriend) return;
+  
+  var role = prompt('角色 (user 或 assistant):', 'assistant');
+  if(!role || (role !== 'user' && role !== 'assistant')) return;
+  
+  var content = prompt('消息内容:');
+  if(!content || !content.trim()) return;
+  
+  var hist = getChatHist(chatFriend.id);
+  hist.push({
+    role: role,
+    content: content.trim(),
+    time: getNowTime(),
+    ts: Date.now(),
+    _injected: true
+  });
+  setChatHist(chatFriend.id, hist);
+  renderChatHist();
+  showToast('已注入 ' + role + ' 消息', 'ok');
 }
 </script>
 </body>
