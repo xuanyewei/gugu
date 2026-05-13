@@ -4728,6 +4728,22 @@ input[type="range"]::-webkit-slider-thumb{
   padding:10px 0;
 }
 .vc-setting-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.7)}
+
+/* --- 修复全局所有聊天、记忆、收藏等文本不换行的问题 --- */
+.ct-bubble, 
+.vc-msg-text, 
+.fav-text, 
+.fav-detail-text, 
+.mem-card-text, 
+.film-mem-frame-text, 
+.iv-sheet-text, 
+.iv-history-text, 
+.iv-cine-htext,
+.ct-share-card-text,
+.sum-tl-text,
+.sum-card-text {
+  white-space: pre-wrap !important;
+}
 </style>
 </head>
 <body>
@@ -9077,6 +9093,13 @@ var mergedRecent = [];
 recent.forEach(function(m){
   var msgRole = m.role === 'user' ? 'user' : 'assistant';
   var isVision = m.image && m.msgType === 'realImg';
+  var isRp = !!m.rpMode;
+  
+  // 给RP消息加场景前缀，让AI知道这是线下见面时说的
+  var contentWithScene = m.content;
+  if(isRp){
+    contentWithScene = '[线下见面] ' + m.content;
+  }
   
   if(isVision){
     var parts = [];
@@ -9090,8 +9113,10 @@ recent.forEach(function(m){
   
   var last = mergedRecent.length > 0 ? mergedRecent[mergedRecent.length - 1] : null;
   
-  if(last && last.role === msgRole && !last.isVision){
-    last.content += '\n---\n' + m.content;
+  // 只有同角色、同场景（都线上或都线下）才合并，避免混淆
+  var lastIsRp = last ? !!last._isRp : false;
+  if(last && last.role === msgRole && !last.isVision && lastIsRp === isRp){
+    last.content += '\n---\n' + contentWithScene;
     last.msgCount = (last.msgCount || 1) + 1;
   } else {
     // ★ 保留时间信息
@@ -9100,7 +9125,7 @@ recent.forEach(function(m){
       var d = new Date(m.ts);
       timeLabel = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
     }
-    mergedRecent.push({role:msgRole, content:m.content, msgCount:1, time:timeLabel});
+    mergedRecent.push({role:msgRole, content:contentWithScene, msgCount:1, time:timeLabel, _isRp:isRp});
   }
 });
 
@@ -9584,7 +9609,8 @@ if(sense.enabled){
   p += '2. [引用:x] 后面同条必须跟回复文字，不能单独一条只有引用\n';
   p += '3. 引用只能引对方发的某一条完整原话，不能拼接多条\n';
   p += '4. 对方连续消息用---分隔，每段是一条独立消息\n';
-  p += '5. 只输出合法JSON，JSON外不写任何文字\n\n';
+  p += '5. 带[线下见面]前缀的是你们面对面时的互动记录，带[手机聊天]前缀的是手机短信。你能自然回忆这些经历，但不要输出这些标记\n';
+  p += '6. 只输出合法JSON，JSON外不写任何文字\n\n';
   
   // === 唯一示例 ===
   p += '示例：\n';
@@ -16234,18 +16260,36 @@ sys += '直接输出文本，不要JSON/前缀/解释。\n';
     messages.push({role:'system', content:sumText});
   }
   
-  // 上下文：只取RP消息
-  var ctxRounds = getContextCount(f.id);
-  var liveStart = rpSums.length > 0 ? Math.max(0, rpSumCount - 4) : 0;
-  var liveRp = rpMsgs.slice(liveStart);
-  var recent = liveRp;
-  if(ctxRounds > 0 && liveRp.length > ctxRounds * 2){
-    recent = liveRp.slice(-ctxRounds * 2);
+// 统一上下文：线上+线下按时间顺序，共享上下文轮数设置
+var ctxRounds = getContextCount(f.id);
+var allHist = hist; // hist 已包含所有消息（线上+线下）
+var recentAll;
+if(ctxRounds <= 0){
+  recentAll = allHist;
+} else {
+  var roundCount = 0;
+  var cutIdx = allHist.length;
+  for(var ri = allHist.length - 1; ri >= 0; ri--){
+    if(allHist[ri].role === 'user'){
+      roundCount++;
+      if(roundCount > ctxRounds){ cutIdx = ri + 1; break; }
+    }
+    if(ri === 0) cutIdx = 0;
   }
-  
-  recent.forEach(function(m){
-    messages.push({role: m.role === 'user' ? 'user' : 'assistant', content: m.content});
-  });
+  recentAll = allHist.slice(cutIdx);
+}
+
+// 注入上下文，带场景标记让AI区分线上线下
+recentAll.forEach(function(m){
+  var role = m.role === 'user' ? 'user' : 'assistant';
+  var content = m.content;
+  if(m.rpMode){
+    content = '[线下见面] ' + content;
+  } else {
+    content = '[手机聊天] ' + content;
+  }
+  messages.push({role: role, content: content});
+});
   
   var lastRole = rpMsgs.length > 0 ? rpMsgs[rpMsgs.length - 1].role : null;
 if(!lastRole || lastRole === 'assistant'){
