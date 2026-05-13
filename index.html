@@ -4395,6 +4395,339 @@ input[type="range"]::-webkit-slider-thumb{
 }
 .dev-tab.on{color:var(--c1);background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .dev-tab:active{opacity:.5}
+
+/* ===== 视频通话系统 ===== */
+.vc-page{
+  position:fixed;inset:0;z-index:900;
+  background:#000;
+  display:flex;flex-direction:column;
+  max-width:480px;margin:0 auto;
+  transform:translateY(100%);transition:transform .5s cubic-bezier(.16,1,.3,1);
+  pointer-events:none;
+}
+.vc-page.show{transform:translateY(0);pointer-events:auto}
+
+/* 顶栏 */
+.vc-top{
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:4px;
+  padding:calc(48px + env(safe-area-inset-top,0px)) 20px 12px;
+  flex-shrink:0;position:relative;z-index:10;
+}
+.vc-top-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.vc-top-status{font-size:11px;color:rgba(255,255,255,.45);font-weight:500;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.vc-top-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:vcPulse 2s infinite}
+@keyframes vcPulse{0%,100%{opacity:.4}50%{opacity:1}}
+.vc-top-timer{font-size:13px;color:rgba(255,255,255,.6);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:1px;margin-top:2px}
+
+/* 主画面区域 */
+.vc-main{
+  flex:1;position:relative;overflow:hidden;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding-top:30px;
+}
+
+/* 背景图层 */
+.vc-bg-layer{
+  position:absolute;inset:0;z-index:0;
+  background-size:cover;background-position:center;
+  transition:opacity .4s;
+}
+/* 底部虚化遮罩 */
+.vc-bg-layer::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg, 
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0.15) 30%,
+    rgba(0,0,0,0.55) 65%,
+    rgba(0,0,0,0.92) 100%);
+  backdrop-filter:blur(0px);
+}
+/* 顶部轻微暗化方便看名字 */
+.vc-bg-layer::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg, 
+    rgba(0,0,0,0.5) 0%,
+    rgba(0,0,0,0.1) 25%,
+    transparent 40%);
+}
+
+/* 背景按钮（顶栏右上角） */
+.vc-bg-btn{
+  position:absolute;top:calc(48px + env(safe-area-inset-top,0px));right:16px;
+  z-index:30;width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.1);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  border:1px solid rgba(255,255,255,.08);transition:.15s;
+}
+.vc-bg-btn:active{transform:scale(.88);background:rgba(255,255,255,.18)}
+.vc-bg-btn svg{width:16px;height:16px;stroke:rgba(255,255,255,.7);stroke-width:1.8;fill:none}
+.vc-ai-area{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  position:relative;z-index:2;transition:opacity .3s;
+}
+.vc-ai-area.hidden{opacity:0;pointer-events:none}
+.vc-ai-avatar{
+  width:120px;height:120px;border-radius:50%;
+  background:#1a1a1a;border:3px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:48px;font-weight:200;color:rgba(255,255,255,.3);
+  overflow:hidden;
+  box-shadow:0 0 60px rgba(255,255,255,.04);
+}
+.vc-ai-avatar img{width:100%;height:100%;object-fit:cover}
+.vc-ai-action{
+  font-size:13px;color:rgba(255,255,255,.35);font-style:italic;
+  text-align:center;max-width:260px;line-height:1.6;
+  min-height:20px;transition:opacity .3s;
+}
+
+/* 我方摄像头画中画 */
+.vc-pip{
+  position:absolute;top:12px;right:12px;z-index:20;
+  width:100px;height:140px;border-radius:14px;
+  background:#111;border:2px solid rgba(255,255,255,.1);
+  overflow:hidden;cursor:pointer;transition:transform .2s;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+.vc-pip:active{transform:scale(.95)}
+.vc-pip video{width:100%;height:100%;object-fit:cover;display:block}
+.vc-pip-off{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:4px;
+}
+.vc-pip-off svg{width:24px;height:24px;stroke:rgba(255,255,255,.2);stroke-width:1.5;fill:none}
+.vc-pip-off span{font-size:8px;color:rgba(255,255,255,.2);font-weight:600;letter-spacing:1px}
+
+/* 聊天消息覆盖层 */
+.vc-chat{
+  position:absolute;bottom:0;left:0;right:0;z-index:15;
+  max-height:45%;overflow-y:auto;
+  padding:60px 16px 8px;
+  mask-image:linear-gradient(transparent 0%,#000 30%);
+  -webkit-mask-image:linear-gradient(transparent 0%,#000 30%);
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+}
+.vc-chat::-webkit-scrollbar{display:none}
+
+.vc-msg{
+  margin-bottom:8px;display:flex;gap:8px;
+  animation:vcMsgIn .3s ease both;
+}
+.vc-msg.is-me{flex-direction:row-reverse}
+@keyframes vcMsgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.vc-msg-av{
+  width:28px;height:28px;border-radius:50%;
+  background:#222;flex-shrink:0;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  align-self:flex-end;
+}
+.vc-msg-av span{font-size:10px;font-weight:700;color:#555}
+.vc-msg-av img{width:100%;height:100%;object-fit:cover}
+
+.vc-msg-bubble{max-width:72%;position:relative}
+.vc-msg-name{font-size:9px;color:rgba(255,255,255,.3);font-weight:600;margin-bottom:3px;letter-spacing:.3px}
+.vc-msg.is-me .vc-msg-name{text-align:right}
+
+.vc-msg-text{
+  padding:10px 14px;font-size:14px;line-height:1.6;
+  word-break:break-word;border-radius:4px 16px 16px 16px;
+}
+.vc-msg.is-me .vc-msg-text{border-radius:16px 4px 16px 16px}
+.vc-msg:not(.is-me) .vc-msg-text{
+  background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);
+  border:1px solid rgba(255,255,255,.06);
+}
+.vc-msg.is-me .vc-msg-text{
+  background:rgba(255,255,255,.15);color:#fff;
+}
+.vc-msg-text em{font-style:italic;color:rgba(255,255,255,.4)}
+.vc-msg-time{font-size:8px;color:rgba(255,255,255,.2);margin-top:3px;letter-spacing:.3px}
+.vc-msg.is-me .vc-msg-time{text-align:right}
+
+/* vc消息长按菜单 */
+.vc-msg-menu{
+  position:absolute;bottom:calc(100% + 6px);left:0;
+  display:flex;gap:4px;padding:6px 8px;
+  background:rgba(255,255,255,.12);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:20px;border:1px solid rgba(255,255,255,.08);
+  opacity:0;transform:scale(.8);pointer-events:none;
+  transition:all .2s cubic-bezier(.16,1,.3,1);z-index:30;
+  white-space:nowrap;
+}
+.vc-msg-menu.show{opacity:1;transform:scale(1);pointer-events:auto}
+.vc-msg.is-me .vc-msg-menu{left:auto;right:0}
+.vc-msg-menu-btn{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:.15s;
+}
+.vc-msg-menu-btn:active{transform:scale(.85);background:rgba(255,255,255,.15)}
+.vc-msg-menu-btn svg{width:13px;height:13px;stroke:rgba(255,255,255,.7);stroke-width:2;fill:none}
+.vc-msg-menu-btn.danger svg{stroke:#ff6b6b}
+
+/* 正在输入指示器 */
+.vc-typing{
+  display:flex;align-items:center;gap:3px;padding:4px 0 8px 36px;
+}
+.vc-typing i{
+  width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.2);
+  animation:typeDot 1.4s infinite ease-in-out;
+}
+.vc-typing i:nth-child(2){animation-delay:.2s}
+.vc-typing i:nth-child(3){animation-delay:.4s}
+
+/* 底部控制栏 */
+.vc-controls{
+  display:flex;align-items:center;justify-content:center;gap:20px;
+  padding:16px 20px calc(24px + var(--safe-b));flex-shrink:0;
+  position:relative;z-index:20;
+}
+.vc-ctrl{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;transition:.15s;
+}
+.vc-ctrl:active{transform:scale(.88)}
+.vc-ctrl-circle{
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.vc-ctrl-circle svg{width:22px;height:22px;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.vc-ctrl-label{font-size:9px;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:.5px}
+
+.vc-ctrl-cam .vc-ctrl-circle{background:rgba(255,255,255,.1)}
+.vc-ctrl-cam .vc-ctrl-circle svg{stroke:#fff;stroke-width:1.8}
+.vc-ctrl-cam.off .vc-ctrl-circle{background:rgba(255,255,255,.25)}
+.vc-ctrl-cam.off .vc-ctrl-circle svg{stroke:#ff6b6b}
+
+.vc-ctrl-end .vc-ctrl-circle{background:#ff3b30;width:60px;height:60px}
+.vc-ctrl-end .vc-ctrl-circle svg{stroke:#fff;stroke-width:2}
+
+.vc-ctrl-mic .vc-ctrl-circle{background:rgba(255,255,255,.1)}
+.vc-ctrl-mic .vc-ctrl-circle svg{stroke:#fff;stroke-width:1.8}
+.vc-ctrl-mic.off .vc-ctrl-circle{background:rgba(255,255,255,.25)}
+.vc-ctrl-mic.off .vc-ctrl-circle svg{stroke:#ff6b6b}
+
+.vc-ctrl-ai .vc-ctrl-circle{background:rgba(255,255,255,.1)}
+.vc-ctrl-ai .vc-ctrl-circle svg{stroke:#fff;stroke-width:0;fill:#fff}
+.vc-ctrl-ai.loading{opacity:.4;pointer-events:none}
+
+/* 输入栏 */
+.vc-input-area{
+  padding:0 16px 0;flex-shrink:0;position:relative;z-index:20;
+}
+.vc-input-row{display:flex;align-items:center;gap:10px}
+.vc-input-wrap{
+  flex:1;background:rgba(255,255,255,.08);border-radius:22px;
+  display:flex;align-items:center;padding:4px 14px;min-height:36px;
+  border:1px solid rgba(255,255,255,.06);transition:border .2s;
+}
+.vc-input-wrap:focus-within{border-color:rgba(255,255,255,.15)}
+.vc-input-field{
+  flex:1;border:none;background:none;outline:none;
+  font-size:14px;color:#fff;font-family:inherit;
+  padding:8px 0;min-height:18px;max-height:80px;
+  resize:none;line-height:18px;
+}
+.vc-input-field::placeholder{color:rgba(255,255,255,.25)}
+.vc-send{
+  color:rgba(255,255,255,.6);font-weight:600;font-size:14px;
+  cursor:pointer;padding:4px 0 4px 8px;user-select:none;flex-shrink:0;
+}
+.vc-send:active{opacity:.3}
+
+/* ===== 来电界面 ===== */
+.vc-incoming{
+  position:fixed;inset:0;z-index:950;
+  background:linear-gradient(180deg,#0a0a0a 0%,#1a1a1a 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  max-width:480px;margin:0 auto;
+  opacity:0;pointer-events:none;transition:opacity .4s;
+}
+.vc-incoming.show{opacity:1;pointer-events:auto}
+
+.vc-inc-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.vc-inc-ring{
+  position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.04);
+  animation:vcRingPulse 3s infinite ease-out;
+}
+.vc-inc-ring:nth-child(1){width:200px;height:200px;animation-delay:0s}
+.vc-inc-ring:nth-child(2){width:280px;height:280px;animation-delay:.5s}
+.vc-inc-ring:nth-child(3){width:360px;height:360px;animation-delay:1s}
+@keyframes vcRingPulse{
+  0%{transform:scale(.8);opacity:0}
+  50%{opacity:.6}
+  100%{transform:scale(1.2);opacity:0}
+}
+
+.vc-inc-avatar{
+  width:96px;height:96px;border-radius:50%;
+  background:#222;border:3px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;font-weight:200;color:rgba(255,255,255,.4);
+  overflow:hidden;position:relative;z-index:2;
+  box-shadow:0 0 80px rgba(255,255,255,.05);
+  margin-bottom:20px;
+}
+.vc-inc-avatar img{width:100%;height:100%;object-fit:cover}
+.vc-inc-name{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:6px;position:relative;z-index:2}
+.vc-inc-label{font-size:12px;color:rgba(255,255,255,.35);letter-spacing:2px;font-weight:500;margin-bottom:60px;position:relative;z-index:2}
+
+.vc-inc-btns{display:flex;gap:48px;position:relative;z-index:2}
+.vc-inc-btn{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  cursor:pointer;transition:.15s;
+}
+.vc-inc-btn:active{transform:scale(.88)}
+.vc-inc-btn-circle{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.vc-inc-btn-circle svg{width:28px;height:28px;stroke:#fff;stroke-width:2;fill:none}
+.vc-inc-decline .vc-inc-btn-circle{background:#ff3b30}
+.vc-inc-accept .vc-inc-btn-circle{background:#34c759}
+.vc-inc-btn span{font-size:11px;color:rgba(255,255,255,.5);font-weight:500}
+
+/* 编辑弹窗（通话中） */
+.vc-edit-modal{
+  position:fixed;inset:0;z-index:960;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.vc-edit-modal.show{opacity:1;pointer-events:auto}
+.vc-edit-panel{
+  width:88%;max-width:340px;background:#1a1a1a;border-radius:20px;
+  padding:24px 20px 20px;border:1px solid #2a2a2a;
+  transform:scale(.92);transition:transform .3s cubic-bezier(.16,1,.3,1);
+}
+.vc-edit-modal.show .vc-edit-panel{transform:scale(1)}
+.vc-edit-panel textarea{
+  width:100%;min-height:80px;border:1.5px solid #333;border-radius:14px;
+  padding:14px;font-size:14px;color:#fff;background:#111;
+  outline:none;font-family:inherit;resize:none;line-height:1.7;
+  margin-bottom:12px;
+}
+.vc-edit-panel textarea:focus{border-color:#555}
+.vc-edit-btns{display:flex;gap:8px}
+.vc-edit-btns button{
+  flex:1;height:40px;border:none;border-radius:12px;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:.15s;
+}
+.vc-edit-btns button:active{transform:scale(.96)}
+.vc-edit-btns .vc-btn-cancel{background:#222;color:#888}
+.vc-edit-btns .vc-btn-save{background:#fff;color:#000}
+
+/* 通话设置入口（聊天菜单） */
+.vc-setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;
+}
+.vc-setting-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.7)}
 </style>
 </head>
 <body>
@@ -4667,6 +5000,24 @@ input[type="range"]::-webkit-slider-thumb{
           </div>
         </div>
       </div>
+      
+       <!-- 👇 新增：正则与预设入口 -->
+    <div style="font-size:10px;font-weight:700;color:#999;letter-spacing:1.5px;text-transform:uppercase;margin:24px 0 12px">高级脚本</div>
+    <div class="set-card">
+      <div class="set-row" onclick="openRegexPage()">
+        <div class="set-row-icon" style="background:#111">
+          <svg viewBox="0 0 24 24" style="stroke:#fff;stroke-width:1.8;fill:none;width:18px;height:18px"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+        </div>
+        <div class="set-row-info">
+          <div class="set-row-name">正则脚本</div>
+          <div class="set-row-desc">格式化提示词或渲染样式</div>
+        </div>
+        <div class="set-row-arrow">
+          <svg viewBox="0 0 24 24" style="stroke:#bbb;stroke-width:2;fill:none;width:16px;height:16px"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+    <!-- 👆 新增结束 -->
     </div>
   </div>
 
@@ -6203,6 +6554,179 @@ input[type="range"]::-webkit-slider-thumb{
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<!-- ===== 视频通话页面 ===== -->
+<div class="vc-page" id="vcPage">
+  <div class="vc-top">
+    <div class="vc-top-name" id="vcName">--</div>
+    <div class="vc-top-status">
+      <div class="vc-top-dot"></div>
+      <span>视频通话中</span>
+    </div>
+    <div class="vc-top-timer" id="vcTimer">00:00</div>
+  </div>
+
+<div class="vc-main" id="vcMain">
+  <!-- 背景图层 -->
+  <div class="vc-bg-layer" id="vcBgLayer" style="display:none"></div>
+  
+  <!-- 切换背景按钮 -->
+  <div class="vc-bg-btn" onclick="vcChangeBg()" title="更换背景">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+  </div>
+  
+  <!-- AI头像区 -->
+  <div class="vc-ai-area" id="vcAiArea">
+    <div class="vc-ai-avatar" id="vcAiAvatar">?</div>
+    <div class="vc-ai-action" id="vcAiAction"></div>
+  </div>
+
+  <!-- 我方摄像头PiP -->
+  <div class="vc-pip" id="vcPip" onclick="vcToggleCam()">
+    <video id="vcVideo" autoplay playsinline muted style="display:none"></video>
+    <div class="vc-pip-off" id="vcPipOff">
+      <svg viewBox="0 0 24 24"><path d="M1 1l22 22"/><path d="M21 21H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3m3-3h6l2 3h4a2 2 0 0 1 2 2v9.34"/></svg>
+      <span>摄像头关闭</span>
+    </div>
+  </div>
+
+  <!-- 聊天消息覆盖 -->
+  <div class="vc-chat" id="vcChat"></div>
+</div>
+
+  <div class="vc-input-area">
+    <div class="vc-input-row">
+      <div class="vc-input-wrap">
+        <textarea class="vc-input-field" id="vcInput" rows="1" placeholder="说点什么..." oninput="vcAutoResize(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();vcSendMsg()}"></textarea>
+      </div>
+      <div class="vc-send" onclick="vcSendMsg()">发送</div>
+    </div>
+  </div>
+
+  <div class="vc-controls">
+    <div class="vc-ctrl vc-ctrl-cam" id="vcCamCtrl" onclick="vcToggleCam()">
+      <div class="vc-ctrl-circle">
+        <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      </div>
+      <span class="vc-ctrl-label">摄像头</span>
+    </div>
+    <div class="vc-ctrl vc-ctrl-ai" id="vcAiCtrl" onclick="vcInvokeAI()">
+      <div class="vc-ctrl-circle">
+        <svg viewBox="0 0 24 24"><path d="M12 2L14.5 9L22 11.5L14.5 14L12 21L9.5 14L2 11.5L9.5 9L12 2Z"/></svg>
+      </div>
+      <span class="vc-ctrl-label">AI回复</span>
+    </div>
+    <div class="vc-ctrl vc-ctrl-end" onclick="vcEndCall()">
+      <div class="vc-ctrl-circle">
+        <svg viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </div>
+      <span class="vc-ctrl-label">挂断</span>
+    </div>
+    <div class="vc-ctrl vc-ctrl-mic" id="vcMicCtrl" onclick="vcToggleMic()">
+      <div class="vc-ctrl-circle">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+      </div>
+      <span class="vc-ctrl-label">麦克风</span>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="vcBgFileInput" accept="image/*" style="display:none" onchange="vcHandleBgUpload(event)">
+
+<!-- ===== 来电界面 ===== -->
+<div class="vc-incoming" id="vcIncoming">
+  <div class="vc-inc-rings">
+    <div class="vc-inc-ring"></div>
+    <div class="vc-inc-ring"></div>
+    <div class="vc-inc-ring"></div>
+  </div>
+  <div class="vc-inc-avatar" id="vcIncAvatar">?</div>
+  <div class="vc-inc-name" id="vcIncName">--</div>
+  <div class="vc-inc-label">视频来电...</div>
+  <div class="vc-inc-btns">
+    <div class="vc-inc-btn vc-inc-decline" onclick="vcDeclineCall()">
+      <div class="vc-inc-btn-circle">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <span>拒绝</span>
+    </div>
+    <div class="vc-inc-btn vc-inc-accept" onclick="vcAcceptCall()">
+      <div class="vc-inc-btn-circle">
+        <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      </div>
+      <span>接听</span>
+    </div>
+  </div>
+</div>
+
+<!-- 视频通话消息编辑弹窗 -->
+<div class="vc-edit-modal" id="vcEditModal">
+  <div class="vc-edit-panel">
+    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:14px">编辑消息</div>
+    <textarea id="vcEditTextarea"></textarea>
+    <div class="vc-edit-btns">
+      <button class="vc-btn-cancel" onclick="vcCloseEdit()">取消</button>
+      <button class="vc-btn-save" onclick="vcSaveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 正则与预设页面 ===== -->
+<div class="add-friend-page" id="regexPage" style="z-index: 600;">
+  <div class="add-f-top">
+    <span onclick="closeRegexPage()">返回</span>
+    <strong>正则脚本</strong>
+    <span class="add-f-save" onclick="openRegexModal()">+ 新建</span>
+  </div>
+  <div class="add-f-body">
+    <div style="font-size:11px;color:var(--c4);line-height:1.6;margin-bottom:16px;">
+      在这里创建正则表达式，可以自动替换用户输入、AI回复，或仅在界面渲染时改变样式（不影响历史记录）。支持 <code>$1</code> 等捕获组。
+    </div>
+    <div id="regexListArea" style="display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+</div>
+
+<!-- ===== 正则编辑模态框 ===== -->
+<div class="modal-overlay" id="regexModal" onclick="if(event.target===this)closeModal('regexModal')">
+  <div class="modal-panel" style="max-height:88vh">
+    <div class="modal-bar"></div>
+    <div class="modal-title"><span id="regexModalTitle">新建正则</span> <button class="modal-close" onclick="closeModal('regexModal')">✕</button></div>
+
+    <div class="field"><label>脚本名称</label>
+      <input type="text" id="rgxName" placeholder="例如：动作渲染高亮"></div>
+
+    <div class="field"><label>正则表达式</label>
+      <input type="text" id="rgxPattern" placeholder="\*(.*?)\*" style="font-family:monospace"></div>
+
+    <div class="field"><label>替换内容</label>
+      <textarea id="rgxReplacement" style="width:100%;height:60px;padding:12px;border:1.5px solid var(--c5);border-radius:12px;font-size:13px;background:var(--c7);color:var(--c1);outline:none;font-family:monospace;resize:vertical;" placeholder="<em>$1</em>"></textarea></div>
+
+    <div class="field"><label>所属文件夹</label>
+      <select id="rgxFolder">
+        <option value="">未分类</option>
+      </select></div>
+
+    <div class="field"><label>生效位置</label>
+      <select id="rgxPlacement">
+        <option value="render">界面渲染（仅视觉）</option>
+        <option value="aiOutput">AI 回复时（修改历史）</option>
+        <option value="userInput">用户发送时</option>
+      </select></div>
+
+    <div class="field"><label>生效模式</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="add-f-tag on" data-rgx-scope="all" onclick="setRgxScope('all',this)">全部通用</span>
+        <span class="add-f-tag" data-rgx-scope="online" onclick="setRgxScope('online',this)">仅线上</span>
+        <span class="add-f-tag" data-rgx-scope="offline" onclick="setRgxScope('offline',this)">仅线下RP</span>
+      </div></div>
+
+    <div class="field"><label>作用角色（不勾选=全局对所有角色生效）</label>
+      <div id="rgxFriendList" style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;padding:4px 0"></div></div>
+
+    <button class="btn btn-primary" onclick="saveRegexRule()">保存</button>
+    <button class="btn btn-secondary" style="color:#e11d48;display:none" id="rgxDelBtn" onclick="deleteRegexRule()">删除</button>
+  </div>
+</div>
 <script>
 
 // 启动时迁移老的图库数据
@@ -7847,6 +8371,8 @@ function renderChatHistFrom(fromIdx){
 }
 
 function appendBubble(role, text, time, animate, showAvatar, tsSet, needAvSlot, quoteText){
+  // 注入 渲染层拦截正则
+  text = applyRegex(text, 'render', false, chatFriend ? chatFriend.id : null);
 // 跳过RP消息在线上模式不显示
 if(text === '[RP剧情]') return;
   if(!tsSet) tsSet = getTimestampSettings(chatFriend ? chatFriend.id : null);
@@ -8066,11 +8592,46 @@ var isImgMsg = !!(isTextImg || isRealImg || isGalImg);
 
 var isSpecialMsg = isImgMsg || isShareCard; // 去掉了 isVoice
 
+// 找到这一行（原有代码）：
+var isImgMsg = !!(isTextImg || isRealImg || isGalImg);
+
+// 👇 ============ 从这里开始新增/修改 ============
+
+// 1. 去除 AI 可能带上的 Markdown 代码块包裹
+var pureText = text.replace(/^[\s\S]*?```(html|xml|css)?\s*\n/i, '').replace(/\n```[\s\S]*$/, '').trim();
+
+// 2. 检测是否是纯 HTML 结构（以 < 开头，> 结尾，并且包含常见的标签）
+var isHtmlCard = /^<[a-z!][\s\S]*>$/i.test(pureText) && /<(div|span|style|svg|table|ul|p|button)\b/i.test(pureText);
+var safeHtmlText = pureText;
+
+if (!isHtmlCard) {
+  var trimText = text.trim();
+  isHtmlCard = /^<[a-z!][\s\S]*>$/i.test(trimText) && /<(div|span|style|svg|table|ul|p)\b/i.test(trimText);
+  if(isHtmlCard) safeHtmlText = trimText;
+}
+
+// 3. 简易安全过滤（去掉 script 和内联事件）
+if (isHtmlCard) {
+  safeHtmlText = safeHtmlText
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/ on[a-z]+=["'][^"']*["']/gi, "");
+}
+
+// 修改 isSpecialMsg 判定，把 isHtmlCard 加进去
+var isSpecialMsg = isImgMsg || isShareCard || isHtmlCard; 
+
+// 修改 bubbleContent 的内容生成
 var bubbleContent = isVoice ? voiceBubbleHtml :
   (isShareCard ? shareCardHtml : 
     (isImgMsg ? imgCardHtml :
+      (isHtmlCard ? safeHtmlText :   // <--- 如果是 HTML，直接放入源码，不转义
     ((quoteText ? '<span class="ct-msg-quote">"' + escapeHTML(quoteText) + '"</span>' : '') + 
-    escapeHTML(text) + timeInsideHtml)));
+    escapeHTML(text) + timeInsideHtml))));
+
+// 修改 extraStyle，如果是特殊消息（包含HTML），去掉背景、边框、阴影和内边距
+var extraStyle = isSpecialMsg ? ' style="padding:0;border:none;background:none !important;box-shadow:none;"' : (isVoice ? ' style="padding:0"' : '');
+
+// 👆 ============ 新增/修改结束 ============
 
 // 判断是否为语音，是语音的话只去掉 padding，保留气泡背景和圆角
 var extraStyle = isSpecialMsg ? ' style="padding:0;border:none;background:none !important"' : (isVoice ? ' style="padding:0"' : '');
@@ -8403,6 +8964,7 @@ function ctSendMsg(){
   var input=document.getElementById('ctMsgInput');
   var text=input.value.trim();
   if(!chatFriend)return;
+  text = applyRegex(text, 'userInput', false, chatFriend.id);
   
   if(!text){
     return;
@@ -8777,10 +9339,11 @@ if(memoryItems.length > 0 && activeFriendId){
     
     var delay=0;
     parsedMsgs.forEach(function(part,i){
-      // 解析 AI 是否发了 [引用: XXX]
-      var finalQuote = null;
-      var cleanText = part;
-      var quoteMatch = part.match(/\[引用[:：]\s*([\s\S]*?)\]/);
+  var finalQuote = null;
+  var cleanText = part;
+  // 注入 AI 输出拦截正则
+  cleanText = applyRegex(cleanText, 'aiOutput', false, activeFriendId);
+  var quoteMatch = part.match(/\[引用[:：]\s*([\s\S]*?)\]/);
       if(quoteMatch) {
         finalQuote = quoteMatch[1].trim();
         cleanText = part.replace(/\[引用[:：]\s*[\s\S]*?\]/, '').trim();
@@ -8853,6 +9416,7 @@ if(i===parsedMsgs.length-1){
     document.getElementById('ctInvoke').classList.remove('loading');
   }
   checkAutoSummarize(activeFriendId);
+  vcMaybeIncomingCall(activeFriendId);
 }
       },delay);
     });
@@ -11469,12 +12033,11 @@ function closeWbMountPage() {
 function renderWbMountPage(){
   var body = document.getElementById('wbMountBody');
   var entries = getWbEntries();
+  var folders = getWbFolders();
   var mounted = getChatWbMounted(chatFriend.id);
   var friendName = chatFriend ? chatFriend.name : '?';
   
-  var available = entries.filter(function(e){
-    return e.scope === 'global' || e.scope === 'chat';
-  });
+  var available = entries.filter(function(e){ return e.scope === 'global' || e.scope === 'chat'; });
   
   var mountedCount = 0;
   available.forEach(function(e){
@@ -11483,8 +12046,6 @@ function renderWbMountPage(){
   });
   
   var html = '';
-  
-  // === 唱片架头部 ===
   html += '<div class="vinyl-mount-header">';
   html += '<div class="vinyl-mount-logo-row">';
   html += '<div class="vinyl-mount-disc"><div class="vinyl-mount-disc-groove"></div></div>';
@@ -11494,46 +12055,42 @@ function renderWbMountPage(){
   html += '<div class="vinyl-mount-sub">' + escapeHTML(friendName) + ' 的世界设定</div>';
   html += '</div>';
   
-  // === 统计 ===
   html += '<div class="vinyl-mount-stats">';
   html += '<div class="vinyl-mount-stat"><div class="vinyl-mount-stat-num">' + available.length + '</div><div class="vinyl-mount-stat-label">Available</div></div>';
   html += '<div class="vinyl-mount-stat"><div class="vinyl-mount-stat-num">' + mountedCount + '</div><div class="vinyl-mount-stat-label">Mounted</div></div>';
   html += '</div>';
-  
   html += '<div class="vinyl-mount-divider"></div>';
   
   if(available.length === 0){
-    html += '<div class="vinyl-mount-empty">';
-    html += '<div class="vinyl-mount-empty-disc"></div>';
-    html += '<div class="vinyl-mount-empty-title">没有可用的唱片</div>';
-    html += '<div class="vinyl-mount-empty-desc">请先在世界书中创建条目</div>';
-    html += '</div>';
+    html += '<div class="vinyl-mount-empty"><div class="vinyl-mount-empty-disc"></div><div class="vinyl-mount-empty-title">没有可用条目</div><div class="vinyl-mount-empty-desc">请先在世界书中创建</div></div>';
     body.innerHTML = html;
     return;
   }
   
-  // === 按文件夹分组 ===
-  var folders = getWbFolders();
-  var unclassed = available.filter(function(e){ return !e.folderId });
+  var unclassed = available.filter(function(e){ return !e.folderId; });
   
   folders.forEach(function(f){
-    var folderEntries = available.filter(function(e){ return e.folderId === f.id });
+    var folderEntries = available.filter(function(e){ return e.folderId === f.id; });
     if(folderEntries.length === 0) return;
+    
+    // 文件夹整体勾选状态
+    var allMounted = folderEntries.every(function(e){
+      var isAuto = e.scope === 'global' && e.mode === 'always' && e.enabled;
+      return isAuto || mounted.indexOf(e.id) >= 0;
+    });
     
     html += '<div class="vinyl-mount-section">';
     html += '<div class="vinyl-mount-section-head">';
     html += '<div class="vinyl-mount-section-tab"></div>';
     html += '<span class="vinyl-mount-section-label">' + escapeHTML(f.name) + '</span>';
     html += '<span class="vinyl-mount-section-count">' + folderEntries.length + '</span>';
+    // 一键挂载按钮
+    html += '<div class="vinyl-mount-toggle-btn' + (allMounted ? ' on' : '') + '" style="margin-left:8px" onclick="toggleWbFolderMount(\'' + f.id + '\',this)" title="一键挂载/卸载整个文件夹"></div>';
     html += '</div>';
-    
-    folderEntries.forEach(function(e){
-      html += renderMountItem(e, mounted);
-    });
+    folderEntries.forEach(function(e){ html += renderMountItem(e, mounted); });
     html += '</div>';
   });
   
-  // 未分类
   if(unclassed.length > 0){
     html += '<div class="vinyl-mount-section">';
     html += '<div class="vinyl-mount-section-head">';
@@ -11541,20 +12098,50 @@ function renderWbMountPage(){
     html += '<span class="vinyl-mount-section-label">Uncategorized</span>';
     html += '<span class="vinyl-mount-section-count">' + unclassed.length + '</span>';
     html += '</div>';
-    
-    unclassed.forEach(function(e){
-      html += renderMountItem(e, mounted);
-    });
+    unclassed.forEach(function(e){ html += renderMountItem(e, mounted); });
     html += '</div>';
   }
   
-  // 提示
-  html += '<div class="vinyl-mount-hint">';
-  html += '💿 全局常驻条目默认挂载，无需手动操作。<br>点击开关可手动控制其他条目的挂载状态。';
-  html += '</div>';
-  
+  html += '<div class="vinyl-mount-hint">💿 全局常驻条目自动挂载。点击文件夹右侧开关可一键挂载整个文件夹。</div>';
   html += '<div style="height:40px"></div>';
   body.innerHTML = html;
+}
+
+// 一键挂载/卸载整个文件夹
+function toggleWbFolderMount(folderId, el){
+  if(!chatFriend) return;
+  var entries = getWbEntries();
+  var folderEntries = entries.filter(function(e){
+    return e.folderId === folderId && (e.scope === 'global' || e.scope === 'chat');
+  });
+  var mounted = getChatWbMounted(chatFriend.id);
+  
+  // 判断当前是不是已全部挂载
+  var allOn = folderEntries.every(function(e){
+    var isAuto = e.scope === 'global' && e.mode === 'always' && e.enabled;
+    return isAuto || mounted.indexOf(e.id) >= 0;
+  });
+  
+  if(allOn){
+    // 全部卸载（自动挂载的不动）
+    folderEntries.forEach(function(e){
+      var isAuto = e.scope === 'global' && e.mode === 'always' && e.enabled;
+      if(!isAuto){
+        var idx = mounted.indexOf(e.id);
+        if(idx >= 0) mounted.splice(idx, 1);
+      }
+    });
+    showToast('已卸载文件夹', 'ok');
+  } else {
+    // 全部挂载
+    folderEntries.forEach(function(e){
+      if(mounted.indexOf(e.id) < 0) mounted.push(e.id);
+    });
+    showToast('已挂载文件夹', 'ok');
+  }
+  
+  setChatWbMounted(chatFriend.id, mounted);
+  renderWbMountPage(); // 重新渲染同步状态
 }
 
 function renderMountItem(e, mounted){
@@ -15506,7 +16093,9 @@ function renderRpHist(){
       avHtml = '<img src="' + avatarCache[myP.avatarKey] + '">';
     }
     
-    var formatted = escapeHTML(m.content || '');
+    // 注入 渲染层拦截正则 (线下)
+m.content = applyRegex(m.content, 'render', true, chatFriend ? chatFriend.id : null);
+var formatted = escapeHTML(m.content || '');
     formatted = formatted.replace(/「([^」]+)」/g, '<strong style="font-weight:600">「$1」</strong>');
     formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
     formatted = formatted.replace(/\n/g, '<br>');
@@ -15548,6 +16137,7 @@ function rpSendMsg(){
   var input = document.getElementById('rpInput');
   var text = input.value.trim();
   if(!text || !chatFriend) return;
+  text = applyRegex(text, 'userInput', true, chatFriend.id);
   
   var hist = getChatHist(chatFriend.id);
   hist.push({ role:'user', content:text, time:getNowTime(), ts:Date.now(), rpMode:true });
@@ -15682,8 +16272,10 @@ if(rpWc > 0){
   .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
   .then(function(json){
     if(!json.choices||!json.choices[0]||!json.choices[0].message) throw new Error('格式异常');
-    var content = json.choices[0].message.content.trim();
-    if(!content) throw new Error('回复为空');
+var content = json.choices[0].message.content.trim();
+// 注入 AI 输出拦截正则 (线下)
+content = applyRegex(content, 'aiOutput', true, chatFriend ? chatFriend.id : null);
+if(!content) throw new Error('回复为空');
     var h = getChatHist(chatFriend.id);
     h.push({role:'assistant', content:content, time:getNowTime(), ts:Date.now(), rpMode:true});
     setChatHist(chatFriend.id, h);
@@ -20001,6 +20593,1032 @@ function devInjectMsg(){
   setChatHist(chatFriend.id, hist);
   renderChatHist();
   showToast('已注入 ' + role + ' 消息', 'ok');
+}
+
+/* ===== 视频通话系统 ===== */
+var vcActive = false;
+var vcFriend = null;
+var vcMessages = [];
+var vcTimer = null;
+var vcStartTime = 0;
+var vcCamOn = false;
+var vcMicOn = true;
+var vcStream = null;
+var vcBusy = false;
+var vcLongTimer = null;
+var vcEditIdx = -1;
+var vcIncomingFriend = null;
+var vcIncomingTimer = null;
+// AI来电开关
+var vcAutoCallEnabled = localStorage.getItem('vcAutoCall') !== 'false';
+
+// ---- 发起通话 ----
+function vcStartCall(friendId){
+  if(vcActive) return;
+  var list = getFriends();
+  var f = list.find(function(x){ return x.id === friendId });
+  if(!f) return;
+  
+  vcFriend = f;
+  vcActive = true;
+  vcMessages = [];
+  vcCamOn = false;
+  vcMicOn = true;
+  vcStartTime = Date.now();
+  
+  // 设置UI
+  document.getElementById('vcName').textContent = f.name;
+  var avEl = document.getElementById('vcAiAvatar');
+  var initial = f.name.charAt(0).toUpperCase();
+  avEl.innerHTML = '<span style="font-size:48px;font-weight:200;color:rgba(255,255,255,.3)">' + initial + '</span>';
+  if(f.avatarKey && avatarCache[f.avatarKey]){
+    avEl.innerHTML = '<img src="' + avatarCache[f.avatarKey] + '">';
+  }
+  
+  document.getElementById('vcAiAction').textContent = '';
+  document.getElementById('vcChat').innerHTML = '';
+  document.getElementById('vcTimer').textContent = '00:00';
+  document.getElementById('vcCamCtrl').classList.remove('off');
+  document.getElementById('vcMicCtrl').classList.remove('off');
+  document.getElementById('vcPipOff').style.display = 'flex';
+  document.getElementById('vcVideo').style.display = 'none';
+  
+  // 启动计时器
+  vcTimer = setInterval(vcUpdateTimer, 1000);
+  
+  // 打开页面
+  document.getElementById('vcPage').classList.add('show');
+  
+  // 播放提示音
+  playMsgTone();
+  
+  // 自动请求摄像头
+  setTimeout(function(){ vcRequestCamera(); }, 800);
+  // 加载该好友的背景图
+vcLoadBg(f.id);
+}
+
+// ---- 来电 ----
+function vcShowIncoming(friendId){
+  var list = getFriends();
+  var f = list.find(function(x){ return x.id === friendId });
+  if(!f) return;
+  
+  vcIncomingFriend = f;
+  
+  document.getElementById('vcIncName').textContent = f.name;
+  var avEl = document.getElementById('vcIncAvatar');
+  var initial = f.name.charAt(0).toUpperCase();
+  avEl.innerHTML = '<span style="font-size:36px;font-weight:200;color:rgba(255,255,255,.4)">' + initial + '</span>';
+  if(f.avatarKey && avatarCache[f.avatarKey]){
+    avEl.innerHTML = '<img src="' + avatarCache[f.avatarKey] + '">';
+  }
+  
+  document.getElementById('vcIncoming').classList.add('show');
+  
+  // 播放铃声（简单音效）
+  vcPlayRingtone();
+  
+  // 30秒无操作自动挂断
+  vcIncomingTimer = setTimeout(function(){
+    vcDeclineCall();
+    showToast(f.name + ' 的来电已挂断', 'info');
+  }, 30000);
+}
+
+function vcAcceptCall(){
+  if(!vcIncomingFriend) return;
+  if(vcIncomingTimer){ clearTimeout(vcIncomingTimer); vcIncomingTimer = null; }
+  vcStopRingtone();
+  document.getElementById('vcIncoming').classList.remove('show');
+  vcStartCall(vcIncomingFriend.id);
+  vcIncomingFriend = null;
+}
+
+function vcDeclineCall(){
+  if(vcIncomingTimer){ clearTimeout(vcIncomingTimer); vcIncomingTimer = null; }
+  vcStopRingtone();
+  document.getElementById('vcIncoming').classList.remove('show');
+  vcIncomingFriend = null;
+}
+
+// ---- 挂断 ----
+function vcEndCall(){
+  vcActive = false;
+  if(vcTimer){ clearInterval(vcTimer); vcTimer = null; }
+  vcStopCamera();
+  
+  // 将通话记录存入聊天历史
+  if(vcFriend && vcMessages.length > 0){
+    var hist = getChatHist(vcFriend.id);
+    var duration = vcFormatTime(Date.now() - vcStartTime);
+    hist.push({role:'system', content:'[视频通话 ' + duration + ']', time:getNowTime(), ts:Date.now()});
+    vcMessages.forEach(function(m){
+      hist.push({role:m.role, content:m.text, time:m.time, ts:m.ts});
+    });
+    setChatHist(vcFriend.id, hist);
+    updateFriendLastMsg('[视频通话 ' + duration + ']', getNowTime(), vcFriend.id);
+  }
+  
+  document.getElementById('vcPage').classList.remove('show');
+  vcFriend = null;
+  vcMessages = [];
+  showToast('通话已结束', 'ok');
+}
+
+// ---- 计时器 ----
+function vcUpdateTimer(){
+  var elapsed = Date.now() - vcStartTime;
+  document.getElementById('vcTimer').textContent = vcFormatTime(elapsed);
+}
+
+function vcFormatTime(ms){
+  var sec = Math.floor(ms / 1000);
+  var m = Math.floor(sec / 60);
+  var s = sec % 60;
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+// ---- 摄像头 ----
+function vcRequestCamera(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    showToast('此设备不支持摄像头', 'info');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:240}},audio:false})
+    .then(function(stream){
+      vcStream = stream;
+      vcCamOn = true;
+      var video = document.getElementById('vcVideo');
+      video.srcObject = stream;
+      video.style.display = 'block';
+      document.getElementById('vcPipOff').style.display = 'none';
+      document.getElementById('vcCamCtrl').classList.remove('off');
+    })
+    .catch(function(err){
+      console.log('[摄像头] 获取失败:', err.message);
+      vcCamOn = false;
+      document.getElementById('vcCamCtrl').classList.add('off');
+    });
+}
+
+function vcStopCamera(){
+  if(vcStream){
+    vcStream.getTracks().forEach(function(t){ t.stop(); });
+    vcStream = null;
+  }
+  vcCamOn = false;
+  var video = document.getElementById('vcVideo');
+  video.srcObject = null;
+  video.style.display = 'none';
+  document.getElementById('vcPipOff').style.display = 'flex';
+}
+
+function vcToggleCam(){
+  if(vcCamOn){
+    vcStopCamera();
+    document.getElementById('vcCamCtrl').classList.add('off');
+  } else {
+    vcRequestCamera();
+  }
+}
+
+function vcToggleMic(){
+  vcMicOn = !vcMicOn;
+  document.getElementById('vcMicCtrl').classList.toggle('off', !vcMicOn);
+}
+
+// 截取摄像头画面
+function vcCaptureFrame(){
+  if(!vcCamOn || !vcStream) return null;
+  var video = document.getElementById('vcVideo');
+  if(!video.videoWidth) return null;
+  try{
+    var canvas = document.createElement('canvas');
+    canvas.width = 160; canvas.height = 120;
+    canvas.getContext('2d').drawImage(video, 0, 0, 160, 120);
+    return canvas.toDataURL('image/jpeg', 0.4);
+  }catch(e){ return null; }
+}
+
+// ---- 消息渲染 ----
+function vcRenderMessages(){
+  var chat = document.getElementById('vcChat');
+  chat.innerHTML = '';
+  vcMessages.forEach(function(m, idx){
+    chat.appendChild(vcCreateMsgEl(m, idx));
+  });
+  requestAnimationFrame(function(){ chat.scrollTop = chat.scrollHeight; });
+}
+
+function vcCreateMsgEl(m, idx){
+  var div = document.createElement('div');
+  div.className = 'vc-msg' + (m.role === 'user' ? ' is-me' : '');
+  div.setAttribute('data-idx', idx);
+  
+  // 头像
+  var avHtml = '';
+  if(m.role === 'user'){
+    var myP = getActivePersona(vcFriend ? vcFriend.id : null);
+    var myInitial = myP.name.charAt(0).toUpperCase();
+    avHtml = '<div class="vc-msg-av"><span>' + myInitial + '</span></div>';
+    if(myP.avatarKey && avatarCache[myP.avatarKey]){
+      avHtml = '<div class="vc-msg-av"><img src="' + avatarCache[myP.avatarKey] + '"></div>';
+    }
+  } else {
+    var aiInitial = vcFriend ? vcFriend.name.charAt(0).toUpperCase() : '?';
+    avHtml = '<div class="vc-msg-av"><span>' + aiInitial + '</span></div>';
+    if(vcFriend && vcFriend.avatarKey && avatarCache[vcFriend.avatarKey]){
+      avHtml = '<div class="vc-msg-av"><img src="' + avatarCache[vcFriend.avatarKey] + '"></div>';
+    }
+  }
+  
+  // 格式化文字：*动作* 变斜体
+  var formatted = escapeHTML(m.text).replace(/\*([^*]+)\*/g, '<em>*$1*</em>');
+  formatted = formatted.replace(/\n/g, '<br>');
+  
+  var nameLabel = m.role === 'user' ? '' : escapeHTML(vcFriend ? vcFriend.name : '?');
+  
+  div.innerHTML = avHtml +
+    '<div class="vc-msg-bubble" ontouchstart="vcMsgLongStart(event,' + idx + ')" ontouchend="vcMsgLongEnd()" ontouchmove="vcMsgLongEnd()" oncontextmenu="event.preventDefault();vcShowMsgMenu(' + idx + ')">' +
+      (nameLabel ? '<div class="vc-msg-name">' + nameLabel + '</div>' : '') +
+      '<div class="vc-msg-text">' + formatted + '</div>' +
+      '<div class="vc-msg-time">' + (m.time || '') + '</div>' +
+    '</div>';
+  
+  return div;
+}
+
+function vcAppendMsg(role, text, animate){
+  var time = getNowTime();
+  var msg = {role:role, text:text, time:time, ts:Date.now()};
+  vcMessages.push(msg);
+  
+  var chat = document.getElementById('vcChat');
+  var el = vcCreateMsgEl(msg, vcMessages.length - 1);
+  if(animate){
+    el.style.opacity = '0'; el.style.transform = 'translateY(10px)';
+    el.style.transition = 'all .3s ease';
+  }
+  chat.appendChild(el);
+  
+  if(animate){
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+      });
+    });
+  }
+  requestAnimationFrame(function(){ chat.scrollTop = chat.scrollHeight; });
+}
+
+// ---- 发消息 ----
+function vcSendMsg(){
+  var input = document.getElementById('vcInput');
+  var text = input.value.trim();
+  if(!text || !vcActive) return;
+  
+  vcAppendMsg('user', text, true);
+  input.value = '';
+  input.style.height = 'auto';
+  playMsgTone();
+}
+
+// ---- AI回复 ----
+function vcInvokeAI(){
+  if(!vcActive || !vcFriend || vcBusy) return;
+  vcBusy = true;
+  document.getElementById('vcAiCtrl').classList.add('loading');
+  
+  var config = window.getAPIConfig();
+  if(!config.base || !config.key || !config.model){
+    vcBusy = false;
+    document.getElementById('vcAiCtrl').classList.remove('loading');
+    showToast('请先配置 API', 'err');
+    return;
+  }
+  
+  // 显示typing
+  vcShowTyping();
+  
+  var f = vcFriend;
+  var myP = getActivePersona(f.id);
+  var camFrame = vcCaptureFrame();
+  var duration = vcFormatTime(Date.now() - vcStartTime);
+  
+  // 构建提示词
+  var sys = '你是「' + f.name + '」，正在和「' + myP.name + '」进行视频通话。\n';
+  if(f.relation) sys += '关系：' + f.relation + '。';
+  if(f.tags && f.tags.length) sys += '性格：' + f.tags.join('、') + '。';
+  if(f.bio) sys += '\n' + f.bio;
+  sys += '\n\n对方（' + myP.name + '）';
+  if(myP.bio) sys += '：' + myP.bio;
+  
+  sys += '\n\n【视频通话场景】\n';
+  sys += '你们正在视频通话，已通话 ' + duration + '。\n';
+  if(vcCamOn){
+    sys += '你能看到对方的摄像头画面。\n';
+  } else {
+    sys += '对方的摄像头关闭了，你只能听到声音。\n';
+  }
+  if(!vcMicOn) sys += '对方把麦克风关了。\n';
+  
+  sys += '\n【规则】\n';
+  sys += '- 你在视频里看着对方说话，像真实视频通话\n';
+  sys += '- 可以用 *动作描写* 来表达你的表情和动作\n';
+  sys += '- 对话简短自然，像视频里说话的节奏\n';
+  sys += '- 可以评论看到的画面（如果摄像头开着）\n';
+  sys += '- 每条消息1-30个字，可以连发\n\n';
+  
+  sys += '【输出格式 - JSON】\n';
+  sys += '{"msgs":["消息1","消息2"],"action":"你的动作描写"}\n\n';
+  sys += 'msgs: 你说的话，支持 *动作* 标记\n';
+  sys += 'action: 简短描述你在视频中的状态/表情/动作（5-20字）\n\n';
+  sys += '示例：\n';
+  sys += '{"msgs":["*凑近屏幕* 你怎么不开灯啊","黑漆漆的看不清你"],"action":"皱着眉凑近手机屏幕"}\n';
+  sys += '{"msgs":["嗯？","*歪头* 你刚才说什么"],"action":"歪着头看向镜头"}\n';
+  sys += '\n只输出JSON。\n';
+  
+  var messages = [{role:'system', content:sys}];
+  
+  // 记忆
+  var memories = getMemoriesForPrompt(f.id);
+  if(memories.length > 0){
+    var memText = '[记忆]\n';
+    memories.forEach(function(m){ memText += '· ' + m.content + '\n'; });
+    messages.push({role:'system', content:memText});
+  }
+  
+  // 最近聊天上下文
+  // 注入普通聊天的最近上下文（让AI知道你们之前聊过什么）
+var chatHist = getChatHist(f.id);
+var ctxRounds = getContextCount(f.id);
+var recentChat = chatHist;
+if(ctxRounds > 0 && chatHist.length > ctxRounds * 2){
+  recentChat = chatHist.slice(-ctxRounds * 2);
+} else if(chatHist.length > 30){
+  recentChat = chatHist.slice(-30);
+}
+
+if(recentChat.length > 0){
+  var historyText = '【你们最近的聊天记录（视频通话前的对话背景）】\n';
+  recentChat.forEach(function(m){
+    if(m.role === 'system') return;
+    var who = m.role === 'user' ? myP.name : f.name;
+    var text = m.content || '';
+    if(text.indexOf('[图片') >= 0) text = '[图片]';
+    else if(text.indexOf('[语音') >= 0) text = '[语音]';
+    else if(text.indexOf('[收藏卡片') >= 0) text = '[分享]';
+    if(text.length > 80) text = text.substring(0, 80) + '…';
+    historyText += who + ': ' + text + '\n';
+  });
+  historyText += '\n（以上是聊天背景，以下是当前视频通话内容）';
+  messages.push({role:'system', content: historyText});
+}
+
+// 通话内的消息
+var recent = vcMessages.slice(-30);
+recent.forEach(function(m){
+  messages.push({role: m.role === 'user' ? 'user' : 'assistant', content: m.text});
+});
+  
+  // 如果摄像头开着，截图给AI看
+  if(camFrame){
+    messages.push({role:'user', content:[
+      {type:'text', text:'[系统：以下是对方摄像头当前画面]'},
+      {type:'image_url', image_url:{url:camFrame, detail:'low'}}
+    ]});
+  }
+  
+  // 确保最后是user
+  var lastRole = messages[messages.length - 1].role;
+  if(lastRole !== 'user'){
+    messages.push({role:'user', content:'[对方在看着屏幕等你说话]'});
+  }
+  
+  var url = config.base + (config.base.includes('/v1') ? '/chat/completions' : '/v1/chat/completions');
+  
+  fetch(url, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+config.key},
+    body:JSON.stringify({model:config.model, messages:messages, temperature:config.temperature})
+  })
+  .then(function(res){ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+  .then(function(json){
+    if(!json.choices || !json.choices[0]) throw new Error('格式异常');
+    var content = json.choices[0].message.content.trim();
+    
+    var parsedMsgs = [];
+    var action = '';
+    
+    try{
+      var jsonStr = content;
+      var cb = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if(cb) jsonStr = cb[1].trim();
+      var parsed = null;
+      try{ parsed = JSON.parse(jsonStr); }catch(e1){
+        var jm = content.match(/\{[\s\S]*\}/);
+        if(jm) try{ parsed = JSON.parse(jm[0]); }catch(e2){}
+      }
+      if(parsed && parsed.msgs && Array.isArray(parsed.msgs)){
+        parsedMsgs = parsed.msgs.filter(function(m){ return typeof m === 'string' && m.trim(); }).map(function(m){ return m.trim(); });
+        if(parsed.action) action = parsed.action.trim();
+      }
+      if(parsedMsgs.length === 0) parsedMsgs = [content];
+    }catch(e){
+      parsedMsgs = [content];
+    }
+    
+    vcHideTyping();
+    
+    // 显示动作
+    if(action){
+      document.getElementById('vcAiAction').textContent = action;
+      document.getElementById('vcAiAction').style.opacity = '1';
+    }
+    
+    // 分条发送
+    var delay = 0;
+    parsedMsgs.forEach(function(msg, i){
+      delay += Math.min(msg.length * 30 + 400, 2000);
+      if(i > 0){
+        setTimeout(function(){ if(vcActive) vcShowTyping(); }, delay - 800);
+      }
+      setTimeout(function(){
+        if(!vcActive) return;
+        vcHideTyping();
+        vcAppendMsg('assistant', msg, true);
+        playMsgTone();
+        if(i === parsedMsgs.length - 1){
+          vcBusy = false;
+          document.getElementById('vcAiCtrl').classList.remove('loading');
+        }
+      }, delay);
+    });
+  })
+  .catch(function(err){
+    vcHideTyping();
+    vcBusy = false;
+    document.getElementById('vcAiCtrl').classList.remove('loading');
+    showToast('AI回复失败: ' + err.message, 'err');
+  });
+}
+
+function vcShowTyping(){
+  var chat = document.getElementById('vcChat');
+  var old = document.getElementById('vcTyping');
+  if(old) old.remove();
+  var div = document.createElement('div');
+  div.id = 'vcTyping';
+  div.className = 'vc-typing';
+  div.innerHTML = '<i></i><i></i><i></i>';
+  chat.appendChild(div);
+  requestAnimationFrame(function(){ chat.scrollTop = chat.scrollHeight; });
+}
+
+function vcHideTyping(){
+  var el = document.getElementById('vcTyping');
+  if(el) el.remove();
+}
+
+// ---- 长按菜单 ----
+function vcMsgLongStart(e, idx){
+  vcLongTimer = setTimeout(function(){
+    vcShowMsgMenu(idx);
+    if(navigator.vibrate) navigator.vibrate(20);
+  }, 500);
+}
+function vcMsgLongEnd(){
+  if(vcLongTimer){ clearTimeout(vcLongTimer); vcLongTimer = null; }
+}
+
+function vcShowMsgMenu(idx){
+  vcCloseMsgMenu();
+  var msgEls = document.querySelectorAll('.vc-msg');
+  var target = null;
+  msgEls.forEach(function(el){
+    if(parseInt(el.getAttribute('data-idx')) === idx) target = el;
+  });
+  if(!target) return;
+  
+  var bubble = target.querySelector('.vc-msg-bubble');
+  var m = vcMessages[idx];
+  var isMe = m.role === 'user';
+  
+  var menu = document.createElement('div');
+  menu.className = 'vc-msg-menu';
+  menu.id = 'vcMsgMenu';
+  menu.onclick = function(e){ e.stopPropagation(); };
+  
+  // 编辑
+  var editBtn = document.createElement('div');
+  editBtn.className = 'vc-msg-menu-btn';
+  editBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+  editBtn.onclick = function(){ vcEditMsg(idx); vcCloseMsgMenu(); };
+  menu.appendChild(editBtn);
+  
+  // 重试（仅AI消息）
+  if(!isMe){
+    var retryBtn = document.createElement('div');
+    retryBtn.className = 'vc-msg-menu-btn';
+    retryBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>';
+    retryBtn.onclick = function(){ vcRetryMsg(idx); vcCloseMsgMenu(); };
+    menu.appendChild(retryBtn);
+  }
+  
+  // 删除
+  var delBtn = document.createElement('div');
+  delBtn.className = 'vc-msg-menu-btn danger';
+  delBtn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+  delBtn.onclick = function(){ vcDeleteMsg(idx); vcCloseMsgMenu(); };
+  menu.appendChild(delBtn);
+  
+  bubble.appendChild(menu);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ menu.classList.add('show'); });
+  });
+  
+  // 点别处关闭
+  setTimeout(function(){
+    document.addEventListener('click', vcCloseMsgMenu, {once:true});
+  }, 100);
+}
+
+function vcCloseMsgMenu(){
+  var old = document.getElementById('vcMsgMenu');
+  if(old) old.remove();
+}
+
+function vcEditMsg(idx){
+  vcEditIdx = idx;
+  document.getElementById('vcEditTextarea').value = vcMessages[idx].text;
+  document.getElementById('vcEditModal').classList.add('show');
+}
+
+function vcCloseEdit(){
+  document.getElementById('vcEditModal').classList.remove('show');
+  vcEditIdx = -1;
+}
+
+function vcSaveEdit(){
+  if(vcEditIdx < 0 || vcEditIdx >= vcMessages.length){ vcCloseEdit(); return; }
+  var text = document.getElementById('vcEditTextarea').value.trim();
+  if(!text){ vcCloseEdit(); return; }
+  vcMessages[vcEditIdx].text = text;
+  vcRenderMessages();
+  vcCloseEdit();
+}
+
+function vcRetryMsg(idx){
+  // 删除从idx开始的所有AI连续消息
+  var end = idx;
+  while(end < vcMessages.length && vcMessages[end].role === 'assistant') end++;
+  vcMessages.splice(idx, end - idx);
+  vcRenderMessages();
+  vcInvokeAI();
+}
+
+function vcDeleteMsg(idx){
+  vcMessages.splice(idx, 1);
+  vcRenderMessages();
+}
+
+function vcAutoResize(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 80) + 'px';
+}
+
+// ---- 铃声 ----
+var _vcRingInterval = null;
+
+function vcPlayRingtone(){
+  vcPlayRingOnce();
+  _vcRingInterval = setInterval(vcPlayRingOnce, 2500);
+}
+
+function vcPlayRingOnce(){
+  try{
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if(ctx.state === 'suspended') ctx.resume();
+    var now = ctx.currentTime;
+    var notes = [659, 784, 880, 784, 659];
+    notes.forEach(function(freq, i){
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = 'sine';
+      var t = now + i * 0.15;
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.001, now);
+      g.gain.linearRampToValueAtTime(0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t); o.stop(t + 0.12);
+    });
+  }catch(e){}
+}
+
+function vcStopRingtone(){
+  if(_vcRingInterval){ clearInterval(_vcRingInterval); _vcRingInterval = null; }
+}
+
+// ---- AI来电触发 ----
+// 在AI聊天回复后，有概率触发来电
+// ---- AI来电触发 ----
+// 已经关闭：AI 不再会自动打视频过来了
+function vcMaybeIncomingCall(friendId){
+  return; 
+}
+
+// ---- 从聊天页发起视频通话 ----
+// 在聊天菜单里添加入口：在 ct-menu 的 HTML 中添加一个菜单项
+// 这里用JS动态注入
+(function(){
+  var menu = document.querySelector('#ctMenuOverlay .ct-menu');
+  if(!menu) return;
+  
+  // 在"更多设置"之前插入
+  var firstItem = menu.querySelector('.ct-menu-item');
+  if(!firstItem) return;
+  
+  var vcItem = document.createElement('div');
+  vcItem.className = 'ct-menu-item';
+vcItem.onclick = function(){
+  toggleCtMenu();
+  showToast('暂时无法使用，等诅骨后续优化。', 'info');
+};
+  vcItem.innerHTML = '<svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> 视频通话';
+  
+  var divider = document.createElement('div');
+  divider.className = 'ct-menu-divider';
+  
+  menu.insertBefore(divider, firstItem);
+  menu.insertBefore(vcItem, divider);
+})();
+
+/* ===== 视频通话背景图 ===== */
+function vcChangeBg(){
+  if(!vcFriend) return;
+  var hasBg = !!localStorage.getItem('vcBgKey_' + vcFriend.id);
+  
+  // 简单菜单：上传 / 清除
+  var old = document.getElementById('vcBgMenu');
+  if(old) old.remove();
+  
+  var overlay = document.createElement('div');
+  overlay.id = 'vcBgMenu';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:970;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s';
+  overlay.onclick = function(e){ if(e.target === overlay) vcCloseBgMenu(); };
+  
+  overlay.innerHTML = '<div style="background:#1a1a1a;border-radius:20px;padding:20px;width:280px;border:1px solid #2a2a2a">' +
+    '<div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:14px;text-align:center">通话背景</div>' +
+    '<button onclick="document.getElementById(\'vcBgFileInput\').click()" style="width:100%;height:44px;border:none;border-radius:12px;background:#fff;color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">上传图片</button>' +
+    (hasBg ? '<button onclick="vcClearBg()" style="width:100%;height:44px;border:none;border-radius:12px;background:#3a1a1e;color:#ff6b6b;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">清除背景</button>' : '') +
+    '<button onclick="vcCloseBgMenu()" style="width:100%;height:44px;border:none;border-radius:12px;background:#222;color:#888;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">取消</button>' +
+  '</div>';
+  
+  document.body.appendChild(overlay);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ overlay.style.opacity = '1'; });
+  });
+}
+
+function vcCloseBgMenu(){
+  var el = document.getElementById('vcBgMenu');
+  if(!el) return;
+  el.style.opacity = '0';
+  setTimeout(function(){ if(el.parentElement) el.remove(); }, 250);
+}
+
+function vcHandleBgUpload(e){
+  var f = e.target.files[0];
+  if(!f || !vcFriend) return;
+  e.target.value = '';
+  
+  var bgKey = 'vcBg_' + vcFriend.id;
+  localStorage.setItem('vcBgKey_' + vcFriend.id, bgKey);
+  dbPut(bgKey, f).catch(function(){});
+  
+  var url = URL.createObjectURL(f);
+  vcApplyBg(url);
+  vcCloseBgMenu();
+  showToast('背景已设置', 'ok');
+}
+
+function vcClearBg(){
+  if(!vcFriend) return;
+  var bgKey = localStorage.getItem('vcBgKey_' + vcFriend.id);
+  if(bgKey) dbDel(bgKey).catch(function(){});
+  localStorage.removeItem('vcBgKey_' + vcFriend.id);
+  vcApplyBg(null);
+  vcCloseBgMenu();
+  showToast('已清除', 'ok');
+}
+
+function vcApplyBg(url){
+  var bgLayer = document.getElementById('vcBgLayer');
+  var aiArea = document.getElementById('vcAiArea');
+  if(url){
+    bgLayer.style.backgroundImage = 'url(' + url + ')';
+    bgLayer.style.display = 'block';
+    aiArea.classList.add('hidden');  // 有背景时隐藏圆形头像
+  } else {
+    bgLayer.style.display = 'none';
+    bgLayer.style.backgroundImage = '';
+    aiArea.classList.remove('hidden');
+  }
+}
+
+function vcLoadBg(friendId){
+  var bgKey = localStorage.getItem('vcBgKey_' + friendId);
+  if(!bgKey){
+    vcApplyBg(null);
+    return;
+  }
+  dbGet(bgKey).then(function(blob){
+    if(blob){
+      vcApplyBg(URL.createObjectURL(blob));
+    } else {
+      vcApplyBg(null);
+    }
+  }).catch(function(){ vcApplyBg(null); });
+}
+
+/* ===== 正则引擎核心 ===== */
+function applyRegex(text, placement, isOffline, friendId) {
+  if (!text || typeof text !== 'string') return text;
+  var rules;
+  try { rules = getRegexRules(); } catch(e) { return text; }
+  
+  rules = rules.filter(function(r) {
+    if (!r.enabled) return false;
+    if (r.placement !== placement) return false;
+    // 模式过滤
+    if (r.scope !== 'all') {
+      if (isOffline && r.scope !== 'offline') return false;
+      if (!isOffline && r.scope !== 'online') return false;
+    }
+    // 角色过滤：有指定 friendIds 则只对这些角色生效
+    if (r.friendIds && r.friendIds.length > 0) {
+      if (!friendId || r.friendIds.indexOf(friendId) < 0) return false;
+    }
+    return true;
+  });
+
+  if (rules.length === 0) return text;
+  
+  var result = text;
+  rules.forEach(function(r) {
+    try {
+      var re = new RegExp(r.pattern, 'g');
+      result = result.replace(re, r.replacement);
+    } catch(e) { 
+      console.error('正则错误[' + r.name + ']:', e); 
+    }
+  });
+  return result;
+}
+
+var editingRgxId = null;
+var _rgxSelectedFriends = [];
+
+function getRegexRules() { return JSON.parse(localStorage.getItem('regexRules') || '[]'); }
+function setRegexRules(r) { localStorage.setItem('regexRules', JSON.stringify(r)); }
+function getRgxFolders() { return JSON.parse(localStorage.getItem('rgxFolders') || '[]'); }
+function setRgxFolders(f) { localStorage.setItem('rgxFolders', JSON.stringify(f)); }
+
+function openRegexPage() { renderRegexList(); document.getElementById('regexPage').classList.add('show'); }
+function closeRegexPage() {
+  document.getElementById('regexPage').classList.remove('show');
+  if(chatFriend) reloadCurrentChat();
+}
+
+function rgxNewFolder(){
+  var name = prompt('文件夹名称');
+  if(!name || !name.trim()) return;
+  var folders = getRgxFolders();
+  folders.push({id:'rgf_'+Date.now(), name:name.trim()});
+  setRgxFolders(folders);
+  renderRegexList();
+}
+
+function rgxRenameFolder(id){
+  var folders = getRgxFolders();
+  var f = folders.find(function(x){return x.id===id});
+  if(!f) return;
+  var n = prompt('新名称', f.name);
+  if(n && n.trim()){ f.name = n.trim(); setRgxFolders(folders); renderRegexList(); }
+}
+
+function rgxDeleteFolder(id){
+  if(!confirm('删除文件夹？规则会移到未分类')) return;
+  setRgxFolders(getRgxFolders().filter(function(x){return x.id!==id}));
+  var rules = getRegexRules();
+  rules.forEach(function(r){ if(r.folderId===id) r.folderId=null; });
+  setRegexRules(rules);
+  renderRegexList();
+}
+
+function renderRegexList() {
+  var rules = getRegexRules();
+  var folders = getRgxFolders();
+  var container = document.getElementById('regexListArea');
+  
+  if(rules.length === 0 && folders.length === 0){
+    container.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--c4);font-size:12px;">没有任何正则脚本<br>点右上角新建，或点下方按钮建文件夹</div>' +
+      '<button class="btn btn-secondary" style="margin-top:16px" onclick="rgxNewFolder()">+ 新建文件夹</button>';
+    return;
+  }
+
+  var html = '<button class="btn btn-secondary" style="margin-bottom:14px" onclick="rgxNewFolder()">+ 新建文件夹</button>';
+  
+  // 分组
+  var grouped = {'_uncat': []};
+  folders.forEach(function(f){ grouped[f.id] = []; });
+  rules.forEach(function(r){
+    var k = r.folderId && grouped[r.folderId] ? r.folderId : '_uncat';
+    grouped[k].push(r);
+  });
+
+  folders.forEach(function(f){
+    html += renderRgxFolderBlock(f, grouped[f.id]);
+  });
+  if(grouped._uncat.length > 0 || folders.length === 0){
+    html += renderRgxFolderBlock({id:'_uncat', name:'未分类'}, grouped._uncat);
+  }
+  
+  container.innerHTML = html;
+}
+
+function renderRgxFolderBlock(folder, rules){
+  var isUncat = folder.id === '_uncat';
+  var html = '<div style="margin-bottom:16px;background:var(--card);border-radius:14px;border:1px solid var(--c6);overflow:hidden">';
+  html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--c7);border-bottom:1px solid var(--c6)">';
+  html += '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--c3);stroke-width:2;fill:none"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+  html += '<span style="font-size:12px;font-weight:700;color:var(--c2);flex:1">' + escapeHTML(folder.name) + ' <span style="color:var(--c4);font-weight:500">(' + rules.length + ')</span></span>';
+  if(!isUncat){
+    html += '<span style="font-size:10px;color:var(--c3);cursor:pointer;padding:2px 6px" onclick="rgxRenameFolder(\''+folder.id+'\')">改名</span>';
+    html += '<span style="font-size:10px;color:#e11d48;cursor:pointer;padding:2px 6px" onclick="rgxDeleteFolder(\''+folder.id+'\')">删除</span>';
+  }
+  html += '</div>';
+  html += '<div style="padding:8px 12px">';
+  
+  if(rules.length === 0){
+    html += '<div style="font-size:11px;color:var(--c4);text-align:center;padding:12px 0;font-style:italic">空文件夹</div>';
+  } else {
+    rules.forEach(function(r){
+      var placeName = r.placement === 'render' ? '渲染' : (r.placement === 'aiOutput' ? 'AI输出' : '用户输入');
+      var scopeName = r.scope === 'all' ? '全模式' : (r.scope === 'online' ? '线上' : '线下');
+      var friendName = '全角色';
+      if(r.friendIds && r.friendIds.length > 0){
+        var names = r.friendIds.map(function(fid){
+          var f = getFriends().find(function(x){return x.id===fid});
+          return f ? f.name : '?';
+        });
+        friendName = names.length > 2 ? names.slice(0,2).join('、') + '+' + (names.length-2) : names.join('、');
+      }
+      
+      html += '<div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--c6)">';
+      html += '<div class="set-switch' + (r.enabled ? ' on' : '') + '" onclick="toggleRegexRule(\'' + r.id + '\', this)" style="flex-shrink:0;transform:scale(.85)"></div>';
+      html += '<div style="flex:1;min-width:0;cursor:pointer" onclick="openRegexModal(\'' + r.id + '\')">';
+      html += '<div style="font-size:13px;font-weight:600;color:var(--c1);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHTML(r.name) + '</div>';
+      html += '<div style="font-size:9px;color:var(--c4);display:flex;gap:4px;flex-wrap:wrap"><span style="background:var(--c7);padding:2px 6px;border-radius:4px">' + placeName + '</span><span style="background:var(--c7);padding:2px 6px;border-radius:4px">' + scopeName + '</span><span style="background:var(--c7);padding:2px 6px;border-radius:4px">' + friendName + '</span></div>';
+      html += '</div></div>';
+    });
+  }
+  html += '</div></div>';
+  return html;
+}
+
+function toggleRegexRule(id, el) {
+  var rules = getRegexRules();
+  var r = rules.find(function(x) { return x.id === id; });
+  if (r) {
+    r.enabled = !r.enabled;
+    setRegexRules(rules);
+    el.classList.toggle('on', r.enabled);
+  }
+}
+
+function setRgxScope(val, el) {
+  document.querySelectorAll('[data-rgx-scope]').forEach(function(t) { t.classList.remove('on'); });
+  el.classList.add('on');
+}
+
+function renderRgxFriendCheckboxes(selectedIds) {
+  _rgxSelectedFriends = selectedIds.slice();
+  var container = document.getElementById('rgxFriendList');
+  var friends = getFriends();
+  if (friends.length === 0) {
+    container.innerHTML = '<span style="font-size:11px;color:var(--c4)">还没有好友</span>';
+    return;
+  }
+  var html = '';
+  friends.forEach(function(f) {
+    var isChecked = _rgxSelectedFriends.indexOf(f.id) >= 0;
+    var initial = f.name ? f.name.charAt(0).toUpperCase() : '?';
+    var avHtml = '<span style="font-size:10px;font-weight:700;color:var(--c3)">' + initial + '</span>';
+    if (f.avatarKey && avatarCache[f.avatarKey]) {
+      avHtml = '<img src="' + avatarCache[f.avatarKey] + '" style="width:100%;height:100%;object-fit:cover">';
+    }
+    html += '<div class="css-friend-check' + (isChecked ? ' checked' : '') + '" onclick="toggleRgxFriendCheck(\'' + f.id + '\',this)">';
+    html += '<div class="css-friend-check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>';
+    html += '<div class="css-friend-check-avatar">' + avHtml + '</div>';
+    html += '<span class="css-friend-check-name">' + escapeHTML(f.name) + '</span>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function toggleRgxFriendCheck(fid, el) {
+  var idx = _rgxSelectedFriends.indexOf(fid);
+  if (idx >= 0) { _rgxSelectedFriends.splice(idx, 1); el.classList.remove('checked'); }
+  else { _rgxSelectedFriends.push(fid); el.classList.add('checked'); }
+}
+
+function refreshRgxFolderSelect(currentFolderId){
+  var sel = document.getElementById('rgxFolder');
+  sel.innerHTML = '<option value="">未分类</option>';
+  getRgxFolders().forEach(function(f){
+    var o = document.createElement('option');
+    o.value = f.id; o.textContent = f.name;
+    if(f.id === currentFolderId) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function openRegexModal(id) {
+  editingRgxId = id || null;
+  document.getElementById('regexModalTitle').textContent = id ? '编辑正则' : '新建正则';
+  
+  if (id) {
+    var r = getRegexRules().find(function(x) { return x.id === id; });
+    if (r) {
+      document.getElementById('rgxName').value = r.name;
+      document.getElementById('rgxPattern').value = r.pattern;
+      document.getElementById('rgxReplacement').value = r.replacement;
+      document.getElementById('rgxPlacement').value = r.placement;
+      setRgxScope(r.scope, document.querySelector('[data-rgx-scope="'+r.scope+'"]'));
+      refreshRgxFolderSelect(r.folderId);
+      renderRgxFriendCheckboxes(r.friendIds || []);
+      document.getElementById('rgxDelBtn').style.display = 'block';
+    }
+  } else {
+    document.getElementById('rgxName').value = '';
+    document.getElementById('rgxPattern').value = '';
+    document.getElementById('rgxReplacement').value = '';
+    document.getElementById('rgxPlacement').value = 'render';
+    setRgxScope('all', document.querySelector('[data-rgx-scope="all"]'));
+    refreshRgxFolderSelect(null);
+    renderRgxFriendCheckboxes([]);
+    document.getElementById('rgxDelBtn').style.display = 'none';
+  }
+  openModal('regexModal');
+}
+
+function saveRegexRule() {
+  var name = document.getElementById('rgxName').value.trim();
+  var pattern = document.getElementById('rgxPattern').value.trim();
+  var replacement = document.getElementById('rgxReplacement').value;
+  var placement = document.getElementById('rgxPlacement').value;
+  var folderId = document.getElementById('rgxFolder').value || null;
+  var scopeEl = document.querySelector('[data-rgx-scope].on');
+  var scope = scopeEl ? scopeEl.getAttribute('data-rgx-scope') : 'all';
+
+  if (!name || !pattern) { showToast('名称和正则为必填项', 'err'); return; }
+  try { new RegExp(pattern); } catch(e) { showToast('正则语法错误', 'err'); return; }
+
+  var rules = getRegexRules();
+  if (editingRgxId) {
+    var r = rules.find(function(x) { return x.id === editingRgxId; });
+    if (r) {
+      r.name = name; r.pattern = pattern; r.replacement = replacement;
+      r.placement = placement; r.scope = scope;
+      r.folderId = folderId;
+      r.friendIds = _rgxSelectedFriends.slice();
+    }
+  } else {
+    rules.push({
+      id: 'rgx_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+      name: name, pattern: pattern, replacement: replacement,
+      placement: placement, scope: scope,
+      folderId: folderId,
+      friendIds: _rgxSelectedFriends.slice(),
+      enabled: true
+    });
+  }
+  
+  setRegexRules(rules);
+  closeModal('regexModal');
+  renderRegexList();
+  showToast('保存成功', 'ok');
+}
+
+function deleteRegexRule() {
+  if (!confirm('删除此规则？')) return;
+  setRegexRules(getRegexRules().filter(function(x) { return x.id !== editingRgxId; }));
+  closeModal('regexModal');
+  renderRegexList();
+  showToast('已删除', 'ok');
 }
 </script>
 </body>
